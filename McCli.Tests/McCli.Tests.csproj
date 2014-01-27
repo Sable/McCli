@@ -6,7 +6,7 @@
     <ProjectGuid>{BCA05895-5A10-4A6D-8CCC-F90093E91B88}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>McCli.Tests</RootNamespace>
+    <RootNamespace>McCli</RootNamespace>
     <AssemblyName>McCli.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -53,13 +53,19 @@
   <ItemGroup>
     <Compile Include="TestArrays.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestCompilation.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\McCli.Compilation\McCli.Compilation.csproj">
+      <Project>{075ef8b5-d4b5-495b-b118-1d423d10545d}</Project>
+      <Name>McCli.Compilation</Name>
+    </ProjectReference>
     <ProjectReference Include="..\McCli\McCli.csproj">
       <Project>{a2193eba-11d1-43a7-9aba-d1f98c8d6a18}</Project>
       <Name>McCli</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

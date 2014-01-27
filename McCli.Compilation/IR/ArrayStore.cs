@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace McCli.Compilation.IR
 {
-	public sealed class ArraySet : Statement
+	public sealed class ArrayStore : Assignment
 	{
 		public readonly Name Array;
 		public readonly Name Index;
 		public readonly Name Value;
 
-		public ArraySet(Name array, Name index, Name value)
+		public ArrayStore(Name array, Name index, Name value)
 		{
 			Contract.Requires(array != null);
 			Contract.Requires(index != null);
@@ -22,6 +22,11 @@ namespace McCli.Compilation.IR
 			this.Array = array;
 			this.Index = index;
 			this.Value = value;
+		}
+
+		public override void Accept(Visitor visitor)
+		{
+			visitor.VisitArrayStore(this);
 		}
 	}
 }

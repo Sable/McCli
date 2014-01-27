@@ -7,23 +7,22 @@ using System.Threading.Tasks;
 
 namespace McCli.Compilation.IR
 {
-	public sealed class Literal : Assignment
+	public sealed class Copy : Assignment
 	{
-		public readonly Name Target;
-		public readonly object Value;
+		public readonly Name Value, Target;
 
-		public Literal(Name target, object value)
+		public Copy(Name value, Name target)
 		{
-			Contract.Requires(target != null);
 			Contract.Requires(value != null);
+			Contract.Requires(target != null);
 
-			this.Target = target;
 			this.Value = value;
+			this.Target = target;
 		}
 
 		public override void Accept(Visitor visitor)
 		{
-			visitor.VisitLiteral(this);
+			visitor.VisitCopy(this);
 		}
 	}
 }

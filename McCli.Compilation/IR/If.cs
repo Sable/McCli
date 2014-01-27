@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace McCli.Compilation.IR
 {
-	public sealed class If : Statement
+	public sealed class If : ControlFlow
 	{
 		public readonly Name Condition;
 		public readonly ImmutableArray<Statement> Then;
@@ -20,6 +20,11 @@ namespace McCli.Compilation.IR
 			this.Condition = condition;
 			this.Then = @then;
 			this.Else = @else;
+		}
+
+		public override void Accept(Visitor visitor)
+		{
+			visitor.VisitIf(this);
 		}
 	}
 }

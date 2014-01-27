@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace McCli.Compilation.IR
 {
-	public sealed class Call : Statement
+	public sealed class Call : Assignment
 	{
 		public readonly Name Function;
 		public readonly ImmutableArray<Name> Arguments;
@@ -17,6 +17,11 @@ namespace McCli.Compilation.IR
 			this.Function = function;
 			this.Arguments = arguments;
 			this.Targets = targets;
+		}
+
+		public override void Accept(Visitor visitor)
+		{
+			visitor.VisitCall(this);
 		}
 	}
 }

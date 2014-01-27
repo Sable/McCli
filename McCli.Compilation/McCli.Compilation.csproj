@@ -34,14 +34,20 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IR\ArrayGet.cs" />
-    <Compile Include="IR\ArraySet.cs" />
+    <Compile Include="CodeGen\FunctionEmitter.cs" />
+    <Compile Include="IR\ArrayLoad.cs" />
+    <Compile Include="IR\ArrayStore.cs" />
+    <Compile Include="IR\Assignment.cs" />
     <Compile Include="IR\Call.cs" />
+    <Compile Include="IR\ControlFlow.cs" />
+    <Compile Include="IR\Copy.cs" />
+    <Compile Include="IR\Function.cs" />
     <Compile Include="IR\If.cs" />
     <Compile Include="IR\Literal.cs" />
     <Compile Include="IR\Name.cs" />
     <Compile Include="IR\Node.cs" />
     <Compile Include="IR\Statement.cs" />
+    <Compile Include="IR\Visitor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

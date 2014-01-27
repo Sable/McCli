@@ -3,7 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Runtime.CompilerServices;
 using System.Diagnostics;
 
-namespace McCli.Tests
+namespace McCli
 {
 	[TestClass]
 	public class TestArrays

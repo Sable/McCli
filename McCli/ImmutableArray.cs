@@ -25,7 +25,7 @@ namespace McCli
 		#endregion
 
 		#region Constructors
-		public ImmutableArray(T[] array)
+		public ImmutableArray(params T[] array)
 		{
 			Contract.Requires(array != null);
 

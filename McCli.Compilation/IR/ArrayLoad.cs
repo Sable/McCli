@@ -11,13 +11,13 @@ namespace McCli.Compilation.IR
 	/// A statement in which the value at an array's index is obtained.
 	/// <c>target = array(index)</c>
 	/// </summary>
-	public sealed class ArrayGet : Statement
+	public sealed class ArrayLoad : Assignment
 	{
 		public readonly Name Array;
 		public readonly Name Index;
 		public readonly Name Target;
 
-		public ArrayGet(Name array, Name index, Name target)
+		public ArrayLoad(Name array, Name index, Name target)
 		{
 			Contract.Requires(array != null);
 			Contract.Requires(index != null);
@@ -26,6 +26,11 @@ namespace McCli.Compilation.IR
 			this.Array = array;
 			this.Index = index;
 			this.Target = target;
+		}
+
+		public override void Accept(Visitor visitor)
+		{
+			visitor.VisitArrayLoad(this);
 		}
 	}
 }
