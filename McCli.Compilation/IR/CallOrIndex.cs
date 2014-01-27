@@ -6,13 +6,17 @@ using System.Threading.Tasks;
 
 namespace McCli.Compilation.IR
 {
-	public sealed class Call : Assignment
+	/// <summary>
+	/// An expression in which either a function is called or
+	/// an array is indexed (syntactically ambiguous).
+	/// </summary>
+	public sealed class CallOrIndex : Assignment
 	{
 		public readonly Name Function;
 		public readonly ImmutableArray<Name> Arguments;
 		public readonly ImmutableArray<Name> Targets;
 
-		public Call(Name function, ImmutableArray<Name> arguments, ImmutableArray<Name> targets)
+		public CallOrIndex(Name function, ImmutableArray<Name> arguments, ImmutableArray<Name> targets)
 		{
 			this.Function = function;
 			this.Arguments = arguments;
@@ -21,7 +25,7 @@ namespace McCli.Compilation.IR
 
 		public override void Accept(Visitor visitor)
 		{
-			visitor.VisitCall(this);
+			visitor.VisitCallOrIndex(this);
 		}
 	}
 }

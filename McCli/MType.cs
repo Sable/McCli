@@ -7,88 +7,47 @@ using System.Threading.Tasks;
 
 namespace McCli
 {
-	public abstract class MType
+	public abstract class MType : IEquatable<MType>
 	{
-		public abstract string ClassName { get; }
-		public abstract Type BoxedType { get; }
-	}
-
-	public sealed class MNumericType : MType
-	{
-		#region Fields
-		public static MNumericType Double = new MNumericType(typeof(double), "double");
-
-		private readonly Type classType;
-		private readonly Type elementType;
-		private readonly Type arrayType;
-		private readonly string className;
-		#endregion
-
 		#region Constructors
-		private MNumericType(Type elementType, string className)
-		{
-			Contract.Requires(elementType != null);
-			this.elementType = elementType;
-			this.classType = elementType.IsGenericType
-				? elementType.GetGenericArguments()[0] : elementType;
-			this.arrayType = typeof(MArray<>).MakeGenericType(elementType);
-			this.className = className;
-		}
+		internal MType() { }
 		#endregion
 
 		#region Properties
-		public Type ClassType
-		{
-			get { return classType; }
-		}
-
-		public Type ElementType
-		{
-			get { return elementType; }
-		}
-
-		public bool IsComplex
-		{
-			get { return elementType != classType; }
-		}
-
-		public Type ArrayType
-		{
-			get { return arrayType; }
-		}
-
-		public override Type BoxedType
-		{
-			get { return arrayType; }
-		}
-
-		public override string ClassName
-		{
-			get { return className; }
-		}
+		/// <summary>
+		/// Gets the underlying class of this type.
+		/// </summary>
+		public abstract MClass Class { get; }
+		public abstract Type BoxedType { get; }
 		#endregion
 
 		#region Methods
-		public static MNumericType FromElementType(Type elementType)
+		public abstract bool Equals(MType other);
+
+		public override sealed bool Equals(object obj)
 		{
-			if (elementType == typeof(double)) return Double;
-			throw new NotImplementedException();
+			return Equals(obj as MType);
 		}
 
-		public static MNumericType FromElementType<T>()
+		public override abstract int GetHashCode();
+
+		public static bool Equals(MType first, MType second)
 		{
-			return FromElementType(typeof(T));
+			return ReferenceEquals(first, null)
+				? ReferenceEquals(second, null)
+				: first.Equals(second);
 		}
-		
-		public static MNumericType FromPrimitiveType(Type primitiveType, bool complex)
+		#endregion
+
+		#region Operators
+		public static bool operator==(MType lhs, MType rhs)
 		{
-			if (complex) primitiveType = typeof(MComplex<>).MakeGenericType(primitiveType);
-			return FromElementType(primitiveType);
+			return Equals(lhs, rhs);
 		}
 
-		public static MNumericType FromPrimitiveType<T>(bool complex)
+		public static bool operator !=(MType lhs, MType rhs)
 		{
-			return FromPrimitiveType(typeof(T), complex);
+			return !Equals(lhs, rhs);
 		}
 		#endregion
 	}

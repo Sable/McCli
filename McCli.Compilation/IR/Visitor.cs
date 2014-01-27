@@ -12,9 +12,8 @@ namespace McCli.Compilation.IR
 	public abstract class Visitor
 	{
 		// Concrete classes
-		public virtual void VisitArrayLoad(ArrayLoad arrayLoad) { VisitAssignment((Assignment)arrayLoad); }
 		public virtual void VisitArrayStore(ArrayStore arrayStore) { VisitAssignment((Assignment)arrayStore); }
-		public virtual void VisitCall(Call call) { VisitAssignment((Assignment)call); }
+		public virtual void VisitCallOrIndex(CallOrIndex callOrIndex) { VisitAssignment((Assignment)callOrIndex); }
 		public virtual void VisitCopy(Copy copy) { VisitAssignment((Assignment)copy); }
 		public virtual void VisitFunction(Function function) { VisitNode((Node)function); }
 		public virtual void VisitIf(If @if) { VisitNode((ControlFlow)@if); }

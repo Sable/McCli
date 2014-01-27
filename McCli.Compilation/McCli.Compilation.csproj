@@ -36,10 +36,9 @@
   <ItemGroup>
     <Compile Include="CodeGen\FunctionBodyEmitter.cs" />
     <Compile Include="CodeGen\MethodFactory.cs" />
-    <Compile Include="IR\ArrayLoad.cs" />
     <Compile Include="IR\ArrayStore.cs" />
     <Compile Include="IR\Assignment.cs" />
-    <Compile Include="IR\Call.cs" />
+    <Compile Include="IR\CallOrIndex.cs" />
     <Compile Include="IR\ControlFlow.cs" />
     <Compile Include="IR\Copy.cs" />
     <Compile Include="IR\Function.cs" />

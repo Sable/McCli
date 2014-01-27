@@ -87,7 +87,7 @@ namespace McCli
 
 		public override MType MType
 		{
-			get { return MNumericType.FromElementType(typeof(T)); }
+			get { throw new NotImplementedException(); }
 		}
 		#endregion
 

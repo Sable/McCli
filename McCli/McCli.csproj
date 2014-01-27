@@ -37,8 +37,11 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MComplexType.cs" />
     <Compile Include="MArrayShape.cs" />
+    <Compile Include="MClass.cs" />
     <Compile Include="MComplex.cs" />
+    <Compile Include="MNumericClass.cs" />
     <Compile Include="MType.cs" />
     <Compile Include="Builtins.cs" />
     <Compile Include="Program.cs" />
