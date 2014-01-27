@@ -19,9 +19,9 @@ namespace McCli
 			var name = new Name("identity");
 
 			var function = new Function(name,
-				new ImmutableArray<Name>(input),
-				new ImmutableArray<Name>(output),
-				new ImmutableArray<Statement>(
+				ImmutableArray.Create(input),
+				ImmutableArray.Create(output),
+				ImmutableArray.Create<Statement>(
 					new Copy(input, output))
 				);
 

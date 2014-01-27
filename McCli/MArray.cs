@@ -92,7 +92,7 @@ namespace McCli
 		#endregion
 
 		#region Indexers
-		public T this[int index]
+		public new T this[int index]
 		{
 			get { return elements[index]; }
 			set { elements[index] = value; }
@@ -100,6 +100,11 @@ namespace McCli
 		#endregion
 
 		#region Methods
+		public static MArray<T> CreateScalar(T value)
+		{
+			return new MArray<T>(new[] { value }, MArrayShape.Scalar);
+		}
+
 		protected override Array GetBackingArray()
 		{
 			return elements;

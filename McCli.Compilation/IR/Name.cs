@@ -17,5 +17,10 @@ namespace McCli.Compilation.IR
 
 			this.Value = value;
 		}
+
+		public static implicit operator string(Name name)
+		{
+			return name == null ? null : name.Value;
+		}
 	}
 }

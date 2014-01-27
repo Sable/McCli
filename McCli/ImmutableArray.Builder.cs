@@ -42,7 +42,7 @@ namespace McCli
 			#region Methods
 			public ImmutableArray<T> Complete()
 			{
-				var result = new ImmutableArray<T>(array, default(NoCloneTag));
+				var result = CreateNoClone(array);
 				array = null;
 				return result;
 			}

@@ -15,25 +15,15 @@ namespace McCli
 	[Serializable]
 	public partial struct ImmutableArray<T> : IList<T>, IReadOnlyList<T>
 	{
-		private struct NoCloneTag { }
-
 		#region Fields
-		public static readonly ImmutableArray<T> Empty = new ImmutableArray<T>(new T[0]);
+		public static readonly ImmutableArray<T> Empty = CreateNoClone(new T[0]);
 
-		private readonly T[] array;
+		internal readonly T[] array;
 		private readonly int length;
 		#endregion
 
 		#region Constructors
-		public ImmutableArray(params T[] array)
-		{
-			Contract.Requires(array != null);
-
-			this.array = (T[])array.Clone();
-			length = array.Length;
-		}
-
-		private ImmutableArray(T[] array, NoCloneTag tag)
+		private ImmutableArray(T[] array)
 		{
 			Contract.Requires(array != null);
 			this.array = array;
@@ -101,7 +91,7 @@ namespace McCli
 
 			T[] subarray = new T[count];
 			if (count > 0) Array.Copy(array, startIndex, subarray, 0, count);
-			return new ImmutableArray<T>(subarray, default(NoCloneTag));
+			return new ImmutableArray<T>(subarray);
 		}
 
 		public Enumerator GetEnumerator()
@@ -109,13 +99,10 @@ namespace McCli
 			return new Enumerator(array);
 		}
 
-		public static ImmutableArray<T> FromCollection(ICollection<T> collection)
+		internal static ImmutableArray<T> CreateNoClone(T[] array)
 		{
-			Contract.Requires(collection != null);
-
-			T[] array = new T[collection.Count];
-			collection.CopyTo(array, 0);
-			return new ImmutableArray<T>(array, default(NoCloneTag));
+			Contract.Requires(array != null);
+			return new ImmutableArray<T>(array);
 		}
 		#endregion
 
@@ -184,5 +171,52 @@ namespace McCli
 			return new ImmutableArray<T>(array);
 		}
 		#endregion
+	}
+
+	public static class ImmutableArray
+	{
+		public static ImmutableArray<U> Cast<U, T>(ImmutableArray<T> array) where T : U
+		{
+			return ImmutableArray<U>.CreateNoClone((U[])(object)array.array);
+		}
+
+		public static ImmutableArray<T> Create<T>(T element)
+		{
+			return ImmutableArray<T>.CreateNoClone(new[] { element });
+		}
+
+		public static ImmutableArray<T> Create<T>(T element0, T element1)
+		{
+			return ImmutableArray<T>.CreateNoClone(new[] { element0, element1 });
+		}
+
+		public static ImmutableArray<T> Create<T>(T element0, T element1, T element2)
+		{
+			return ImmutableArray<T>.CreateNoClone(new[] { element0, element1, element2 });
+		}
+
+		public static ImmutableArray<T> Create<T>(params T[] elements)
+		{
+			Contract.Requires(elements != null);
+			return ImmutableArray<T>.CreateNoClone(elements);
+		}
+
+		public static ImmutableArray<T> Create<T>(IEnumerable<T> elements)
+		{
+			Contract.Requires(elements != null);
+			return ImmutableArray<T>.CreateNoClone(elements.ToArray());
+		}
+
+		public static ImmutableArray<T> ToImmutable<T>(this T[] array)
+		{
+			Contract.Requires(array != null);
+			return ImmutableArray<T>.CreateNoClone(array);
+		}
+
+		public static ImmutableArray<T> ToImmutableArray<T>(this IEnumerable<T> sequence)
+		{
+			Contract.Requires(sequence != null);
+			return ImmutableArray<T>.CreateNoClone(sequence.ToArray());
+		}
 	}
 }
