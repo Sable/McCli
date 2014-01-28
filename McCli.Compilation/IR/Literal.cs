@@ -9,10 +9,10 @@ namespace McCli.Compilation.IR
 {
 	public sealed class Literal : Assignment
 	{
-		public readonly Name Target;
+		public readonly Variable Target;
 		public readonly object Value;
 
-		public Literal(Name target, object value)
+		public Literal(Variable target, object value)
 		{
 			Contract.Requires(target != null);
 			Contract.Requires(value != null);

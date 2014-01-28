@@ -56,6 +56,10 @@
     <Compile Include="TestCompilation.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CliKit\CliKit.csproj">
+      <Project>{0362b49e-a098-461f-a0c0-c558b8a75e75}</Project>
+      <Name>CliKit</Name>
+    </ProjectReference>
     <ProjectReference Include="..\McCli.Compilation\McCli.Compilation.csproj">
       <Project>{075ef8b5-d4b5-495b-b118-1d423d10545d}</Project>
       <Name>McCli.Compilation</Name>

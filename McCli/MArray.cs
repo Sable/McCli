@@ -54,6 +54,11 @@ namespace McCli
 		#endregion
 
 		#region Methods
+		public new MArray DeepClone()
+		{
+			return (MArray)DoDeepClone();
+		}
+
 		protected abstract Array GetBackingArray();
 		protected abstract object At(int index);
 		#endregion
@@ -100,9 +105,9 @@ namespace McCli
 		#endregion
 
 		#region Methods
-		public static MArray<T> CreateScalar(T value)
+		public new MArray<T> DeepClone()
 		{
-			return new MArray<T>(new[] { value }, MArrayShape.Scalar);
+			return new MArray<T>((T[])elements.Clone(), shape);
 		}
 
 		protected override Array GetBackingArray()
@@ -113,6 +118,16 @@ namespace McCli
 		protected override object At(int index)
 		{
 			return this[index];
+		}
+
+		protected override MValue DoDeepClone()
+		{
+			return DeepClone();
+		}
+
+		public static MArray<T> CreateScalar(T value)
+		{
+			return new MArray<T>(new[] { value }, MArrayShape.Scalar);
 		}
 		#endregion
 	}

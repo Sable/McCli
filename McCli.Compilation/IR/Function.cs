@@ -10,14 +10,14 @@ namespace McCli.Compilation.IR
 	public sealed class Function : Node
 	{
 		#region Fields
-		public readonly Name Name;
-		public readonly ImmutableArray<Name> Inputs;
-		public readonly ImmutableArray<Name> Outputs;
+		public readonly string Name;
+		public readonly ImmutableArray<Variable> Inputs;
+		public readonly ImmutableArray<Variable> Outputs;
 		public readonly ImmutableArray<Statement> Body;
 		#endregion
 
 		#region Constructors
-		public Function(Name name, ImmutableArray<Name> inputs, ImmutableArray<Name> outputs, ImmutableArray<Statement> body)
+		public Function(string name, ImmutableArray<Variable> inputs, ImmutableArray<Variable> outputs, ImmutableArray<Statement> body)
 		{
 			Contract.Requires(name != null);
 

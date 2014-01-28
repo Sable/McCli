@@ -35,6 +35,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CodeGen\FunctionBodyEmitter.cs" />
+    <Compile Include="CodeGen\MethodFactories.cs" />
     <Compile Include="CodeGen\MethodFactory.cs" />
     <Compile Include="IR\ArrayStore.cs" />
     <Compile Include="IR\Assignment.cs" />
@@ -44,12 +45,12 @@
     <Compile Include="IR\Function.cs" />
     <Compile Include="IR\If.cs" />
     <Compile Include="IR\Literal.cs" />
-    <Compile Include="IR\Name.cs" />
+    <Compile Include="IR\Variable.cs" />
     <Compile Include="IR\Node.cs" />
     <Compile Include="IR\Statement.cs" />
     <Compile Include="IR\Visitor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="VariableKind.cs" />
+    <Compile Include="IR\VariableKind.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CliKit\CliKit.csproj">

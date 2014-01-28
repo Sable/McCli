@@ -19,7 +19,7 @@ namespace McCli
 			#region Constructors
 			internal Enumerator(T[] array)
 			{
-				this.array = array;
+				this.array = array ?? ImmutableArray<T>.Empty.array;
 				this.index = -1;
 			}
 			#endregion
@@ -34,9 +34,8 @@ namespace McCli
 			#region Methods
 			public bool MoveNext()
 			{
-				if (array == null || index >= array.Length) return false;
 				index++;
-				return index >= array.Length;
+				return index < array.Length;
 			}
 
 			public void Reset()

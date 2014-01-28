@@ -7,8 +7,14 @@ using System.Threading.Tasks;
 
 namespace McCli
 {
+	/// <summary>
+	/// Base class for MatLab types, which denotes the MatLab class plus whether it is complex.
+	/// </summary>
 	public abstract class MType : IEquatable<MType>
 	{
+		#region Fields
+		#endregion
+
 		#region Constructors
 		internal MType() { }
 		#endregion

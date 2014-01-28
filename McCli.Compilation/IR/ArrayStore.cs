@@ -9,11 +9,11 @@ namespace McCli.Compilation.IR
 {
 	public sealed class ArrayStore : Assignment
 	{
-		public readonly Name Array;
-		public readonly Name Index;
-		public readonly Name Value;
+		public readonly Variable Array;
+		public readonly Variable Index;
+		public readonly Variable Value;
 
-		public ArrayStore(Name array, Name index, Name value)
+		public ArrayStore(Variable array, Variable index, Variable value)
 		{
 			Contract.Requires(array != null);
 			Contract.Requires(index != null);

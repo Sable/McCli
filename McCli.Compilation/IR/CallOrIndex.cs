@@ -12,11 +12,11 @@ namespace McCli.Compilation.IR
 	/// </summary>
 	public sealed class CallOrIndex : Assignment
 	{
-		public readonly Name Function;
-		public readonly ImmutableArray<Name> Arguments;
-		public readonly ImmutableArray<Name> Targets;
+		public readonly Variable Function;
+		public readonly ImmutableArray<Variable> Arguments;
+		public readonly ImmutableArray<Variable> Targets;
 
-		public CallOrIndex(Name function, ImmutableArray<Name> arguments, ImmutableArray<Name> targets)
+		public CallOrIndex(Variable function, ImmutableArray<Variable> arguments, ImmutableArray<Variable> targets)
 		{
 			this.Function = function;
 			this.Arguments = arguments;

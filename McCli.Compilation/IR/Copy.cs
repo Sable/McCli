@@ -9,9 +9,9 @@ namespace McCli.Compilation.IR
 {
 	public sealed class Copy : Assignment
 	{
-		public readonly Name Value, Target;
+		public readonly Variable Value, Target;
 
-		public Copy(Name value, Name target)
+		public Copy(Variable value, Variable target)
 		{
 			Contract.Requires(value != null);
 			Contract.Requires(target != null);

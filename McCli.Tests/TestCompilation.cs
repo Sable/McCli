@@ -1,4 +1,5 @@
-﻿using McCli.Compilation.IR;
+﻿using McCli.Compilation.CodeGen;
+using McCli.Compilation.IR;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -11,20 +12,30 @@ namespace McCli
 	[TestClass]
 	public sealed class TestCompilation
 	{
-		[TestMethod]
-		public void TestIdentity()
-		{
-			var input = new Name("input");
-			var output = new Name("output");
-			var name = new Name("identity");
+		private delegate void DoubleInDoubleOutFunc(MArray<double> @in, ref MArray<double> @out);
 
-			var function = new Function(name,
+		[TestMethod]
+		public void TestDoubleArrayIdentity()
+		{
+			var input = new Variable("input", VariableKind.Input, MNumericClass.Double);
+			var output = new Variable("output", VariableKind.Output, MNumericClass.Double);
+			
+			var function = new Function("identity",
 				ImmutableArray.Create(input),
 				ImmutableArray.Create(output),
 				ImmutableArray.Create<Statement>(
 					new Copy(input, output))
 				);
 
+			var method = FunctionBodyEmitter.Emit(function, MethodFactories.Dynamic);
+			var @delegate = (DoubleInDoubleOutFunc)method.CreateDelegate(typeof(DoubleInDoubleOutFunc));
+
+			var argument = MArray<double>.CreateScalar(42);
+			MArray<double> result = null;
+			@delegate(argument, ref result);
+
+			Assert.AreEqual(argument.Shape, result.Shape);
+			Assert.AreEqual(argument[0], result[0]);
 		}
 	}
 }
