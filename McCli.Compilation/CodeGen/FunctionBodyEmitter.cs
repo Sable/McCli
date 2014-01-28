@@ -14,8 +14,27 @@ namespace McCli.Compilation.CodeGen
 	/// <summary>
 	/// Generates the IL bytecode for MatLab function bodies.
 	/// </summary>
-	public sealed class FunctionBodyEmitter : IR.Visitor
+	public sealed partial class FunctionBodyEmitter
 	{
+		#region EmitStoreScope type
+		private struct EmitStoreScope : IDisposable
+		{
+			private readonly FunctionBodyEmitter instance;
+			private readonly object token;
+
+			public EmitStoreScope(FunctionBodyEmitter instance, object token)
+			{
+				this.instance = instance;
+				this.token = token;
+			}
+
+			public void Dispose()
+			{
+				instance.EndEmitStore(token);
+			}
+		}
+		#endregion
+
 		#region Fields
 		private readonly IR.Function function;
 		private readonly MethodInfo method;
@@ -31,12 +50,30 @@ namespace McCli.Compilation.CodeGen
 
 			this.function = function;
 
-			var parameters = function.Inputs
-				.Select(var => new ParameterDescriptor(var.StaticType.BoxedType, var.Name))
-				.Concat(function.Outputs
-					.Select(var => new ParameterDescriptor(var.StaticType.BoxedType.MakeByRefType(), ParameterAttributes.In | ParameterAttributes.Out, var.Name))
-				).ToImmutableArray();
-			method = methodFactory(function.Name, parameters, ParameterDescriptor.VoidReturn, out ilGenerator);
+			// Handle method parameters
+			var parameterDescriptorsBuilder = new ImmutableArray<ParameterDescriptor>.Builder(
+				function.Inputs.Length + function.Outputs.Length);
+
+			for (int i = 0; i < function.Inputs.Length; ++i)
+			{
+				var input = function.Inputs[i];
+				parameterDescriptorsBuilder[i] = new ParameterDescriptor(input.StaticType.BoxedType, input.Name);
+				locals.Add(input, LocalLocation.Parameter(i));
+			}
+
+			for (int i = 0; i < function.Outputs.Length; ++i)
+			{
+				var output = function.Outputs[i];
+				int parameterIndex = function.Inputs.Length + i;
+				parameterDescriptorsBuilder[parameterIndex] = new ParameterDescriptor(
+					output.StaticType.BoxedType.MakeByRefType(),
+					ParameterAttributes.In | ParameterAttributes.Out, output.Name);
+				locals.Add(output, LocalLocation.Parameter(parameterIndex));
+			}
+
+			// Create the method and get its IL generator
+			method = methodFactory(function.Name, parameterDescriptorsBuilder.Complete(),
+				ParameterDescriptor.VoidReturn, out ilGenerator);
 		}
 		#endregion
 
@@ -57,45 +94,6 @@ namespace McCli.Compilation.CodeGen
 				statement.Accept(this);
 			ilGenerator.Emit(OpCodes.Ret);
 		}
-
-		public override void VisitLiteral(Literal literal)
-		{
-			if (literal.Value is double)
-			{
-				ilGenerator.Emit(OpCodes.Ldc_R8, (double)literal.Value);
-				var createDoubleScalarMethod = typeof(MArray<double>).GetMethod("CreateScalar");
-				ilGenerator.Emit(OpCodes.Call, createDoubleScalarMethod);
-			}
-			else
-			{
-				throw new NotImplementedException();
-			}
-
-			EmitStore(literal.Target);
-		}
-
-		public override void VisitCopy(Copy copy)
-		{
-			Contract.Requires(copy.Value.StaticType == copy.Target.StaticType);
-
-			if (copy.Value.StaticType == MNumericClass.Double)
-			{
-				EmitLoad(copy.Value);
-				var cloneDoubleArrayMethod = typeof(MArray<double>).GetMethod("DeepClone");
-				ilGenerator.Emit(OpCodes.Call, cloneDoubleArrayMethod);
-			}
-			else
-			{
-				throw new NotImplementedException();
-			}
-
-			EmitStore(copy.Target);
-		}
-
-		public override void VisitNode(IR.Node node)
-		{
-			throw new NotImplementedException();
-		}
 		
 		private void EmitLoad(Variable variable)
 		{
@@ -111,8 +109,9 @@ namespace McCli.Compilation.CodeGen
 			}
 		}
 
-		private void EmitStore(Variable variable)
+		private EmitStoreScope BeginEmitStore(Variable variable)
 		{
+			object token = null;
 			switch (variable.Kind)
 			{
 				case VariableKind.Input:
@@ -122,12 +121,22 @@ namespace McCli.Compilation.CodeGen
 
 				case VariableKind.Output:
 					ilGenerator.EmitLoad(GetLocalLocation(variable));
-					ilGenerator.Emit(OpCodes.Stind_Ref);
+					token = variable;
 					break;
 
 				default:
 					throw new NotImplementedException();
 			}
+
+			return new EmitStoreScope(this, token);
+		}
+
+		private void EndEmitStore(object token)
+		{
+			if (token == null) return;
+
+			Contract.Assert(token is Variable);
+			ilGenerator.Emit(OpCodes.Stind_Ref);
 		}
 
 		private LocalLocation GetLocalLocation(Variable variable)
