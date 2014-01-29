@@ -37,13 +37,14 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MComplexType.cs" />
     <Compile Include="MArrayShape.cs" />
     <Compile Include="MClass.cs" />
     <Compile Include="MComplex.cs" />
-    <Compile Include="MNumericClass.cs" />
+    <Compile Include="MPrimitiveClass.cs" />
     <Compile Include="MType.cs" />
     <Compile Include="Builtins.cs" />
+    <Compile Include="MTypeForm.cs" />
+    <Compile Include="Operator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MArray.cs" />
@@ -51,6 +52,7 @@
     <Compile Include="ImmutableArray.Builder.cs" />
     <Compile Include="ImmutableArray.cs" />
     <Compile Include="ImmutableArray.Enumerator.cs" />
+    <Compile Include="Utilities.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

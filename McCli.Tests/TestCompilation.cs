@@ -17,8 +17,8 @@ namespace McCli
 		[TestMethod]
 		public void TestDoubleArrayIdentity()
 		{
-			var input = new Variable("input", VariableKind.Input, MNumericClass.Double);
-			var output = new Variable("output", VariableKind.Output, MNumericClass.Double);
+			var input = new Variable("input", VariableKind.Input, MPrimitiveClass.Double);
+			var output = new Variable("output", VariableKind.Output, MPrimitiveClass.Double);
 			
 			var function = new Function("identity",
 				ImmutableArray.Create(input),

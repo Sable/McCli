@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace McCli
 {
 	/// <summary>
-	/// Base class for all Matlab arrays,
+	/// Base class for all MatLab arrays,
 	/// including numeric types, strings and such.
 	/// </summary>
 	public abstract class MArray : MValue
@@ -64,6 +64,10 @@ namespace McCli
 		#endregion
 	}
 
+	/// <summary>
+	/// Strongly typed base class for all MatLab arrays.
+	/// </summary>
+	/// <typeparam name="T">The type of the array elements.</typeparam>
 	public sealed class MArray<T> : MArray
 	{
 		#region Fields
@@ -82,6 +86,9 @@ namespace McCli
 		{
 			elements = new T[shape.TotalCount];
 		}
+
+		public MArray(int rowCount, int columnCount)
+			: this(new MArrayShape(rowCount, columnCount)) { }
 		#endregion
 
 		#region Properties

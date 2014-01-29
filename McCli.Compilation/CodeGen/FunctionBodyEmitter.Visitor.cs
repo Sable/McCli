@@ -13,13 +13,14 @@ namespace McCli.Compilation.CodeGen
 	{
 		public override void VisitLiteral(Literal literal)
 		{
+			var localInfo = GetLocalInfo(literal.Target);
+
 			using (BeginEmitStore(literal.Target))
 			{
 				if (literal.Value is double)
 				{
 					ilGenerator.Emit(OpCodes.Ldc_R8, (double)literal.Value);
-					var createDoubleScalarMethod = typeof(MArray<double>).GetMethod("CreateScalar");
-					ilGenerator.Emit(OpCodes.Call, createDoubleScalarMethod);
+					EmitConvert(typeof(double), localInfo.Type);
 				}
 				else
 				{
@@ -34,7 +35,8 @@ namespace McCli.Compilation.CodeGen
 
 			using (BeginEmitStore(copy.Target))
 			{
-				if (copy.Value.StaticType == MNumericClass.Double)
+				var staticType = GetLocalInfo(copy.Value).Type;
+				if (staticType == typeof(MArray<double>))
 				{
 					EmitLoad(copy.Value);
 					var cloneDoubleArrayMethod = typeof(MArray<double>).GetMethod("DeepClone");

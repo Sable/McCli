@@ -26,30 +26,36 @@ namespace McCli.Compilation.IR
 		/// <summary>
 		/// The static type of this variable, if available.
 		/// </summary>
-		public readonly MType StaticType;
+		public readonly MType? StaticType;
 
 		/// <summary>
-		/// A value indicating whether this variable is always scalar.
+		/// The constant value of this variable, if available.
 		/// </summary>
-		public readonly bool Scalar;
+		public readonly object ConstantValue;
 		#endregion
 
 		#region Constructors
-		public Variable(string name, VariableKind kind, MType staticType, bool scalar)
+		public Variable(string name, VariableKind kind, MType? staticType)
 		{
 			Contract.Requires(name != null);
 
 			this.Name = name;
 			this.Kind = kind;
 			this.StaticType = staticType;
-			this.Scalar = scalar;
 		}
 
-		public Variable(string name, VariableKind kind, MType staticType)
-			: this(name, kind, staticType, scalar: false) { }
+		public Variable(string name, VariableKind kind, object constantValue)
+		{
+			Contract.Requires(name != null);
+			Contract.Requires(constantValue != null);
 
-		public Variable(string name, VariableKind kind)
-			: this(name, kind, staticType: null, scalar: false) { }
+			this.Name = name;
+			this.Kind = kind;
+			this.ConstantValue = constantValue;
+
+			// TODO: Determine static type from constant value.
+			throw new NotImplementedException();
+		}
 		#endregion
 	}
 }

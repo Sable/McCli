@@ -35,11 +35,19 @@ namespace McCli.Compilation.CodeGen
 		}
 		#endregion
 
+		#region LocalInfo
+		struct LocalInfo
+		{
+			public LocalLocation Location;
+			public Type Type;
+		}
+		#endregion
+
 		#region Fields
 		private readonly IR.Function function;
 		private readonly MethodInfo method;
 		private readonly ILGenerator ilGenerator;
-		private readonly Dictionary<Variable, LocalLocation> locals = new Dictionary<Variable, LocalLocation>();
+		private readonly Dictionary<Variable, LocalInfo> locals = new Dictionary<Variable, LocalInfo>();
 		#endregion
 
 		#region Constructors
@@ -55,20 +63,12 @@ namespace McCli.Compilation.CodeGen
 				function.Inputs.Length + function.Outputs.Length);
 
 			for (int i = 0; i < function.Inputs.Length; ++i)
-			{
-				var input = function.Inputs[i];
-				parameterDescriptorsBuilder[i] = new ParameterDescriptor(input.StaticType.BoxedType, input.Name);
-				locals.Add(input, LocalLocation.Parameter(i));
-			}
+				parameterDescriptorsBuilder[i] = CreateParameter(function.Inputs[i], i);
 
 			for (int i = 0; i < function.Outputs.Length; ++i)
 			{
-				var output = function.Outputs[i];
-				int parameterIndex = function.Inputs.Length + i;
-				parameterDescriptorsBuilder[parameterIndex] = new ParameterDescriptor(
-					output.StaticType.BoxedType.MakeByRefType(),
-					ParameterAttributes.In | ParameterAttributes.Out, output.Name);
-				locals.Add(output, LocalLocation.Parameter(parameterIndex));
+				int index = function.Inputs.Length + i;
+				parameterDescriptorsBuilder[index] = CreateParameter(function.Outputs[i], index);
 			}
 
 			// Create the method and get its IL generator
@@ -101,7 +101,7 @@ namespace McCli.Compilation.CodeGen
 			{
 				case VariableKind.Input:
 				case VariableKind.Local:
-					ilGenerator.EmitLoad(GetLocalLocation(variable));
+					ilGenerator.EmitLoad(GetLocalInfo(variable).Location);
 					break;
 
 				default:
@@ -116,11 +116,11 @@ namespace McCli.Compilation.CodeGen
 			{
 				case VariableKind.Input:
 				case VariableKind.Local:
-					ilGenerator.EmitStore(GetLocalLocation(variable));
+					ilGenerator.EmitStore(GetLocalInfo(variable).Location);
 					break;
 
 				case VariableKind.Output:
-					ilGenerator.EmitLoad(GetLocalLocation(variable));
+					ilGenerator.EmitLoad(GetLocalInfo(variable).Location);
 					token = variable;
 					break;
 
@@ -139,10 +139,25 @@ namespace McCli.Compilation.CodeGen
 			ilGenerator.Emit(OpCodes.Stind_Ref);
 		}
 
-		private LocalLocation GetLocalLocation(Variable variable)
+		private void EmitConvert(Type source, Type target)
 		{
-			LocalLocation location;
-			if (!locals.TryGetValue(variable, out location))
+			if (source == target) return;
+
+			if (source == typeof(double) && target == typeof(MArray<double>))
+			{
+				var createDoubleScalarMethod = typeof(MArray<double>).GetMethod("CreateScalar");
+				ilGenerator.Emit(OpCodes.Call, createDoubleScalarMethod);
+			}
+			else
+			{
+				throw new NotImplementedException();
+			}
+		}
+
+		private LocalInfo GetLocalInfo(Variable variable)
+		{
+			LocalInfo info;
+			if (!locals.TryGetValue(variable, out info))
 			{
 				var localBuilder = ilGenerator.DeclareLocal(typeof(MArray<double>));
 
@@ -150,11 +165,39 @@ namespace McCli.Compilation.CodeGen
 				if (!(method is DynamicMethod))
 					localBuilder.SetLocalSymInfo(variable.Name);
 				
-				location = LocalLocation.Variable(localBuilder.LocalIndex);
-				locals.Add(variable, location);
+				var location = LocalLocation.Variable(localBuilder.LocalIndex);
+				info = new LocalInfo
+				{
+					Location = location,
+					Type = GetDeclaredType(variable.StaticType)
+				};
+				locals.Add(variable, info);
 			}
 
-			return location;
+			return info;
+		}
+
+		private static Type GetDeclaredType(MType? staticType)
+		{
+			return staticType.HasValue ? staticType.Value.RuntimeType : typeof(MValue);
+		}
+
+		private ParameterDescriptor CreateParameter(Variable variable, int index)
+		{
+			Contract.Requires(variable != null);
+			Contract.Requires(variable.Kind == VariableKind.Input || variable.Kind == VariableKind.Output);
+
+			var type = GetDeclaredType(variable.StaticType);
+			if (variable.Kind == VariableKind.Output) type = type.MakeByRefType();
+
+			locals.Add(variable, new LocalInfo
+			{
+				Location = LocalLocation.Parameter(index),
+				Type = type
+			});
+
+			var attributes = variable.Kind == VariableKind.Input ? ParameterAttributes.In : ParameterAttributes.Out; 
+			return new ParameterDescriptor(type, attributes, variable.Name);
 		}
 		#endregion
 	}
