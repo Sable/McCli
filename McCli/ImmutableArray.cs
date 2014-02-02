@@ -94,6 +94,15 @@ namespace McCli
 			return new ImmutableArray<T>(subarray);
 		}
 
+		public ImmutableArray<U> Select<U>(Func<T, U> selector)
+		{
+			Contract.Requires(selector != null);
+			var target = new U[length];
+			for (int i = 0; i < target.Length; ++i)
+				target[i] = selector(array[i]);
+			return ImmutableArray<U>.CreateNoClone(target);
+		}
+
 		public Enumerator GetEnumerator()
 		{
 			return new Enumerator(array);
@@ -165,6 +174,11 @@ namespace McCli
 		#endregion
 
 		#region Operators
+		public static implicit operator ImmutableArray<T>(ImmutableArray.EmptyType empty)
+		{
+			return ImmutableArray<T>.Empty;
+		}
+
 		public static implicit operator ImmutableArray<T>(T[] array)
 		{
 			if (array == null) throw new ArgumentNullException("array");
@@ -175,6 +189,10 @@ namespace McCli
 
 	public static class ImmutableArray
 	{
+		public struct EmptyType { }
+
+		public static readonly EmptyType Empty;
+
 		public static ImmutableArray<U> Cast<U, T>(ImmutableArray<T> array) where T : U
 		{
 			return ImmutableArray<U>.CreateNoClone((U[])(object)array.array);

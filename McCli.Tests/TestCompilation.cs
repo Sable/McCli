@@ -13,6 +13,7 @@ namespace McCli
 	public sealed class TestCompilation
 	{
 		private delegate void DoubleInDoubleOutFunc(MArray<double> @in, ref MArray<double> @out);
+		private delegate void DoubleOutFunc(ref MArray<double> @out);
 
 		[TestMethod]
 		public void TestDoubleArrayIdentity()
@@ -36,6 +37,27 @@ namespace McCli
 
 			Assert.AreEqual(argument.Shape, result.Shape);
 			Assert.AreEqual(argument[0], result[0]);
+		}
+
+		[TestMethod]
+		public void TestParameterlessCall()
+		{
+			var output = new Variable("output", VariableKind.Output, MPrimitiveClass.Double);
+
+			var function = new Function("callEye",
+				ImmutableArray.Empty,
+				ImmutableArray.Create(output),
+				ImmutableArray.Create<Statement>(
+					new StaticCall("eye", ImmutableArray.Empty, ImmutableArray.Create(output)))
+				);
+
+			var method = FunctionBodyEmitter.Emit(function, MethodFactories.Dynamic);
+			var @delegate = (DoubleOutFunc)method.CreateDelegate(typeof(DoubleOutFunc));
+
+			MArray<double> result = null;
+			@delegate(ref result);
+
+			Assert.AreEqual(result.ToScalar(), 1);
 		}
 	}
 }

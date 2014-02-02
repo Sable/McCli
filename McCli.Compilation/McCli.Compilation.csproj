@@ -42,12 +42,13 @@
     <Compile Include="FunctionTable.cs" />
     <Compile Include="IR\ArrayStore.cs" />
     <Compile Include="IR\Assignment.cs" />
-    <Compile Include="IR\CallOrIndex.cs" />
-    <Compile Include="IR\ControlFlow.cs" />
     <Compile Include="IR\Copy.cs" />
+    <Compile Include="IR\IndexCall.cs" />
+    <Compile Include="IR\ControlFlow.cs" />
     <Compile Include="IR\Function.cs" />
     <Compile Include="IR\If.cs" />
     <Compile Include="IR\Literal.cs" />
+    <Compile Include="IR\StaticCall.cs" />
     <Compile Include="IR\Variable.cs" />
     <Compile Include="IR\Node.cs" />
     <Compile Include="IR\Statement.cs" />

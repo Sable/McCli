@@ -21,13 +21,6 @@ namespace McCli
 			return i;
 		}
 
-		public static int IntCoerce(float value)
-		{
-			var i = (int)value;
-			if (i != value) throw new InvalidCastException();
-			return i;
-		}
-
 		public static T AsScalar<T>(MArray<T> array)
 		{
 			Contract.Requires(array != null);

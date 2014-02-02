@@ -14,7 +14,25 @@ namespace McCli
 	/// </summary>
 	public abstract class MClass
 	{
+		#region Fields
+		public static readonly MFunctionHandleClass FunctionHandle = new MFunctionHandleClass();
+		public static readonly MPrimitiveClass Char = new MPrimitiveClass(typeof(char), "char");
+		public static readonly MPrimitiveClass Bool = new MPrimitiveClass(typeof(bool), "logical");
+		public static readonly MPrimitiveClass Double = new MPrimitiveClass(typeof(double), "double");
+		public static readonly MPrimitiveClass Single = new MPrimitiveClass(typeof(float), "single");
+		public static readonly MPrimitiveClass Int8 = new MPrimitiveClass(typeof(sbyte), "int8");
+		public static readonly MPrimitiveClass Int16 = new MPrimitiveClass(typeof(short), "int16");
+		public static readonly MPrimitiveClass Int32 = new MPrimitiveClass(typeof(int), "int32");
+		public static readonly MPrimitiveClass Int64 = new MPrimitiveClass(typeof(long), "int64");
+		public static readonly MPrimitiveClass UInt8 = new MPrimitiveClass(typeof(byte), "uint8");
+		public static readonly MPrimitiveClass UInt16 = new MPrimitiveClass(typeof(ushort), "uint16");
+		public static readonly MPrimitiveClass UInt32 = new MPrimitiveClass(typeof(uint), "uint32");
+		public static readonly MPrimitiveClass UInt64 = new MPrimitiveClass(typeof(ulong), "uint64");
+		#endregion
+
+		#region Constructors
 		internal MClass() { }
+		#endregion
 
 		#region Properties
 		/// <summary>

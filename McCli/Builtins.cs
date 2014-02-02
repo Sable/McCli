@@ -98,13 +98,13 @@ namespace McCli
 			return 0;
 		}
 
-		public static MArray<double> zeros([IntCoercible] int n)
+		public static MArray<double> zeros(int n)
 		{
 			Contract.Requires(n >= 0);
 			return zeros(n, n);
 		}
 
-		public static MArray<double> zeros([IntCoercible] int sz1, [IntCoercible] int sz2)
+		public static MArray<double> zeros(int sz1, int sz2)
 		{
 			Contract.Requires(sz1 >= 0);
 			Contract.Requires(sz2 >= 0);
@@ -118,13 +118,13 @@ namespace McCli
 			return 1;
 		}
 
-		public static MArray<double> ones([IntCoercible] int n)
+		public static MArray<double> ones(int n)
 		{
 			Contract.Requires(n >= 0);
 			return ones(n, n);
 		}
 
-		public static MArray<double> ones([IntCoercible] int sz1, [IntCoercible] int sz2)
+		public static MArray<double> ones(int sz1, int sz2)
 		{
 			Contract.Requires(sz1 >= 0);
 			Contract.Requires(sz2 >= 0);
@@ -143,13 +143,13 @@ namespace McCli
 			return 1;
 		}
 
-		public static MArray<double> eye([IntCoercible] int n)
+		public static MArray<double> eye(int n)
 		{
 			Contract.Requires(n >= 0);
 			return eye(n, n);
 		}
 
-		public static MArray<double> eye([IntCoercible] int sz1, [IntCoercible] int sz2)
+		public static MArray<double> eye(int sz1, int sz2)
 		{
 			Contract.Requires(sz1 >= 0);
 			Contract.Requires(sz2 >= 0);

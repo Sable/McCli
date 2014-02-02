@@ -13,7 +13,8 @@ namespace McCli.Compilation.IR
 	{
 		// Concrete classes
 		public virtual void VisitArrayStore(ArrayStore arrayStore) { VisitAssignment((Assignment)arrayStore); }
-		public virtual void VisitCallOrIndex(CallOrIndex callOrIndex) { VisitAssignment((Assignment)callOrIndex); }
+		public virtual void VisitIndexCall(IndexCall indexCall) { VisitAssignment((Assignment)indexCall); }
+		public virtual void VisitStaticCall(StaticCall staticCall) { VisitAssignment((Assignment)staticCall); }
 		public virtual void VisitCopy(Copy copy) { VisitAssignment((Assignment)copy); }
 		public virtual void VisitFunction(Function function) { VisitNode((Node)function); }
 		public virtual void VisitIf(If @if) { VisitNode((ControlFlow)@if); }

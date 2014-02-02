@@ -50,9 +50,13 @@ namespace McCli.Compilation.CodeGen
 			}
 		}
 
-		public override void VisitCallOrIndex(CallOrIndex callOrIndex)
+		public override void VisitStaticCall(StaticCall staticCall)
 		{
-			base.VisitCallOrIndex(callOrIndex);
+			var argumentTypes = staticCall.Arguments.Select(a => a.StaticType);
+			var method = functionLookup(staticCall.Name, argumentTypes);
+
+
+			base.VisitStaticCall(staticCall);
 		}
 
 		public override void VisitNode(IR.Node node)

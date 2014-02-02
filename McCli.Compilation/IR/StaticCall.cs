@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,25 +8,26 @@ using System.Threading.Tasks;
 namespace McCli.Compilation.IR
 {
 	/// <summary>
-	/// An expression in which either a function is called or
-	/// an array is indexed (syntactically ambiguous).
+	/// A call to a "statically" resolved function (not through a function handle).
 	/// </summary>
-	public sealed class CallOrIndex : Assignment
+	public sealed class StaticCall : Assignment
 	{
-		public readonly Variable Function;
+		public readonly string Name;
 		public readonly ImmutableArray<Variable> Arguments;
 		public readonly ImmutableArray<Variable> Targets;
 
-		public CallOrIndex(Variable function, ImmutableArray<Variable> arguments, ImmutableArray<Variable> targets)
+		public StaticCall(string name, ImmutableArray<Variable> arguments, ImmutableArray<Variable> targets)
 		{
-			this.Function = function;
+			Contract.Requires(name != null);
+
+			this.Name = name;
 			this.Arguments = arguments;
 			this.Targets = targets;
 		}
 
 		public override void Accept(Visitor visitor)
 		{
-			visitor.VisitCallOrIndex(this);
+			visitor.VisitStaticCall(this);
 		}
 	}
 }

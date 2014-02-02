@@ -14,25 +14,12 @@ namespace McCli
 	public sealed class MPrimitiveClass : MClass
 	{
 		#region Fields;
-		public static MPrimitiveClass Char = new MPrimitiveClass(typeof(char), "char");
-		public static MPrimitiveClass Bool = new MPrimitiveClass(typeof(bool), "logical");
-		public static MPrimitiveClass Double = new MPrimitiveClass(typeof(double), "double");
-		public static MPrimitiveClass Single = new MPrimitiveClass(typeof(float), "single");
-		public static MPrimitiveClass Int8 = new MPrimitiveClass(typeof(sbyte), "int8");
-		public static MPrimitiveClass Int16 = new MPrimitiveClass(typeof(short), "int16");
-		public static MPrimitiveClass Int32 = new MPrimitiveClass(typeof(int), "int32");
-		public static MPrimitiveClass Int64 = new MPrimitiveClass(typeof(long), "int64");
-		public static MPrimitiveClass UInt8 = new MPrimitiveClass(typeof(byte), "uint8");
-		public static MPrimitiveClass UInt16 = new MPrimitiveClass(typeof(ushort), "uint16");
-		public static MPrimitiveClass UInt32 = new MPrimitiveClass(typeof(uint), "uint32");
-		public static MPrimitiveClass UInt64 = new MPrimitiveClass(typeof(ulong), "uint64");
-
 		private readonly Type basicScalarType;
 		private readonly string name;
 		#endregion
 
 		#region Constructors
-		private MPrimitiveClass(Type basicScalarType, string name)
+		internal MPrimitiveClass(Type basicScalarType, string name)
 		{
 			Contract.Requires(basicScalarType != null);
 

@@ -112,6 +112,12 @@ namespace McCli
 		#endregion
 
 		#region Methods
+		public T ToScalar()
+		{
+			if (!IsScalar) throw new InvalidCastException();
+			return elements[0];
+		}
+
 		public new MArray<T> DeepClone()
 		{
 			return new MArray<T>((T[])elements.Clone(), shape);
