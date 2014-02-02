@@ -37,6 +37,7 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IntCoercibleAttribute.cs" />
     <Compile Include="MArrayShape.cs" />
     <Compile Include="MClass.cs" />
     <Compile Include="MComplex.cs" />

@@ -14,6 +14,28 @@ namespace McCli
 			return Math.Floor(value) == value;
 		}
 
+		public static int IntCoerce(double value)
+		{
+			var i = (int)value;
+			if (i != value) throw new InvalidCastException();
+			return i;
+		}
+
+		public static int IntCoerce(float value)
+		{
+			var i = (int)value;
+			if (i != value) throw new InvalidCastException();
+			return i;
+		}
+
+		public static T AsScalar<T>(MArray<T> array)
+		{
+			Contract.Requires(array != null);
+
+			if (!array.IsScalar) throw new InvalidCastException();
+			return array.BackingArray[0];
+		}
+
 		public static bool IsTrue(MValue value)
 		{
 			// An evaluated expression is true when the result is nonempty

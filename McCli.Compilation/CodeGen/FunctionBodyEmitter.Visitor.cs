@@ -13,19 +13,20 @@ namespace McCli.Compilation.CodeGen
 	{
 		public override void VisitLiteral(Literal literal)
 		{
-			var localInfo = GetLocalInfo(literal.Target);
-
 			using (BeginEmitStore(literal.Target))
 			{
+				MType sourceType;
 				if (literal.Value is double)
 				{
 					ilGenerator.Emit(OpCodes.Ldc_R8, (double)literal.Value);
-					EmitConvert(typeof(double), localInfo.Type);
+					sourceType = new MType(MPrimitiveClass.Double, MTypeForm.Scalar);
 				}
 				else
 				{
 					throw new NotImplementedException();
 				}
+
+				EmitConversion(sourceType, literal.Target.StaticType);
 			}
 		}
 
@@ -35,18 +36,23 @@ namespace McCli.Compilation.CodeGen
 
 			using (BeginEmitStore(copy.Target))
 			{
-				var staticType = GetLocalInfo(copy.Value).Type;
-				if (staticType == typeof(MArray<double>))
+				EmitLoad(copy.Value);
+
+				// Clone if in boxed form
+				var sourceType = (Type)copy.Value.StaticType;
+				if (typeof(MValue).IsAssignableFrom(sourceType))
 				{
-					EmitLoad(copy.Value);
-					var cloneDoubleArrayMethod = typeof(MArray<double>).GetMethod("DeepClone");
-					ilGenerator.Emit(OpCodes.Call, cloneDoubleArrayMethod);
+					var deepCloneMethod = sourceType.GetMethod("DeepClone");
+					ilGenerator.Emit(OpCodes.Call, deepCloneMethod);
 				}
-				else
-				{
-					throw new NotImplementedException();
-				}
+
+				EmitConversion(copy.Value.StaticType, copy.Target.StaticType);
 			}
+		}
+
+		public override void VisitCallOrIndex(CallOrIndex callOrIndex)
+		{
+			base.VisitCallOrIndex(callOrIndex);
 		}
 
 		public override void VisitNode(IR.Node node)

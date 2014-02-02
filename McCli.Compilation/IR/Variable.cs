@@ -26,7 +26,7 @@ namespace McCli.Compilation.IR
 		/// <summary>
 		/// The static type of this variable, if available.
 		/// </summary>
-		public readonly MType? StaticType;
+		public readonly MType StaticType;
 
 		/// <summary>
 		/// The constant value of this variable, if available.
@@ -35,7 +35,7 @@ namespace McCli.Compilation.IR
 		#endregion
 
 		#region Constructors
-		public Variable(string name, VariableKind kind, MType? staticType)
+		public Variable(string name, VariableKind kind, MType staticType)
 		{
 			Contract.Requires(name != null);
 

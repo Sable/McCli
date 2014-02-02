@@ -39,12 +39,12 @@ namespace McCli.Compilation.CodeGen
 		struct LocalInfo
 		{
 			public LocalLocation Location;
-			public Type Type;
 		}
 		#endregion
 
 		#region Fields
 		private readonly IR.Function function;
+		private readonly FunctionLookup functionLookup;
 		private readonly MethodInfo method;
 		private readonly ILGenerator ilGenerator;
 		private readonly Dictionary<Variable, LocalInfo> locals = new Dictionary<Variable, LocalInfo>();
@@ -139,19 +139,30 @@ namespace McCli.Compilation.CodeGen
 			ilGenerator.Emit(OpCodes.Stind_Ref);
 		}
 
-		private void EmitConvert(Type source, Type target)
+		private void EmitConversion(MType source, MType target)
 		{
 			if (source == target) return;
 
-			if (source == typeof(double) && target == typeof(MArray<double>))
+			if (target.IsAny)
 			{
-				var createDoubleScalarMethod = typeof(MArray<double>).GetMethod("CreateScalar");
-				ilGenerator.Emit(OpCodes.Call, createDoubleScalarMethod);
-			}
-			else
-			{
+				if (source.Form != MTypeForm.Scalar) return;
 				throw new NotImplementedException();
 			}
+
+			if (source.Class == target.Class
+				&& source.IsComplex == target.IsComplex
+				&& source.Form == MTypeForm.Scalar
+				&& target.Form == MTypeForm.Array)
+			{
+				// Boxing to array
+				var boxMethod = typeof(MArray<>)
+					.MakeGenericType(source.Class.BasicScalarType)
+					.GetMethod("CreateScalar");
+				ilGenerator.Emit(OpCodes.Call, boxMethod);
+				return;
+			}
+
+			throw new NotImplementedException();
 		}
 
 		private LocalInfo GetLocalInfo(Variable variable)
@@ -166,20 +177,11 @@ namespace McCli.Compilation.CodeGen
 					localBuilder.SetLocalSymInfo(variable.Name);
 				
 				var location = LocalLocation.Variable(localBuilder.LocalIndex);
-				info = new LocalInfo
-				{
-					Location = location,
-					Type = GetDeclaredType(variable.StaticType)
-				};
+				info = new LocalInfo { Location = location };
 				locals.Add(variable, info);
 			}
 
 			return info;
-		}
-
-		private static Type GetDeclaredType(MType? staticType)
-		{
-			return staticType.HasValue ? staticType.Value.RuntimeType : typeof(MValue);
 		}
 
 		private ParameterDescriptor CreateParameter(Variable variable, int index)
@@ -187,13 +189,12 @@ namespace McCli.Compilation.CodeGen
 			Contract.Requires(variable != null);
 			Contract.Requires(variable.Kind == VariableKind.Input || variable.Kind == VariableKind.Output);
 
-			var type = GetDeclaredType(variable.StaticType);
+			var type = (Type)variable.StaticType;
 			if (variable.Kind == VariableKind.Output) type = type.MakeByRefType();
 
 			locals.Add(variable, new LocalInfo
 			{
-				Location = LocalLocation.Parameter(index),
-				Type = type
+				Location = LocalLocation.Parameter(index)
 			});
 
 			var attributes = variable.Kind == VariableKind.Input ? ParameterAttributes.In : ParameterAttributes.Out; 

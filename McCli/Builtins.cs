@@ -90,5 +90,73 @@ namespace McCli
 			return array;
 		}
 		#endregion
+
+		#region Array Creation
+		#region Zeroes
+		public static double zeros()
+		{
+			return 0;
+		}
+
+		public static MArray<double> zeros([IntCoercible] int n)
+		{
+			Contract.Requires(n >= 0);
+			return zeros(n, n);
+		}
+
+		public static MArray<double> zeros([IntCoercible] int sz1, [IntCoercible] int sz2)
+		{
+			Contract.Requires(sz1 >= 0);
+			Contract.Requires(sz2 >= 0);
+			return new MArray<double>(sz1, sz2);
+		}
+		#endregion
+
+		#region Ones
+		public static double ones()
+		{
+			return 1;
+		}
+
+		public static MArray<double> ones([IntCoercible] int n)
+		{
+			Contract.Requires(n >= 0);
+			return ones(n, n);
+		}
+
+		public static MArray<double> ones([IntCoercible] int sz1, [IntCoercible] int sz2)
+		{
+			Contract.Requires(sz1 >= 0);
+			Contract.Requires(sz2 >= 0);
+
+			var result = new MArray<double>(sz1, sz2);
+			var array = result.BackingArray;
+			for (int i = 0; i < array.Length; ++i)
+				array[i] = 1;
+			return result;
+		}
+		#endregion
+
+		#region Eye
+		public static double eye()
+		{
+			return 1;
+		}
+
+		public static MArray<double> eye([IntCoercible] int n)
+		{
+			Contract.Requires(n >= 0);
+			return eye(n, n);
+		}
+
+		public static MArray<double> eye([IntCoercible] int sz1, [IntCoercible] int sz2)
+		{
+			Contract.Requires(sz1 >= 0);
+			Contract.Requires(sz2 >= 0);
+
+			throw new NotImplementedException();
+		}
+		#endregion
+		#endregion
 	}
 }
