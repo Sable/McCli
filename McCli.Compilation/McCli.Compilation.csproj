@@ -40,10 +40,10 @@
     <Compile Include="CodeGen\MethodFactories.cs" />
     <Compile Include="CodeGen\MethodFactory.cs" />
     <Compile Include="FunctionTable.cs" />
-    <Compile Include="IR\ArrayStore.cs" />
-    <Compile Include="IR\Assignment.cs" />
+    <Compile Include="IR\StoreIndexed.cs" />
+    <Compile Include="IR\Expression.cs" />
     <Compile Include="IR\Copy.cs" />
-    <Compile Include="IR\IndexCall.cs" />
+    <Compile Include="IR\LoadCall.cs" />
     <Compile Include="IR\ControlFlow.cs" />
     <Compile Include="IR\Function.cs" />
     <Compile Include="IR\If.cs" />

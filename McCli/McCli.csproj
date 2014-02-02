@@ -38,13 +38,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MArrayShape.cs" />
+    <Compile Include="MCellArrayClass.cs" />
     <Compile Include="MClass.cs" />
+    <Compile Include="MClassAttributes.cs" />
     <Compile Include="MComplex.cs" />
+    <Compile Include="MDenseArray.cs" />
     <Compile Include="MFunctionHandleClass.cs" />
     <Compile Include="MPrimitiveClass.cs" />
-    <Compile Include="MType.cs" />
     <Compile Include="Builtins.cs" />
-    <Compile Include="MTypeForm.cs" />
+    <Compile Include="MValueForm.cs" />
     <Compile Include="Operator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

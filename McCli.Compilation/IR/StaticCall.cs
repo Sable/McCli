@@ -10,7 +10,7 @@ namespace McCli.Compilation.IR
 	/// <summary>
 	/// A call to a "statically" resolved function (not through a function handle).
 	/// </summary>
-	public sealed class StaticCall : Assignment
+	public sealed class StaticCall : Expression
 	{
 		public readonly string Name;
 		public readonly ImmutableArray<Variable> Arguments;

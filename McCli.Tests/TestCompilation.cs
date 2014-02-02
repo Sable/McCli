@@ -31,7 +31,7 @@ namespace McCli
 			var method = FunctionBodyEmitter.Emit(function, MethodFactories.Dynamic);
 			var @delegate = (DoubleInDoubleOutFunc)method.CreateDelegate(typeof(DoubleInDoubleOutFunc));
 
-			var argument = MArray<double>.CreateScalar(42);
+			var argument = MDenseArray<double>.CreateScalar(42);
 			MArray<double> result = null;
 			@delegate(argument, ref result);
 

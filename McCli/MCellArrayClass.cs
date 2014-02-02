@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 
 namespace McCli
 {
-	public sealed class MFunctionHandleClass : MClass
+	public sealed class MCellArrayClass : MClass
 	{
 		#region Constructors
-		internal MFunctionHandleClass() { }
+		internal MCellArrayClass() { }
 		#endregion
 
 		#region Properties
 		public override string Name
 		{
-			get { return "function_handle"; }
+			get { return "cell"; }
 		}
 
 		public override MClassAttributes SupportedAttributes

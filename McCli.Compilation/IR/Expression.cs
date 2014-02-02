@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 namespace McCli.Compilation.IR
 {
 	/// <summary>
-	/// Abstract base class for assignment statements.
+	/// Abstract base class for expression statements.
 	/// </summary>
-	public abstract class Assignment : Statement
+	public abstract class Expression : Statement
 	{
 	}
 }

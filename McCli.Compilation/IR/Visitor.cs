@@ -12,16 +12,17 @@ namespace McCli.Compilation.IR
 	public abstract class Visitor
 	{
 		// Concrete classes
-		public virtual void VisitArrayStore(ArrayStore arrayStore) { VisitAssignment((Assignment)arrayStore); }
-		public virtual void VisitIndexCall(IndexCall indexCall) { VisitAssignment((Assignment)indexCall); }
-		public virtual void VisitStaticCall(StaticCall staticCall) { VisitAssignment((Assignment)staticCall); }
-		public virtual void VisitCopy(Copy copy) { VisitAssignment((Assignment)copy); }
+		public virtual void VisitArrayStore(StoreIndexed arrayStore) { VisitAssignment((Expression)arrayStore); }
+		public virtual void VisitLoadCall(LoadCall loadCall) { VisitAssignment((Expression)loadCall); }
+		public virtual void VisitStoreIndexed(StoreIndexed storeIndexed) { VisitAssignment((Expression)storeIndexed); }
+		public virtual void VisitStaticCall(StaticCall staticCall) { VisitAssignment((Expression)staticCall); }
+		public virtual void VisitCopy(Copy copy) { VisitAssignment((Expression)copy); }
 		public virtual void VisitFunction(Function function) { VisitNode((Node)function); }
 		public virtual void VisitIf(If @if) { VisitNode((ControlFlow)@if); }
-		public virtual void VisitLiteral(Literal literal) { VisitAssignment((Assignment)literal); }
+		public virtual void VisitLiteral(Literal literal) { VisitAssignment((Expression)literal); }
 
 		// Intermediate/categorization abstract base classes
-		public virtual void VisitAssignment(Assignment assignment) { VisitNode((Node)assignment); }
+		public virtual void VisitAssignment(Expression assignment) { VisitNode((Node)assignment); }
 		public virtual void VisitControlFlow(ControlFlow controlFlow) { VisitNode((Node)controlFlow); }
 
 		// Root class

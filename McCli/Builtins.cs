@@ -16,9 +16,8 @@ namespace McCli
 			Contract.Requires(b != null);
 			Contract.Requires(a.Shape == b.Shape);
 
-			var c = new MArray<double>(a.Shape);
-			var aArray = a.BackingArray;
-			for (int i = 0; i < aArray.Length; ++i)
+			var c = new MDenseArray<double>(a.Shape);
+			for (int i = 0; i < a.Count; ++i)
 				c[i] = a[i] + b[i];
 			return c;
 		}
@@ -27,8 +26,8 @@ namespace McCli
 		{
 			Contract.Requires(a != null);
 
-			var c = new MArray<double>(a.Shape);
-			for (int i = 0; i < a.ElementCount; ++i)
+			var c = new MDenseArray<double>(a.Shape);
+			for (int i = 0; i < a.Count; ++i)
 				c[i] = a[i] + b;
 			return c;
 		}
@@ -39,9 +38,8 @@ namespace McCli
 			Contract.Requires(b != null);
 			Contract.Requires(a.Shape == b.Shape);
 
-			var c = new MArray<double>(a.Shape);
-			var aArray = a.BackingArray;
-			for (int i = 0; i < aArray.Length; ++i)
+			var c = new MDenseArray<double>(a.Shape);
+			for (int i = 0; i < a.Count; ++i)
 				c[i] = a[i] - b[i];
 			return c;
 		}
@@ -50,8 +48,8 @@ namespace McCli
 		{
 			Contract.Requires(a != null);
 
-			var c = new MArray<double>(a.Shape);
-			for (int i = 0; i < a.ElementCount; ++i)
+			var c = new MDenseArray<double>(a.Shape);
+			for (int i = 0; i < a.Count; ++i)
 				c[i] = a[i] - b;
 			return c;
 		}
@@ -65,12 +63,8 @@ namespace McCli
 
 			if (a.Shape != b.Shape) return false;
 
-			var aArray = a.BackingArray;
-			var bArray = b.BackingArray;
-			int count = a.ElementCount;
-
-			for (int i = 0; i < count; ++i)
-				if (aArray[i] != bArray[i])
+			for (int i = 0; i < a.Count; ++i)
+				if (a[i] != b[i])
 					return false;
 
 			return true;
@@ -78,12 +72,12 @@ namespace McCli
 		#endregion
 
 		#region Colon
-		public static MArray<double> colon(double low, double high)
+		public static MDenseArray<double> colon(double low, double high)
 		{
-			if (low > high) return new MArray<double>(1, 0);
+			if (low > high) return new MDenseArray<double>(1, 0);
 
 			var count = (int)(high - low) + 1;
-			var array = new MArray<double>(1, count);
+			var array = new MDenseArray<double>(1, count);
 			for (int i = 0; i < count; ++i)
 				array[i] = low + i;
 
@@ -98,17 +92,17 @@ namespace McCli
 			return 0;
 		}
 
-		public static MArray<double> zeros(int n)
+		public static MDenseArray<double> zeros(int n)
 		{
 			Contract.Requires(n >= 0);
 			return zeros(n, n);
 		}
 
-		public static MArray<double> zeros(int sz1, int sz2)
+		public static MDenseArray<double> zeros(int sz1, int sz2)
 		{
 			Contract.Requires(sz1 >= 0);
 			Contract.Requires(sz2 >= 0);
-			return new MArray<double>(sz1, sz2);
+			return new MDenseArray<double>(sz1, sz2);
 		}
 		#endregion
 
@@ -118,18 +112,18 @@ namespace McCli
 			return 1;
 		}
 
-		public static MArray<double> ones(int n)
+		public static MDenseArray<double> ones(int n)
 		{
 			Contract.Requires(n >= 0);
 			return ones(n, n);
 		}
 
-		public static MArray<double> ones(int sz1, int sz2)
+		public static MDenseArray<double> ones(int sz1, int sz2)
 		{
 			Contract.Requires(sz1 >= 0);
 			Contract.Requires(sz2 >= 0);
 
-			var result = new MArray<double>(sz1, sz2);
+			var result = new MDenseArray<double>(sz1, sz2);
 			var array = result.BackingArray;
 			for (int i = 0; i < array.Length; ++i)
 				array[i] = 1;
@@ -143,13 +137,13 @@ namespace McCli
 			return 1;
 		}
 
-		public static MArray<double> eye(int n)
+		public static MDenseArray<double> eye(int n)
 		{
 			Contract.Requires(n >= 0);
 			return eye(n, n);
 		}
 
-		public static MArray<double> eye(int sz1, int sz2)
+		public static MDenseArray<double> eye(int sz1, int sz2)
 		{
 			Contract.Requires(sz1 >= 0);
 			Contract.Requires(sz2 >= 0);
@@ -157,6 +151,28 @@ namespace McCli
 			throw new NotImplementedException();
 		}
 		#endregion
+		#endregion
+
+		#region Real/Imaginary
+		public static MArray<TNumeric> real<TNumeric>(MArray<MComplex<TNumeric>> array) where TNumeric : struct
+		{
+			Contract.Requires(array != null);
+
+			var result = new MDenseArray<TNumeric>(array.Shape);
+			for (int i = 0; i < array.Count; ++i)
+				result[i] = array[i].RealPart;
+			return result;
+		}
+
+		public static MArray<TNumeric> imag<TNumeric>(MArray<MComplex<TNumeric>> array) where TNumeric : struct
+		{
+			Contract.Requires(array != null);
+
+			var result = new MDenseArray<TNumeric>(array.Shape);
+			for (int i = 0; i < array.Count; ++i)
+				result[i] = array[i].ImaginaryPart;
+			return result;
+		}
 		#endregion
 	}
 }

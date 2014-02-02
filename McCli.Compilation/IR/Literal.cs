@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace McCli.Compilation.IR
 {
-	public sealed class Literal : Assignment
+	public sealed class Literal : Expression
 	{
 		public readonly Variable Target;
 		public readonly object Value;

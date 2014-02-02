@@ -14,16 +14,16 @@ namespace McCli
 	public sealed class MPrimitiveClass : MClass
 	{
 		#region Fields;
-		private readonly Type basicScalarType;
+		private readonly Type cliType;
 		private readonly string name;
 		#endregion
 
 		#region Constructors
-		internal MPrimitiveClass(Type basicScalarType, string name)
+		internal MPrimitiveClass(Type cliType, string name)
 		{
-			Contract.Requires(basicScalarType != null);
+			Contract.Requires(cliType != null);
 
-			this.basicScalarType = basicScalarType;
+			this.cliType = cliType;
 			this.name = name;
 		}
 		#endregion
@@ -34,58 +34,61 @@ namespace McCli
 			get { return name; }
 		}
 
-		public override Type BasicScalarType
+		public Type CliType
 		{
-			get { return basicScalarType; }
+			get { return cliType; }
+		}
+
+		public bool IsNumerical
+		{
+			get { return cliType != typeof(char) && cliType != typeof(bool); }
 		}
 
 		public bool IsFloat
 		{
-			get { return basicScalarType == typeof(float) || basicScalarType == typeof(double); }
+			get { return cliType == typeof(float) || cliType == typeof(double); }
 		}
 
 		public bool IsInteger
 		{
-			get { return !IsFloat; }
+			get { return name[0] == 'i' || name[0] == 'u'; }
 		}
 
 		public bool IsSignedInteger
 		{
-			get
-			{
-				return basicScalarType == typeof(sbyte)
-					|| basicScalarType == typeof(short)
-					|| basicScalarType == typeof(int)
-					|| basicScalarType == typeof(long);
-			}
+			get { return name[0] == 'i'; }
 		}
 
 		public bool IsUnsignedInteger
 		{
+			get { return name[0] == 'u'; }
+		}
+
+		public override MClassAttributes SupportedAttributes
+		{
 			get
 			{
-				return basicScalarType == typeof(byte)
-					|| basicScalarType == typeof(ushort)
-					|| basicScalarType == typeof(uint)
-					|| basicScalarType == typeof(ulong);
+				var attributes = MClassAttributes.SparseMatrix;
+				if (IsNumerical) attributes |= MClassAttributes.Complex;
+				return attributes;
 			}
-		}
-
-		public override MTypeForm DefaultForm
-		{
-			get { return MTypeForm.Array; }
-		}
-
-		public override int FixedSizeInBytes
-		{
-			get { return Marshal.SizeOf(basicScalarType); }
 		}
 		#endregion
 
 		#region Methods
-		public override bool SupportsForm(MTypeForm form)
+		public override int GetScalarSizeInBytes(MClassAttributes attributes)
 		{
-			return true;
+			// Marshal.SizeOf returns 1 for 'char' and 'bool', which is what we want.
+			int size = Marshal.SizeOf(cliType);
+			if ((attributes & MClassAttributes.Complex) != 0) size *= 2;
+			return size;
+		}
+
+		[Pure]
+		public static MPrimitiveClass FromCliType(Type type)
+		{
+			Contract.Requires(type != null);
+			throw new NotImplementedException();
 		}
 		#endregion
 	}

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace McCli.Compilation.IR
 {
-	public sealed class Copy : Assignment
+	public sealed class Copy : Expression
 	{
 		public readonly Variable Value, Target;
 

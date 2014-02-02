@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,24 +11,31 @@ namespace McCli
 	/// Represents a matlab complex value, with an imaginary and a real part.
 	/// Complex values are handled transparently with real values by matlab programs.
 	/// </summary>
-	/// <typeparam name="T">The underlying primitive numerical type.</typeparam>
-	public struct MComplex<T> where T : struct
+	/// <typeparam name="TNumerical">The underlying primitive numerical type.</typeparam>
+	public struct MComplex<TNumerical> where TNumerical : struct
 	{
 		#region Fields
-		public readonly T RealPart, ImaginaryPart;
+		public readonly TNumerical RealPart, ImaginaryPart;
 		#endregion
 
 		#region Constructors
-		public MComplex(T realPart)
+		public MComplex(TNumerical realPart)
 		{
 			this.RealPart = realPart;
-			this.ImaginaryPart = default(T);
+			this.ImaginaryPart = default(TNumerical);
 		}
 
-		public MComplex(T realPart, T imaginaryPart)
+		public MComplex(TNumerical realPart, TNumerical imaginaryPart)
 		{
 			this.RealPart = realPart;
 			this.ImaginaryPart = imaginaryPart;
+		}
+
+		static MComplex()
+		{
+			// Ensure the primitive numerical type is one that supports complex numbers.
+			var @class = MPrimitiveClass.FromCliType(typeof(TNumerical));
+			Contract.Assert(@class != null && (@class.SupportedAttributes & MClassAttributes.Complex) != 0);
 		}
 		#endregion
 	}

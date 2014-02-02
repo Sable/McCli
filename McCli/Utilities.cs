@@ -21,14 +21,6 @@ namespace McCli
 			return i;
 		}
 
-		public static T AsScalar<T>(MArray<T> array)
-		{
-			Contract.Requires(array != null);
-
-			if (!array.IsScalar) throw new InvalidCastException();
-			return array.BackingArray[0];
-		}
-
 		public static bool IsTrue(MValue value)
 		{
 			// An evaluated expression is true when the result is nonempty
@@ -36,16 +28,15 @@ namespace McCli
 			// Otherwise, the expression is false.
 			Contract.Requires(value != null);
 
-			var type = value.MType;
-			if (type.IsComplex) return false;
+			if ((value.ClassAttributes & MClassAttributes.Complex) != 0) return false;
 
 			var array = value as MArray;
 			if (array != null)
 			{
-				int count = array.ElementCount;
+				int count = array.Count;
 				if (count == 0) return false;
 
-				var doubleArray = array as MArray<double>;
+				var doubleArray = array as MDenseArray<double>;
 				if (doubleArray != null)
 				{
 					for (int i = 0; i < count; ++i)
@@ -54,7 +45,7 @@ namespace McCli
 					return true;
 				}
 
-				var logicalArray = array as MArray<bool>;
+				var logicalArray = array as MDenseArray<bool>;
 				if (logicalArray != null)
 				{
 					for (int i = 0; i < count; ++i)

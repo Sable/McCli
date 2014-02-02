@@ -25,12 +25,12 @@ namespace McCli
 		#endregion
 
 		#region Properties
-		public Array BackingArray
+		public MArrayShape Shape
 		{
-			get { return GetBackingArray(); }
+			get { return shape; }
 		}
 
-		public int ElementCount
+		public int Count
 		{
 			get { return shape.TotalCount; }
 		}
@@ -38,11 +38,6 @@ namespace McCli
 		public bool IsScalar
 		{
 			get { return shape.IsScalar; }
-		}
-
-		public MArrayShape Shape
-		{
-			get { return shape; }
 		}
 		#endregion
 
@@ -59,88 +54,52 @@ namespace McCli
 			return (MArray)DoDeepClone();
 		}
 
-		protected abstract Array GetBackingArray();
 		protected abstract object At(int index);
 		#endregion
 	}
 
 	/// <summary>
-	/// Strongly typed base class for all MatLab arrays.
+	/// Strongly-typed base class for MatLab arrays.
 	/// </summary>
-	/// <typeparam name="T">The type of the array elements.</typeparam>
-	public sealed class MArray<T> : MArray
+	/// <typeparam name="TScalar">The type of the array elements.</typeparam>
+	public abstract class MArray<TScalar> : MArray
 	{
-		#region Fields
-		private T[] elements;
-		#endregion
-
 		#region Constructors
-		public MArray(T[] backingArray, MArrayShape shape)
-			: base(shape)
-		{
-			Contract.Requires(backingArray != null && backingArray.Length == shape.TotalCount);
-			this.elements = backingArray;
-		}
-
-		public MArray(MArrayShape shape) : base(shape)
-		{
-			elements = new T[shape.TotalCount];
-		}
-
-		public MArray(int rowCount, int columnCount)
-			: this(new MArrayShape(rowCount, columnCount)) { }
+		internal MArray(MArrayShape shape) : base(shape) {}
 		#endregion
 
 		#region Properties
-		public new T[] BackingArray
-		{
-			get { return elements; }
-		}
-
-		public override MType MType
+		public override MClass Class
 		{
 			get { throw new NotImplementedException(); }
 		}
 		#endregion
 
 		#region Indexers
-		public new T this[int index]
+		public new abstract TScalar this[int index] { get; set; }
+
+		public override MClassAttributes ClassAttributes
 		{
-			get { return elements[index]; }
-			set { elements[index] = value; }
+			get
+			{
+				bool isComplex = typeof(TScalar).IsGenericType && typeof(TScalar).GetGenericTypeDefinition() == typeof(MComplex<>);
+				return isComplex ? MClassAttributes.Complex : MClassAttributes.None;
+			}
 		}
 		#endregion
 
 		#region Methods
-		public T ToScalar()
+		public TScalar ToScalar()
 		{
 			if (!IsScalar) throw new InvalidCastException();
-			return elements[0];
+			return this[0];
 		}
 
-		public new MArray<T> DeepClone()
-		{
-			return new MArray<T>((T[])elements.Clone(), shape);
-		}
-
-		protected override Array GetBackingArray()
-		{
-			return elements;
-		}
+		public abstract MDenseArray<TScalar> AsDense();
 
 		protected override object At(int index)
 		{
 			return this[index];
-		}
-
-		protected override MValue DoDeepClone()
-		{
-			return DeepClone();
-		}
-
-		public static MArray<T> CreateScalar(T value)
-		{
-			return new MArray<T>(new[] { value }, MArrayShape.Scalar);
 		}
 		#endregion
 	}

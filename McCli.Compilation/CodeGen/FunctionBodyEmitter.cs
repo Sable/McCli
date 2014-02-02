@@ -155,7 +155,7 @@ namespace McCli.Compilation.CodeGen
 				&& target.Form == MTypeForm.Array)
 			{
 				// Boxing to array
-				var boxMethod = typeof(MArray<>)
+				var boxMethod = typeof(MDenseArray<>)
 					.MakeGenericType(source.Class.BasicScalarType)
 					.GetMethod("CreateScalar");
 				ilGenerator.Emit(OpCodes.Call, boxMethod);
@@ -170,7 +170,7 @@ namespace McCli.Compilation.CodeGen
 			LocalInfo info;
 			if (!locals.TryGetValue(variable, out info))
 			{
-				var localBuilder = ilGenerator.DeclareLocal(typeof(MArray<double>));
+				var localBuilder = ilGenerator.DeclareLocal(typeof(MDenseArray<double>));
 
 				// Dynamic method don't support debug info
 				if (!(method is DynamicMethod))
