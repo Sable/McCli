@@ -39,6 +39,7 @@
     <Compile Include="CodeGen\FunctionLookup.cs" />
     <Compile Include="CodeGen\MethodFactories.cs" />
     <Compile Include="CodeGen\MethodFactory.cs" />
+    <Compile Include="FunctionInfo.cs" />
     <Compile Include="FunctionTable.cs" />
     <Compile Include="IR\StoreIndexed.cs" />
     <Compile Include="IR\Expression.cs" />

@@ -83,13 +83,6 @@ namespace McCli
 			if ((attributes & MClassAttributes.Complex) != 0) size *= 2;
 			return size;
 		}
-
-		[Pure]
-		public static MPrimitiveClass FromCliType(Type type)
-		{
-			Contract.Requires(type != null);
-			throw new NotImplementedException();
-		}
 		#endregion
 	}
 }

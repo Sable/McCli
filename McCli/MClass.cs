@@ -15,9 +15,6 @@ namespace McCli
 	public abstract class MClass
 	{
 		#region Fields
-		public static readonly MFunctionHandleClass FunctionHandle = new MFunctionHandleClass();
-		public static readonly MPrimitiveClass Char = new MPrimitiveClass(typeof(char), "char");
-		public static readonly MPrimitiveClass Bool = new MPrimitiveClass(typeof(bool), "logical");
 		public static readonly MPrimitiveClass Double = new MPrimitiveClass(typeof(double), "double");
 		public static readonly MPrimitiveClass Single = new MPrimitiveClass(typeof(float), "single");
 		public static readonly MPrimitiveClass Int8 = new MPrimitiveClass(typeof(sbyte), "int8");
@@ -28,10 +25,32 @@ namespace McCli
 		public static readonly MPrimitiveClass UInt16 = new MPrimitiveClass(typeof(ushort), "uint16");
 		public static readonly MPrimitiveClass UInt32 = new MPrimitiveClass(typeof(uint), "uint32");
 		public static readonly MPrimitiveClass UInt64 = new MPrimitiveClass(typeof(ulong), "uint64");
+		public static readonly MPrimitiveClass Char = new MPrimitiveClass(typeof(char), "char");
+		public static readonly MPrimitiveClass Bool = new MPrimitiveClass(typeof(bool), "logical");
+		public static readonly MCellArrayClass CellArray = new MCellArrayClass();
+		public static readonly MFunctionHandleClass FunctionHandle = new MFunctionHandleClass();
+
+		private static readonly Dictionary<Type, MClass> cliTypeToClass;
 		#endregion
 
 		#region Constructors
 		internal MClass() { }
+
+		static MClass()
+		{
+			cliTypeToClass = new Dictionary<Type,MClass>();
+
+			foreach (var field in typeof(MClass).GetFields())
+			{
+				if (field.IsStatic && field.FieldType == typeof(MPrimitiveClass))
+				{
+					var primitiveClass = (MPrimitiveClass)field.GetValue(null);
+					cliTypeToClass.Add(primitiveClass.CliType, primitiveClass);
+				}
+			}
+
+			cliTypeToClass.Add(typeof(MCellArray), CellArray);
+		}
 		#endregion
 
 		#region Properties
@@ -54,12 +73,33 @@ namespace McCli
 		/// <returns>The size in bytes of a scalar.</returns>
 		public abstract int GetScalarSizeInBytes(MClassAttributes attributes);
 
-		public static MClass FromBasicScalarType(Type type)
+		/// <summary>
+		/// Obtains the MatLab class represented by a given CLI type.
+		/// </summary>
+		/// <param name="type">The CLI type.</param>
+		/// <param name="attributes">Outputs the class attributes of the representation.</param>
+		/// <returns>The MatLab class represented by that CLI type, if any.</returns>
+		public static MClass FromCliType(Type type, out MClassAttributes attributes)
 		{
 			Contract.Requires(type != null);
 
-			if (type == typeof(double)) return MPrimitiveClass.Double;
-			throw new NotImplementedException();
+			attributes = MClassAttributes.None;
+
+			MClass @class;
+			while (true)
+			{
+				if (cliTypeToClass.TryGetValue(type, out @class)) return @class;
+				if (!type.IsGenericType) return null;
+
+				if (type.GetGenericTypeDefinition() == typeof(MComplex<>)) attributes |= MClassAttributes.Complex;
+				type = type.GetGenericArguments()[0];
+			}
+		}
+
+		public static MClass FromCliType(Type type)
+		{
+			MClassAttributes attributes;
+			return FromCliType(type, out attributes);
 		}
 		#endregion
 	}

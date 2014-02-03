@@ -38,6 +38,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MArrayShape.cs" />
+    <Compile Include="MCellArray.cs" />
     <Compile Include="MCellArrayClass.cs" />
     <Compile Include="MClass.cs" />
     <Compile Include="MClassAttributes.cs" />

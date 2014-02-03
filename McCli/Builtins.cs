@@ -153,7 +153,27 @@ namespace McCli
 		#endregion
 		#endregion
 
-		#region Real/Imaginary
+		#region Complex
+		public static MComplex<TNumeric> complex<TNumeric>(TNumeric a) where TNumeric : struct
+		{
+			return new MComplex<TNumeric>(a);
+		}
+
+		public static MComplex<TNumeric> complex<TNumeric>(TNumeric a, TNumeric b) where TNumeric : struct
+		{
+			return new MComplex<TNumeric>(a, b);
+		}
+
+		public static MComplex<TNumeric> i<TNumeric>() where TNumeric : struct
+		{
+			return new MComplex<TNumeric>(default(TNumeric), (TNumeric)Convert.ChangeType(1, typeof(TNumeric)));
+		}
+
+		public static MComplex<TNumeric> j<TNumeric>() where TNumeric : struct
+		{
+			return i<TNumeric>();
+		}
+
 		public static MArray<TNumeric> real<TNumeric>(MArray<MComplex<TNumeric>> array) where TNumeric : struct
 		{
 			Contract.Requires(array != null);

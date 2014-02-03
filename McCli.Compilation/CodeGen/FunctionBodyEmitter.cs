@@ -139,9 +139,20 @@ namespace McCli.Compilation.CodeGen
 			ilGenerator.Emit(OpCodes.Stind_Ref);
 		}
 
-		private void EmitConversion(MType source, MType target)
+		private void EmitConversion(Type source, Type target)
 		{
 			if (source == target) return;
+			if (target.IsAssignableFrom(source)) return;
+
+			MClassAttributes sourceAttributes, targetAttributes;
+			var sourceClass = MClass.FromCliType(source, out sourceAttributes);
+			var targetClass = MClass.FromCliType(target, out targetAttributes);
+			Contract.Assert(sourceClass != null && targetClass != null);
+
+			if (sourceClass == targetClass)
+			{
+
+			}
 
 			if (target.IsAny)
 			{
@@ -189,7 +200,7 @@ namespace McCli.Compilation.CodeGen
 			Contract.Requires(variable != null);
 			Contract.Requires(variable.Kind == VariableKind.Input || variable.Kind == VariableKind.Output);
 
-			var type = (Type)variable.StaticType;
+			var type = (Type)variable.StaticClass;
 			if (variable.Kind == VariableKind.Output) type = type.MakeByRefType();
 
 			locals.Add(variable, new LocalInfo

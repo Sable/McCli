@@ -63,11 +63,11 @@ namespace McCli.Compilation
 			functions.Add(key, method);
 		}
 
-		public MethodInfo Lookup(string name, ImmutableArray<MType> argumentTypes)
+		public MethodInfo Lookup(string name, ImmutableArray<MClass> argumentClasses)
 		{
 			Contract.Requires(name != null);
 
-			var key = new GroupKey(name, argumentTypes.Length);
+			var key = new GroupKey(name, argumentClasses.Length);
 			return functions[key];
 		}
 		#endregion

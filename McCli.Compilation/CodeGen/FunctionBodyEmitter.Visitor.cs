@@ -26,33 +26,33 @@ namespace McCli.Compilation.CodeGen
 					throw new NotImplementedException();
 				}
 
-				EmitConversion(sourceType, literal.Target.StaticType);
+				EmitConversion(sourceType, literal.Target.StaticClass);
 			}
 		}
 
 		public override void VisitCopy(Copy copy)
 		{
-			Contract.Requires(copy.Value.StaticType == copy.Target.StaticType);
+			Contract.Requires(copy.Value.StaticClass == copy.Target.StaticClass);
 
 			using (BeginEmitStore(copy.Target))
 			{
 				EmitLoad(copy.Value);
 
 				// Clone if in boxed form
-				var sourceType = (Type)copy.Value.StaticType;
+				var sourceType = (Type)copy.Value.StaticClass;
 				if (typeof(MValue).IsAssignableFrom(sourceType))
 				{
 					var deepCloneMethod = sourceType.GetMethod("DeepClone");
 					ilGenerator.Emit(OpCodes.Call, deepCloneMethod);
 				}
 
-				EmitConversion(copy.Value.StaticType, copy.Target.StaticType);
+				EmitConversion(copy.Value.StaticClass, copy.Target.StaticClass);
 			}
 		}
 
 		public override void VisitStaticCall(StaticCall staticCall)
 		{
-			var argumentTypes = staticCall.Arguments.Select(a => a.StaticType);
+			var argumentTypes = staticCall.Arguments.Select(a => a.StaticClass);
 			var method = functionLookup(staticCall.Name, argumentTypes);
 
 

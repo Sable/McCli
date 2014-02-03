@@ -13,20 +13,14 @@ namespace McCli
 	public struct MArrayShape : IEquatable<MArrayShape>
 	{
 		#region Fields
-		public static readonly MArrayShape Scalar = new MArrayShape(1);
+		public static readonly MArrayShape Zero = new MArrayShape(0, 0);
+		public static readonly MArrayShape Scalar = new MArrayShape(1, 1);
 
 		private readonly int rowCount, columnCount;
 		private int[] dimensions;
 		#endregion
 
 		#region Constructors
-		public MArrayShape(int rowCount)
-		{
-			this.rowCount = rowCount;
-			this.columnCount = 1;
-			this.dimensions = null;
-		}
-
 		public MArrayShape(int rowCount, int columnCount)
 		{
 			this.rowCount = rowCount;
