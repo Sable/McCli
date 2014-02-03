@@ -28,7 +28,7 @@ namespace McCli
 		public static readonly MPrimitiveClass Char = new MPrimitiveClass(typeof(char), "char");
 		public static readonly MPrimitiveClass Bool = new MPrimitiveClass(typeof(bool), "logical");
 		public static readonly MCellArrayClass CellArray = new MCellArrayClass();
-		public static readonly MFunctionHandleClass FunctionHandle = new MFunctionHandleClass();
+		//public static readonly MFunctionHandleClass FunctionHandle = new MFunctionHandleClass();
 
 		private static readonly Dictionary<Type, MClass> cliTypeToClass;
 		#endregion
@@ -38,68 +38,74 @@ namespace McCli
 
 		static MClass()
 		{
-			cliTypeToClass = new Dictionary<Type,MClass>();
+			cliTypeToClass = new Dictionary<Type, MClass>();
 
 			foreach (var field in typeof(MClass).GetFields())
 			{
-				if (field.IsStatic && field.FieldType == typeof(MPrimitiveClass))
+				if (field.IsStatic && typeof(MClass).IsAssignableFrom(field.FieldType))
 				{
-					var primitiveClass = (MPrimitiveClass)field.GetValue(null);
+					var primitiveClass = (MClass)field.GetValue(null);
 					cliTypeToClass.Add(primitiveClass.CliType, primitiveClass);
 				}
 			}
-
-			cliTypeToClass.Add(typeof(MCellArray), CellArray);
 		}
 		#endregion
 
 		#region Properties
+		/// <summary>
+		/// The CLI type for value of this class (without type layers such as "complex").
+		/// </summary>
+		public abstract Type CliType { get; }
+
 		/// <summary>
 		/// Gets the name of this class.
 		/// </summary>
 		public abstract string Name { get; }
 
 		/// <summary>
-		/// Gets the attributes supported by this class.
+		/// Gets the type layers valid for this class.
 		/// </summary>
-		public abstract MClassAttributes SupportedAttributes { get; }
+		public abstract MTypeLayers ValidTypeLayers { get; }
+
+		/// <summary>
+		/// Gets the default type layers for values of this class.
+		/// </summary>
+		public virtual MTypeLayers DefaultTypeLayers
+		{
+			get { return MTypeLayers.None; }
+		}
 		#endregion
 
 		#region Methods
+		public MType AsType(MTypeLayers layers)
+		{
+			return new MType(this, layers);
+		}
+
+		public MType AsType()
+		{
+			return AsType(DefaultTypeLayers);
+		}
+
 		/// <summary>
-		/// Gets the size of a scalar of this class with the specified attributes, in bytes.
+		/// Gets the size of a scalar of this class with the specified type layers, in bytes.
 		/// </summary>
-		/// <param name="attributes">The class attributes.</param>
+		/// <param name="layers">The type layers.</param>
 		/// <returns>The size in bytes of a scalar.</returns>
-		public abstract int GetScalarSizeInBytes(MClassAttributes attributes);
+		public abstract int GetScalarSizeInBytes(MTypeLayers layers);
 
 		/// <summary>
 		/// Obtains the MatLab class represented by a given CLI type.
 		/// </summary>
 		/// <param name="type">The CLI type.</param>
-		/// <param name="attributes">Outputs the class attributes of the representation.</param>
 		/// <returns>The MatLab class represented by that CLI type, if any.</returns>
-		public static MClass FromCliType(Type type, out MClassAttributes attributes)
+		public static MClass FromCliType(Type type)
 		{
 			Contract.Requires(type != null);
 
-			attributes = MClassAttributes.None;
-
 			MClass @class;
-			while (true)
-			{
-				if (cliTypeToClass.TryGetValue(type, out @class)) return @class;
-				if (!type.IsGenericType) return null;
-
-				if (type.GetGenericTypeDefinition() == typeof(MComplex<>)) attributes |= MClassAttributes.Complex;
-				type = type.GetGenericArguments()[0];
-			}
-		}
-
-		public static MClass FromCliType(Type type)
-		{
-			MClassAttributes attributes;
-			return FromCliType(type, out attributes);
+			cliTypeToClass.TryGetValue(type, out @class);
+			return @class;
 		}
 		#endregion
 	}

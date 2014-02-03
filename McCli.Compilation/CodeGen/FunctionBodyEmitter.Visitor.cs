@@ -19,40 +19,40 @@ namespace McCli.Compilation.CodeGen
 				if (literal.Value is double)
 				{
 					ilGenerator.Emit(OpCodes.Ldc_R8, (double)literal.Value);
-					sourceType = new MType(MPrimitiveClass.Double, MTypeForm.Scalar);
+					sourceType = MPrimitiveClass.Double.AsScalarType();
 				}
 				else
 				{
 					throw new NotImplementedException();
 				}
 
-				EmitConversion(sourceType, literal.Target.StaticClass);
+				EmitConversion(sourceType, literal.Target.StaticType);
 			}
 		}
 
 		public override void VisitCopy(Copy copy)
 		{
-			Contract.Requires(copy.Value.StaticClass == copy.Target.StaticClass);
+			Contract.Requires(copy.Value.StaticType == copy.Target.StaticType);
 
 			using (BeginEmitStore(copy.Target))
 			{
 				EmitLoad(copy.Value);
 
 				// Clone if in boxed form
-				var sourceType = (Type)copy.Value.StaticClass;
+				var sourceType = copy.Value.StaticType.CliType;
 				if (typeof(MValue).IsAssignableFrom(sourceType))
 				{
 					var deepCloneMethod = sourceType.GetMethod("DeepClone");
 					ilGenerator.Emit(OpCodes.Call, deepCloneMethod);
 				}
 
-				EmitConversion(copy.Value.StaticClass, copy.Target.StaticClass);
+				EmitConversion(copy.Value.StaticType, copy.Target.StaticType);
 			}
 		}
 
 		public override void VisitStaticCall(StaticCall staticCall)
 		{
-			var argumentTypes = staticCall.Arguments.Select(a => a.StaticClass);
+			var argumentTypes = staticCall.Arguments.Select(a => a.StaticType);
 			var method = functionLookup(staticCall.Name, argumentTypes);
 
 

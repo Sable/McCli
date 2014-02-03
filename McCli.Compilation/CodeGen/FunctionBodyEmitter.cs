@@ -139,35 +139,23 @@ namespace McCli.Compilation.CodeGen
 			ilGenerator.Emit(OpCodes.Stind_Ref);
 		}
 
-		private void EmitConversion(Type source, Type target)
+		private void EmitConversion(MType source, MType target)
 		{
 			if (source == target) return;
-			if (target.IsAssignableFrom(source)) return;
-
-			MClassAttributes sourceAttributes, targetAttributes;
-			var sourceClass = MClass.FromCliType(source, out sourceAttributes);
-			var targetClass = MClass.FromCliType(target, out targetAttributes);
-			Contract.Assert(sourceClass != null && targetClass != null);
-
-			if (sourceClass == targetClass)
-			{
-
-			}
 
 			if (target.IsAny)
 			{
-				if (source.Form != MTypeForm.Scalar) return;
+				if (source.IsBoxedAsMValue) return;
 				throw new NotImplementedException();
 			}
 
 			if (source.Class == target.Class
 				&& source.IsComplex == target.IsComplex
-				&& source.Form == MTypeForm.Scalar
-				&& target.Form == MTypeForm.Array)
+				&& source.IsScalar && target.IsDenseArray)
 			{
 				// Boxing to array
 				var boxMethod = typeof(MDenseArray<>)
-					.MakeGenericType(source.Class.BasicScalarType)
+					.MakeGenericType(source.CliType)
 					.GetMethod("CreateScalar");
 				ilGenerator.Emit(OpCodes.Call, boxMethod);
 				return;
@@ -200,7 +188,7 @@ namespace McCli.Compilation.CodeGen
 			Contract.Requires(variable != null);
 			Contract.Requires(variable.Kind == VariableKind.Input || variable.Kind == VariableKind.Output);
 
-			var type = (Type)variable.StaticClass;
+			var type = variable.StaticType.CliType;
 			if (variable.Kind == VariableKind.Output) type = type.MakeByRefType();
 
 			locals.Add(variable, new LocalInfo

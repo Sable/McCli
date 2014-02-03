@@ -33,9 +33,9 @@ namespace McCli
 
 		static MComplex()
 		{
-			// Ensure the primitive numerical type is one that supports complex numbers.
-			var @class = MPrimitiveClass.FromCliType(typeof(TNumeric));
-			Contract.Assert(@class != null && (@class.SupportedAttributes & MClassAttributes.Complex) != 0);
+			// Ensure the generic type is one that supports complex numbers.
+			var @class = MClass.FromCliType(typeof(TNumeric));
+			Contract.Assert(@class != null && (@class.ValidTypeLayers & MTypeLayers.Complex) != 0);
 		}
 		#endregion
 	}

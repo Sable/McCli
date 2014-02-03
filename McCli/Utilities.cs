@@ -28,15 +28,15 @@ namespace McCli
 			// Otherwise, the expression is false.
 			Contract.Requires(value != null);
 
-			if ((value.ClassAttributes & MClassAttributes.Complex) != 0) return false;
+			var type = value.Type;
+			if (type.IsComplex) return false;
 
-			var array = value as MArray;
-			if (array != null)
+			if (type.IsArray)
 			{
-				int count = array.Count;
+				int count = ((MArray)value).Count;
 				if (count == 0) return false;
-
-				var doubleArray = array as MDenseArray<double>;
+				
+				var doubleArray = value as MDenseArray<double>;
 				if (doubleArray != null)
 				{
 					for (int i = 0; i < count; ++i)
@@ -45,7 +45,7 @@ namespace McCli
 					return true;
 				}
 
-				var logicalArray = array as MDenseArray<bool>;
+				var logicalArray = value as MDenseArray<bool>;
 				if (logicalArray != null)
 				{
 					for (int i = 0; i < count; ++i)

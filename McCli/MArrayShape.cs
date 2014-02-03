@@ -86,6 +86,16 @@ namespace McCli
 			if (dimensionIndex == 1) return columnCount;
 			throw new NotImplementedException();
 		}
+
+		public static MArrayShape RowVector(int count)
+		{
+			return new MArrayShape(1, count);
+		}
+
+		public static MArrayShape ColumnVector(int count)
+		{
+			return new MArrayShape(count, 1);
+		}
 		#endregion
 
 		#region Operators

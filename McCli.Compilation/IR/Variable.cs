@@ -26,7 +26,7 @@ namespace McCli.Compilation.IR
 		/// <summary>
 		/// The static type of this variable, if available.
 		/// </summary>
-		public readonly MClass StaticClass;
+		public readonly MType StaticType;
 
 		/// <summary>
 		/// The constant value of this variable, if available.
@@ -35,24 +35,27 @@ namespace McCli.Compilation.IR
 		#endregion
 
 		#region Constructors
-		public Variable(string name, VariableKind kind, MClass staticClass)
+		public Variable(string name, VariableKind kind)
 		{
 			Contract.Requires(name != null);
 
 			this.Name = name;
 			this.Kind = kind;
-			this.StaticClass = staticClass;
+		}
+
+		public Variable(string name, VariableKind kind, MType staticType)
+			: this(name, kind)
+		{
+			this.StaticType = staticType;
 		}
 
 		public Variable(string name, VariableKind kind, MValue constantValue)
+			: this(name, kind)
 		{
-			Contract.Requires(name != null);
 			Contract.Requires(constantValue != null);
 
-			this.Name = name;
-			this.Kind = kind;
+			this.StaticType = constantValue.Type;
 			this.ConstantValue = constantValue;
-			this.StaticClass = constantValue.Class;
 		}
 		#endregion
 	}

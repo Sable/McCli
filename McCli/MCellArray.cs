@@ -32,14 +32,9 @@ namespace McCli
 		#endregion
 
 		#region Properties
-		public override MClass Class
+		public override MType Type
 		{
-			get { return MClass.CellArray; }
-		}
-
-		public override MClassAttributes ClassAttributes
-		{
-			get { return MClassAttributes.None; }
+			get { return MClass.CellArray.AsType(); }
 		}
 		#endregion
 

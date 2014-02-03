@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace McCli
 {
+	/// <summary>
+	/// Represents the MatLab class of cell arrays.
+	/// </summary>
 	public sealed class MCellArrayClass : MClass
 	{
 		#region Constructors
@@ -18,14 +21,19 @@ namespace McCli
 			get { return "cell"; }
 		}
 
-		public override MClassAttributes SupportedAttributes
+		public override Type CliType
 		{
-			get { return MClassAttributes.None; }
+			get { return typeof(MCellArray); }
+		}
+
+		public override MTypeLayers ValidTypeLayers
+		{
+			get { return MTypeLayers.None; }
 		}
 		#endregion
 
 		#region Methods
-		public override int GetScalarSizeInBytes(MClassAttributes attributes)
+		public override int GetScalarSizeInBytes(MTypeLayers layers)
 		{
 			return 0;
 		}

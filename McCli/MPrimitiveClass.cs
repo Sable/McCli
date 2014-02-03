@@ -34,7 +34,7 @@ namespace McCli
 			get { return name; }
 		}
 
-		public Type CliType
+		public override Type CliType
 		{
 			get { return cliType; }
 		}
@@ -64,23 +64,49 @@ namespace McCli
 			get { return name[0] == 'u'; }
 		}
 
-		public override MClassAttributes SupportedAttributes
+		public override MTypeLayers ValidTypeLayers
 		{
 			get
 			{
-				var attributes = MClassAttributes.SparseMatrix;
-				if (IsNumerical) attributes |= MClassAttributes.Complex;
-				return attributes;
+				var layers = MTypeLayers.Array | MTypeLayers.DenseArray | MTypeLayers.SparseMatrix;
+				if (IsNumerical) layers |= MTypeLayers.Complex;
+				return layers;
 			}
+		}
+
+		public override MTypeLayers DefaultTypeLayers
+		{
+			get { return MTypeLayers.DenseArray; }
 		}
 		#endregion
 
 		#region Methods
-		public override int GetScalarSizeInBytes(MClassAttributes attributes)
+		public MType AsScalarType()
+		{
+			return new MType(this, MTypeLayers.None);
+		}
+
+		public MType AsComplexType()
+		{
+			Contract.Requires((ValidTypeLayers & MTypeLayers.Complex) != 0);
+			return new MType(this, MTypeLayers.Complex);
+		}
+
+		public MType AsArrayType()
+		{
+			return new MType(this, MTypeLayers.Array);
+		}
+
+		public MType AsDenseArrayType()
+		{
+			return new MType(this, MTypeLayers.DenseArray);
+		}
+
+		public override int GetScalarSizeInBytes(MTypeLayers layers)
 		{
 			// Marshal.SizeOf returns 1 for 'char' and 'bool', which is what we want.
 			int size = Marshal.SizeOf(cliType);
-			if ((attributes & MClassAttributes.Complex) != 0) size *= 2;
+			if ((layers & MTypeLayers.Complex) != 0) size *= 2;
 			return size;
 		}
 		#endregion

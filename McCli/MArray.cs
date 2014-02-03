@@ -66,26 +66,30 @@ namespace McCli
 	{
 		#region Constructors
 		internal MArray(MArrayShape shape) : base(shape) {}
+
+		static MArray()
+		{
+			// Ensure the generic type is one that supports being in arrays.
+			var @class = MType.FromCliType(typeof(TScalar)).Class;
+			Contract.Assert(@class != null && (@class.ValidTypeLayers & MTypeLayers.Array) != 0);
+		}
 		#endregion
 
 		#region Properties
-		public override MClass Class
+		public override sealed MType Type
 		{
-			get { throw new NotImplementedException(); }
+			get
+			{
+				var scalarType = MType.FromCliType(typeof(TScalar));
+				return new MType(scalarType.Class, scalarType.Layers | TypeLayer);
+			}
 		}
+
+		protected abstract MTypeLayers TypeLayer { get; }
 		#endregion
 
 		#region Indexers
 		public new abstract TScalar this[int index] { get; set; }
-
-		public override MClassAttributes ClassAttributes
-		{
-			get
-			{
-				bool isComplex = typeof(TScalar).IsGenericType && typeof(TScalar).GetGenericTypeDefinition() == typeof(MComplex<>);
-				return isComplex ? MClassAttributes.Complex : MClassAttributes.None;
-			}
-		}
 		#endregion
 
 		#region Methods

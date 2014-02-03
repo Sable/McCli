@@ -20,11 +20,17 @@ namespace McCli
 
 		#region Properties
 		/// <summary>
+		/// Gets the type of this value.
+		/// </summary>
+		public abstract MType Type { get; }
+
+		/// <summary>
 		/// Gets the class of this value.
 		/// </summary>
-		public abstract MClass Class { get; }
-
-		public abstract MClassAttributes ClassAttributes { get; }
+		public MClass Class
+		{
+			get { return Type.Class; }
+		}
 		#endregion
 
 		#region Methods

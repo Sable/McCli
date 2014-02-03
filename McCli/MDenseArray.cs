@@ -51,6 +51,11 @@ namespace McCli
 		{
 			get { return elements; }
 		}
+
+		protected override MTypeLayers TypeLayer
+		{
+			get { return MTypeLayers.DenseArray; }
+		}
 		#endregion
 
 		#region Indexers
