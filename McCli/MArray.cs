@@ -101,6 +101,11 @@ namespace McCli
 
 		public abstract MDenseArray<TScalar> AsDense();
 
+		public new MArray<TScalar> DeepClone()
+		{
+			return (MArray<TScalar>)DoDeepClone();
+		}
+
 		protected override object At(int index)
 		{
 			return this[index];

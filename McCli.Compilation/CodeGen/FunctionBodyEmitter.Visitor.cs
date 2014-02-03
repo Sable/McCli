@@ -43,7 +43,9 @@ namespace McCli.Compilation.CodeGen
 				if (typeof(MValue).IsAssignableFrom(sourceType))
 				{
 					var deepCloneMethod = sourceType.GetMethod("DeepClone");
-					ilGenerator.Emit(OpCodes.Call, deepCloneMethod);
+					ilGenerator.Emit(OpCodes.Callvirt, deepCloneMethod);
+					if (!sourceType.IsAssignableFrom(deepCloneMethod.ReturnType))
+						ilGenerator.Emit(OpCodes.Castclass, sourceType);
 				}
 
 				EmitConversion(copy.Value.StaticType, copy.Target.StaticType);
