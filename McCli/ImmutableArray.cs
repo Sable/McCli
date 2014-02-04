@@ -182,7 +182,12 @@ namespace McCli
 		public static implicit operator ImmutableArray<T>(T[] array)
 		{
 			if (array == null) throw new ArgumentNullException("array");
-			return new ImmutableArray<T>(array);
+			return new ImmutableArray<T>((T[])array.Clone());
+		}
+
+		public static implicit operator ImmutableArray<T>(T singleton)
+		{
+			return new ImmutableArray<T>(new[] { singleton });
 		}
 		#endregion
 	}
@@ -216,7 +221,7 @@ namespace McCli
 		public static ImmutableArray<T> Create<T>(params T[] elements)
 		{
 			Contract.Requires(elements != null);
-			return ImmutableArray<T>.CreateNoClone(elements);
+			return ImmutableArray<T>.CreateNoClone((T[])elements.Clone());
 		}
 
 		public static ImmutableArray<T> Create<T>(IEnumerable<T> elements)

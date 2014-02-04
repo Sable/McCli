@@ -54,11 +54,22 @@ namespace McCli.Compilation.CodeGen
 
 		public override void VisitStaticCall(StaticCall staticCall)
 		{
-			var argumentTypes = staticCall.Arguments.Select(a => a.StaticType);
-			var method = functionLookup(staticCall.Name, argumentTypes);
+			Contract.Assert(staticCall.Targets.Length == 1);
+			using (BeginEmitStore(staticCall.Targets[0]))
+			{
+				var argumentTypes = staticCall.Arguments.Select(a => a.StaticType);
+				var function = functionLookup(staticCall.Name, argumentTypes);
 
+				for (int i = 0; i < staticCall.Arguments.Length; ++i)
+				{
+					var argument = staticCall.Arguments[i];
+					EmitLoad(argument);
+					EmitConversion(argument.StaticType, function.InputTypes[i]);
+				}
 
-			base.VisitStaticCall(staticCall);
+				ilGenerator.Emit(OpCodes.Call, function.Method);
+				EmitConversion(function.OutputType, staticCall.Targets[0].StaticType);
+			}
 		}
 
 		public override void VisitNode(IR.Node node)

@@ -38,7 +38,7 @@ namespace McCli.Compilation
 		}
 
 		#region Fields
-		private readonly Dictionary<GroupKey, MethodInfo> functions = new Dictionary<GroupKey, MethodInfo>();
+		private readonly Dictionary<GroupKey, FunctionInfo> functions = new Dictionary<GroupKey, FunctionInfo>();
 		#endregion
 
 		#region Methods
@@ -47,7 +47,7 @@ namespace McCli.Compilation
 			Contract.Requires(type != null);
 
 			foreach (var method in type.GetTypeInfo().DeclaredMethods)
-				if (method.IsPublic && method.IsStatic)
+				if (method.IsPublic && method.IsStatic && !method.IsGenericMethodDefinition)
 					Add(method);
 		}
 
@@ -56,18 +56,19 @@ namespace McCli.Compilation
 			Contract.Requires(method != null);
 
 			// TODO: Support variadic arguments
-			// TODO: Ignore output arguments in arity
+			// TODO: Support multiple return parameters
+			// TODO: Support variadic return parameters
+			// TODO: Support overloading
 			var key = new GroupKey(method.Name, method.GetParameters().Length);
-			
-			// TODO: Support function groups
-			functions.Add(key, method);
+			var functionInfo = new FunctionInfo(method);
+			functions.Add(key, functionInfo);
 		}
 
-		public MethodInfo Lookup(string name, ImmutableArray<MClass> argumentClasses)
+		public FunctionInfo Lookup(string name, ImmutableArray<MType> argumentTypes)
 		{
 			Contract.Requires(name != null);
 
-			var key = new GroupKey(name, argumentClasses.Length);
+			var key = new GroupKey(name, argumentTypes.Length);
 			return functions[key];
 		}
 		#endregion

@@ -20,25 +20,18 @@ namespace McCli.Compilation.CodeGen
 		private struct EmitStoreScope : IDisposable
 		{
 			private readonly FunctionBodyEmitter instance;
-			private readonly object token;
+			private readonly Variable variable;
 
-			public EmitStoreScope(FunctionBodyEmitter instance, object token)
+			public EmitStoreScope(FunctionBodyEmitter instance, Variable variable)
 			{
 				this.instance = instance;
-				this.token = token;
+				this.variable = variable;
 			}
 
 			public void Dispose()
 			{
-				instance.EndEmitStore(token);
+				instance.EndEmitStore(variable);
 			}
-		}
-		#endregion
-
-		#region LocalInfo
-		struct LocalInfo
-		{
-			public LocalLocation Location;
 		}
 		#endregion
 
@@ -47,43 +40,50 @@ namespace McCli.Compilation.CodeGen
 		private readonly FunctionLookup functionLookup;
 		private readonly MethodInfo method;
 		private readonly ILGenerator ilGenerator;
-		private readonly Dictionary<Variable, LocalInfo> locals = new Dictionary<Variable, LocalInfo>();
+		private readonly Dictionary<Variable, LocalLocation> locals = new Dictionary<Variable, LocalLocation>();
 		#endregion
 
 		#region Constructors
-		private FunctionBodyEmitter(IR.Function function, MethodFactory methodFactory)
+		private FunctionBodyEmitter(IR.Function function, MethodFactory methodFactory, FunctionLookup functionLookup)
 		{
 			Contract.Requires(function != null);
 			Contract.Requires(methodFactory != null);
+			Contract.Requires(functionLookup != null);
+
+			Contract.Assert(function.Outputs.Length == 1);
 
 			this.function = function;
+			this.functionLookup = functionLookup;
 
 			// Handle method parameters
-			var parameterDescriptorsBuilder = new ImmutableArray<ParameterDescriptor>.Builder(
-				function.Inputs.Length + function.Outputs.Length);
+			var inputDescriptorsBuilder = new ImmutableArray<ParameterDescriptor>.Builder(function.Inputs.Length);
 
 			for (int i = 0; i < function.Inputs.Length; ++i)
-				parameterDescriptorsBuilder[i] = CreateParameter(function.Inputs[i], i);
-
-			for (int i = 0; i < function.Outputs.Length; ++i)
 			{
-				int index = function.Inputs.Length + i;
-				parameterDescriptorsBuilder[index] = CreateParameter(function.Outputs[i], index);
+				var input = function.Inputs[i];
+				locals.Add(input, LocalLocation.Parameter(i));
+				inputDescriptorsBuilder[i] = new ParameterDescriptor(input.StaticType.CliType, ParameterAttributes.In, input.Name);
 			}
 
 			// Create the method and get its IL generator
-			method = methodFactory(function.Name, parameterDescriptorsBuilder.Complete(),
-				ParameterDescriptor.VoidReturn, out ilGenerator);
+			method = methodFactory(function.Name, inputDescriptorsBuilder.Complete(), function.Outputs[0].StaticType.CliType, out ilGenerator);
+
+			foreach (var output in function.Outputs)
+			{
+				var local = ilGenerator.DeclareLocal(output.StaticType.CliType);
+				locals.Add(output, LocalLocation.Variable(local.LocalIndex));
+			}
 		}
 		#endregion
 
 		#region Methods
-		public static MethodInfo Emit(IR.Function function, MethodFactory methodFactory)
+		public static MethodInfo Emit(IR.Function function, MethodFactory methodFactory, FunctionLookup functionLookup)
 		{
 			Contract.Requires(function != null);
 			Contract.Requires(methodFactory != null);
+			Contract.Requires(functionLookup != null);
 
-			var emitter = new FunctionBodyEmitter(function, methodFactory);
+			var emitter = new FunctionBodyEmitter(function, methodFactory, functionLookup);
 			emitter.Emit();
 			return emitter.method;
 		}
@@ -92,6 +92,8 @@ namespace McCli.Compilation.CodeGen
 		{
 			foreach (var statement in function.Body)
 				statement.Accept(this);
+
+			EmitLoad(function.Outputs[0]);
 			ilGenerator.Emit(OpCodes.Ret);
 		}
 		
@@ -101,7 +103,8 @@ namespace McCli.Compilation.CodeGen
 			{
 				case VariableKind.Input:
 				case VariableKind.Local:
-					ilGenerator.EmitLoad(GetLocalInfo(variable).Location);
+				case VariableKind.Output:
+					ilGenerator.EmitLoad(GetLocalLocation(variable));
 					break;
 
 				default:
@@ -111,47 +114,46 @@ namespace McCli.Compilation.CodeGen
 
 		private EmitStoreScope BeginEmitStore(Variable variable)
 		{
-			object token = null;
 			switch (variable.Kind)
 			{
 				case VariableKind.Input:
 				case VariableKind.Local:
-					ilGenerator.EmitStore(GetLocalInfo(variable).Location);
-					break;
-
 				case VariableKind.Output:
-					ilGenerator.EmitLoad(GetLocalInfo(variable).Location);
-					token = variable;
 					break;
 
 				default:
 					throw new NotImplementedException();
 			}
 
-			return new EmitStoreScope(this, token);
+			return new EmitStoreScope(this, variable);
 		}
 
-		private void EndEmitStore(object token)
+		private void EndEmitStore(Variable variable)
 		{
-			if (token == null) return;
+			if (variable == null) return;
 
-			Contract.Assert(token is Variable);
-			ilGenerator.Emit(OpCodes.Stind_Ref);
+			switch (variable.Kind)
+			{
+				case VariableKind.Input:
+				case VariableKind.Local:
+				case VariableKind.Output:
+					ilGenerator.EmitStore(GetLocalLocation(variable));
+					break;
+
+				default:
+					throw new NotImplementedException();
+			}
 		}
 
 		private void EmitConversion(MType source, MType target)
 		{
 			if (source == target) return;
 
-			if (target.IsAny)
-			{
-				if (source.IsBoxedAsMValue) return;
-				throw new NotImplementedException();
-			}
+			if (target.IsAny && source.IsBoxedAsMValue) return;
 
 			if (source.Class == target.Class
 				&& source.IsComplex == target.IsComplex
-				&& source.IsScalar && target.IsDenseArray)
+				&& source.IsScalar && target.IsArray && !target.IsSparseMatrix)
 			{
 				// Boxing to array
 				var boxMethod = typeof(MDenseArray<>)
@@ -164,40 +166,22 @@ namespace McCli.Compilation.CodeGen
 			throw new NotImplementedException();
 		}
 
-		private LocalInfo GetLocalInfo(Variable variable)
+		private LocalLocation GetLocalLocation(Variable variable)
 		{
-			LocalInfo info;
-			if (!locals.TryGetValue(variable, out info))
+			LocalLocation location;
+			if (!locals.TryGetValue(variable, out location))
 			{
-				var localBuilder = ilGenerator.DeclareLocal(typeof(MDenseArray<double>));
+				var localBuilder = ilGenerator.DeclareLocal(variable.StaticType.CliType);
 
-				// Dynamic method don't support debug info
+				// Dynamic methods do not support debug info
 				if (!(method is DynamicMethod))
 					localBuilder.SetLocalSymInfo(variable.Name);
 				
-				var location = LocalLocation.Variable(localBuilder.LocalIndex);
-				info = new LocalInfo { Location = location };
-				locals.Add(variable, info);
+				location = LocalLocation.Variable(localBuilder.LocalIndex);
+				locals.Add(variable, location);
 			}
 
-			return info;
-		}
-
-		private ParameterDescriptor CreateParameter(Variable variable, int index)
-		{
-			Contract.Requires(variable != null);
-			Contract.Requires(variable.Kind == VariableKind.Input || variable.Kind == VariableKind.Output);
-
-			var type = variable.StaticType.CliType;
-			if (variable.Kind == VariableKind.Output) type = type.MakeByRefType();
-
-			locals.Add(variable, new LocalInfo
-			{
-				Location = LocalLocation.Parameter(index)
-			});
-
-			var attributes = variable.Kind == VariableKind.Input ? ParameterAttributes.In : ParameterAttributes.Out; 
-			return new ParameterDescriptor(type, attributes, variable.Name);
+			return location;
 		}
 		#endregion
 	}

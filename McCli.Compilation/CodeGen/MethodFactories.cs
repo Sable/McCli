@@ -12,10 +12,8 @@ namespace McCli.Compilation.CodeGen
 {
 	public static class MethodFactories
 	{
-		public static DynamicMethod Dynamic(
-			string name,
-			ImmutableArray<ParameterDescriptor> parameters,
-			ParameterDescriptor returnParameter,
+		public static DynamicMethod Dynamic(string name,
+			ImmutableArray<ParameterDescriptor> parameters, Type returnType,
 			out ILGenerator ilGenerator)
 		{
 			Contract.Requires(name != null);
@@ -24,12 +22,11 @@ namespace McCli.Compilation.CodeGen
 			for (int i = 0; i < parameters.Length; ++i)
 				parameterTypes[i] = parameters[i].Type;
 
-			var method = new DynamicMethod(name, returnParameter.Type, parameterTypes);
+			var method = new DynamicMethod(name, returnType, parameterTypes);
 
 			// Define the input/output parameters
 			for (int i = 0; i < parameters.Length; ++i)
 				method.DefineParameter(i + 1, parameters[i].Attributes, parameters[i].Name ?? string.Empty);
-			method.DefineParameter(0, returnParameter.Attributes, returnParameter.Name ?? string.Empty);
 			
 			ilGenerator = method.GetILGenerator();
 

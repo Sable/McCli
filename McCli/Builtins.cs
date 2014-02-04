@@ -14,7 +14,10 @@ namespace McCli
 		{
 			Contract.Requires(a != null);
 			Contract.Requires(b != null);
-			Contract.Requires(a.Shape == b.Shape);
+
+			if (a.IsScalar) return plus(b, a[0]);
+			if (b.IsScalar) return plus(a, b[0]);
+			if (a.Shape != b.Shape) throw new MArrayShapeException();
 
 			var c = new MDenseArray<double>(a.Shape);
 			for (int i = 0; i < a.Count; ++i)
@@ -22,7 +25,7 @@ namespace McCli
 			return c;
 		}
 
-		public static MArray<double> plus(MArray<double> a, double b)
+		private static MArray<double> plus(MArray<double> a, double b)
 		{
 			Contract.Requires(a != null);
 
@@ -36,7 +39,10 @@ namespace McCli
 		{
 			Contract.Requires(a != null);
 			Contract.Requires(b != null);
-			Contract.Requires(a.Shape == b.Shape);
+
+			if (a.IsScalar) return minus(a[0], b);
+			if (b.IsScalar) return minus(a, b[0]);
+			if (a.Shape != b.Shape) throw new MArrayShapeException();
 
 			var c = new MDenseArray<double>(a.Shape);
 			for (int i = 0; i < a.Count; ++i)
@@ -44,13 +50,23 @@ namespace McCli
 			return c;
 		}
 
-		public static MArray<double> minus(MArray<double> a, double b)
+		private static MArray<double> minus(MArray<double> a, double b)
 		{
 			Contract.Requires(a != null);
 
 			var c = new MDenseArray<double>(a.Shape);
 			for (int i = 0; i < a.Count; ++i)
 				c[i] = a[i] - b;
+			return c;
+		}
+
+		private static MArray<double> minus(double a, MArray<double> b)
+		{
+			Contract.Requires(b != null);
+
+			var c = new MDenseArray<double>(b.Shape);
+			for (int i = 0; i < b.Count; ++i)
+				c[i] = a - b[i];
 			return c;
 		}
 		#endregion
@@ -148,7 +164,11 @@ namespace McCli
 			Contract.Requires(sz1 >= 0);
 			Contract.Requires(sz2 >= 0);
 
-			throw new NotImplementedException();
+			var result = new MDenseArray<double>(sz1, sz2);
+			var array = result.BackingArray;
+			for (int i = 0; i < array.Length; ++i)
+				array[i] = (i / sz1) == (i % sz1) ? 1 : 0;
+			return result;
 		}
 		#endregion
 		#endregion

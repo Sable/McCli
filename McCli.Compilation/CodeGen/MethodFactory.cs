@@ -9,9 +9,7 @@ using System.Threading.Tasks;
 
 namespace McCli.Compilation.CodeGen
 {
-	public delegate MethodInfo MethodFactory(
-		string name,
-		ImmutableArray<ParameterDescriptor> parameters,
-		ParameterDescriptor returnParameter,
+	public delegate MethodInfo MethodFactory(string name,
+		ImmutableArray<ParameterDescriptor> parameters, Type returnType,
 		out ILGenerator ilGenerator);
 }

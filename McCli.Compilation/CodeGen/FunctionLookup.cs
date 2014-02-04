@@ -7,5 +7,5 @@ using System.Threading.Tasks;
 
 namespace McCli.Compilation.CodeGen
 {
-	public delegate MethodInfo FunctionLookup(string name, ImmutableArray<MType> argumentTypes);
+	public delegate FunctionInfo FunctionLookup(string name, ImmutableArray<MType> argumentTypes);
 }
