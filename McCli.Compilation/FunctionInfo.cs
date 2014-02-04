@@ -12,8 +12,8 @@ namespace McCli.Compilation
 	{
 		#region Fields
 		private readonly MethodInfo method;
-		private readonly ImmutableArray<MType> inputTypes;
-		private readonly MType outputType;
+		private readonly ImmutableArray<MRepr> inputTypes;
+		private readonly MRepr outputType;
 		#endregion
 
 		#region Constructors
@@ -22,8 +22,8 @@ namespace McCli.Compilation
 			Contract.Requires(method != null);
 
 			this.method = method;
-			inputTypes = method.GetParameters().Select(p => MType.FromCliType(p.ParameterType)).ToImmutableArray();
-			outputType = MType.FromCliType(method.ReturnType);
+			inputTypes = method.GetParameters().Select(p => MRepr.FromCliType(p.ParameterType)).ToImmutableArray();
+			outputType = MRepr.FromCliType(method.ReturnType);
 		}
 		#endregion
 
@@ -33,12 +33,12 @@ namespace McCli.Compilation
 			get { return method; }
 		}
 
-		public ImmutableArray<MType> InputTypes
+		public ImmutableArray<MRepr> InputTypes
 		{
 			get { return inputTypes; }
 		}
 
-		public MType OutputType
+		public MRepr OutputType
 		{
 			get { return outputType; }
 		}

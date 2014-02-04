@@ -34,8 +34,9 @@ namespace McCli
 		static MComplex()
 		{
 			// Ensure the generic type is one that supports complex numbers.
-			var @class = MClass.FromCliType(typeof(TNumeric));
-			Contract.Assert(@class != null && (@class.ValidTypeLayers & MTypeLayers.Complex) != 0);
+			var @class = MType.FromCliType(typeof(TNumeric)) as MClass;
+			if (@class == null || (@class.Kind & MClassKinds.SupportsComplexMask) == 0)
+				throw new InvalidOperationException("Invalid scalar type for MComplex type.");
 		}
 		#endregion
 	}

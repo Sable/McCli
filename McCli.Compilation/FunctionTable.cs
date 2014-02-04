@@ -64,7 +64,7 @@ namespace McCli.Compilation
 			functions.Add(key, functionInfo);
 		}
 
-		public FunctionInfo Lookup(string name, ImmutableArray<MType> argumentTypes)
+		public FunctionInfo Lookup(string name, ImmutableArray<MRepr> argumentTypes)
 		{
 			Contract.Requires(name != null);
 

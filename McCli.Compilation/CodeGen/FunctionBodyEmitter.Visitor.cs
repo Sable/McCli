@@ -15,7 +15,7 @@ namespace McCli.Compilation.CodeGen
 		{
 			using (BeginEmitStore(literal.Target))
 			{
-				MType sourceType;
+				MRepr sourceType;
 				if (literal.Value is double)
 				{
 					ilGenerator.Emit(OpCodes.Ldc_R8, (double)literal.Value);
@@ -89,7 +89,7 @@ namespace McCli.Compilation.CodeGen
 		}
 
 
-		private void EmitCloneIfBoxed(MType type)
+		private void EmitCloneIfBoxed(MRepr type)
 		{
 			var sourceType = type.CliType;
 			if (typeof(MValue).IsAssignableFrom(sourceType))

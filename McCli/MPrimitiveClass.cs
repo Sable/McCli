@@ -14,21 +14,31 @@ namespace McCli
 	public sealed class MPrimitiveClass : MClass
 	{
 		#region Fields;
-		private readonly Type cliType;
+		private readonly MClassKinds kind;
 		private readonly string name;
+		private readonly Type cliType;
+		private readonly MComplexType complexType;
 		#endregion
 
 		#region Constructors
-		internal MPrimitiveClass(Type cliType, string name)
+		internal MPrimitiveClass(MClassKinds kind, Type cliType)
 		{
-			Contract.Requires(cliType != null);
+			Contract.Requires(name != null);
 
+			this.kind = kind;
 			this.cliType = cliType;
-			this.name = name;
+			this.name = kind.ToString().ToLowerInvariant();
+			if ((kind & MClassKinds.NumericMask) != 0)
+				complexType = new MComplexType(this);
 		}
 		#endregion
 
 		#region Properties
+		public override MClassKinds Kind
+		{
+			get { return kind; }
+		}
+
 		public override string Name
 		{
 			get { return name; }
@@ -39,29 +49,42 @@ namespace McCli
 			get { return cliType; }
 		}
 
-		public bool IsNumerical
+		public override int FixedSizeInBytes
 		{
-			get { return cliType != typeof(char) && cliType != typeof(bool); }
+			get { return cliType.StructLayoutAttribute.Size; }
+		}
+
+		/// <summary>
+		/// Gets the complex version of this type.
+		/// </summary>
+		public MComplexType Complex
+		{
+			get { return complexType; }
+		}
+
+		public bool IsNumeric
+		{
+			get { return (kind & MClassKinds.NumericMask) != 0; }
 		}
 
 		public bool IsFloat
 		{
-			get { return cliType == typeof(float) || cliType == typeof(double); }
+			get { return (kind & MClassKinds.FloatMask) != 0; }
 		}
 
 		public bool IsInteger
 		{
-			get { return name[0] == 'i' || name[0] == 'u'; }
+			get { return (kind & MClassKinds.IntegerMask) != 0; }
 		}
 
 		public bool IsSignedInteger
 		{
-			get { return name[0] == 'i'; }
+			get { return (kind & MClassKinds.SignedIntegerMask) != 0; }
 		}
 
 		public bool IsUnsignedInteger
 		{
-			get { return name[0] == 'u'; }
+			get { return (kind & MClassKinds.UnsignedIntegerMask) != 0; }
 		}
 
 		public override MTypeLayers ValidTypeLayers
@@ -69,7 +92,7 @@ namespace McCli
 			get
 			{
 				var layers = MTypeLayers.Array | MTypeLayers.DenseArray | MTypeLayers.SparseMatrix;
-				if (IsNumerical) layers |= MTypeLayers.Complex;
+				if (IsNumeric) layers |= MTypeLayers.Complex;
 				return layers;
 			}
 		}
@@ -81,33 +104,25 @@ namespace McCli
 		#endregion
 
 		#region Methods
-		public MType AsScalarType()
+		public MRepr AsScalarType()
 		{
-			return new MType(this, MTypeLayers.None);
+			return new MRepr(this, MTypeLayers.None);
 		}
 
-		public MType AsComplexType()
+		public MRepr AsComplexType()
 		{
 			Contract.Requires((ValidTypeLayers & MTypeLayers.Complex) != 0);
-			return new MType(this, MTypeLayers.Complex);
+			return new MRepr(this, MTypeLayers.Complex);
 		}
 
-		public MType AsArrayType()
+		public MRepr AsArrayType()
 		{
-			return new MType(this, MTypeLayers.Array);
+			return new MRepr(this, MTypeLayers.Array);
 		}
 
-		public MType AsDenseArrayType()
+		public MRepr AsDenseArrayType()
 		{
-			return new MType(this, MTypeLayers.DenseArray);
-		}
-
-		public override int GetScalarSizeInBytes(MTypeLayers layers)
-		{
-			// Marshal.SizeOf returns 1 for 'char' and 'bool', which is what we want.
-			int size = Marshal.SizeOf(cliType);
-			if ((layers & MTypeLayers.Complex) != 0) size *= 2;
-			return size;
+			return new MRepr(this, MTypeLayers.DenseArray);
 		}
 		#endregion
 	}

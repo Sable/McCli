@@ -22,7 +22,7 @@ namespace McCli
 		/// <summary>
 		/// Gets the type of this value.
 		/// </summary>
-		public abstract MType Type { get; }
+		public abstract MRepr Type { get; }
 
 		/// <summary>
 		/// Gets the class of this value.

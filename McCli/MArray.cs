@@ -75,18 +75,18 @@ namespace McCli
 		static MArray()
 		{
 			// Ensure the generic type is one that supports being in arrays.
-			var @class = MType.FromCliType(typeof(TScalar)).Class;
+			var @class = MRepr.FromCliType(typeof(TScalar)).Class;
 			Contract.Assert(@class != null && (@class.ValidTypeLayers & MTypeLayers.Array) != 0);
 		}
 		#endregion
 
 		#region Properties
-		public override sealed MType Type
+		public override sealed MRepr Type
 		{
 			get
 			{
-				var scalarType = MType.FromCliType(typeof(TScalar));
-				return new MType(scalarType.Class, scalarType.Layers | TypeLayer);
+				var scalarType = MRepr.FromCliType(typeof(TScalar));
+				return new MRepr(scalarType.Class, scalarType.Layers | TypeLayer);
 			}
 		}
 

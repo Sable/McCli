@@ -26,7 +26,7 @@ namespace McCli.Compilation.IR
 		/// <summary>
 		/// The static type of this variable, if available.
 		/// </summary>
-		public readonly MType StaticType;
+		public readonly MRepr StaticType;
 
 		/// <summary>
 		/// The constant value of this variable, if available.
@@ -43,7 +43,7 @@ namespace McCli.Compilation.IR
 			this.Kind = kind;
 		}
 
-		public Variable(string name, VariableKind kind, MType staticType)
+		public Variable(string name, VariableKind kind, MRepr staticType)
 			: this(name, kind)
 		{
 			this.StaticType = staticType;

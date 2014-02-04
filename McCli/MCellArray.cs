@@ -32,7 +32,7 @@ namespace McCli
 		#endregion
 
 		#region Properties
-		public override MType Type
+		public override MRepr Type
 		{
 			get { return MClass.CellArray.AsType(); }
 		}

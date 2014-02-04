@@ -145,7 +145,7 @@ namespace McCli.Compilation.CodeGen
 			}
 		}
 
-		private void EmitConversion(MType source, MType target)
+		private void EmitConversion(MRepr source, MRepr target)
 		{
 			if (source == target) return;
 
