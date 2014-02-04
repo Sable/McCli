@@ -32,7 +32,12 @@ namespace McCli
 
 		public int Count
 		{
-			get { return shape.TotalCount; }
+			get { return shape.Count; }
+		}
+
+		public bool IsEmpty
+		{
+			get { return Count == 0; }
 		}
 
 		public bool IsScalar

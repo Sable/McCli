@@ -14,11 +14,18 @@ namespace McCli
 			return Math.Floor(value) == value;
 		}
 
-		public static int IntCoerce(double value)
+		public static int ToInt(double value)
 		{
 			var i = (int)value;
 			if (i != value) throw new InvalidCastException();
 			return i;
+		}
+
+		public static int ToIntScalar(MArray<double> value)
+		{
+			Contract.Requires(value != null);
+			if (!value.IsScalar) throw new MArrayShapeException();
+			return ToInt(value[0]);
 		}
 
 		public static bool IsTrue(MValue value)
@@ -56,6 +63,26 @@ namespace McCli
 			}
 
 			throw new NotImplementedException();
+		}
+
+		public static MArray<TScalar> Subsref<TScalar>(MArray<TScalar> array, MArray<double> indices)
+		{
+			Contract.Requires(array != null);
+			Contract.Requires(indices != null);
+
+			var indicesShape = indices.Shape;
+			if (indicesShape.IsEmpty) return new MDenseArray<TScalar>(MArrayShape.Empty);
+			Contract.Assert(indicesShape.ColumnCount == 1);
+
+			var result = new MDenseArray<TScalar>(new MArrayShape(indicesShape.RowCount, 1));
+			for (int i = 0; i < indicesShape.RowCount; ++i)
+				result[i] = Subsref(array, ToInt(indices[i]));
+			return result;
+		}
+
+		private static TScalar Subsref<TScalar>(MArray<TScalar> array, int index)
+		{
+			return array[index - 1];
 		}
 	}
 }

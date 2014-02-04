@@ -37,16 +37,7 @@ namespace McCli.Compilation.CodeGen
 			using (BeginEmitStore(copy.Target))
 			{
 				EmitLoad(copy.Value);
-
-				// Clone if in boxed form
-				var sourceType = copy.Value.StaticType.CliType;
-				if (typeof(MValue).IsAssignableFrom(sourceType))
-				{
-					var deepCloneMethod = sourceType.GetMethod("DeepClone");
-					ilGenerator.Emit(OpCodes.Callvirt, deepCloneMethod);
-					if (!sourceType.IsAssignableFrom(deepCloneMethod.ReturnType))
-						ilGenerator.Emit(OpCodes.Castclass, sourceType);
-				}
+				EmitCloneIfBoxed(copy.Value.StaticType);
 
 				EmitConversion(copy.Value.StaticType, copy.Target.StaticType);
 			}
@@ -72,9 +63,42 @@ namespace McCli.Compilation.CodeGen
 			}
 		}
 
+		public override void VisitLoadCall(LoadCall loadCall)
+		{
+			Contract.Assert(loadCall.Targets.Length == 1);
+			Contract.Assert(loadCall.Subject.StaticType.Class is MPrimitiveClass);
+
+			using (BeginEmitStore(loadCall.Targets[0]))
+			{
+				EmitLoad(loadCall.Subject);
+
+				if (loadCall.Arguments.Length == 0)
+				{
+					EmitCloneIfBoxed(loadCall.Subject.StaticType);
+				}
+				else
+				{
+					throw new NotImplementedException();
+				}
+			}
+		}
+
 		public override void VisitNode(IR.Node node)
 		{
 			throw new NotImplementedException();
+		}
+
+
+		private void EmitCloneIfBoxed(MType type)
+		{
+			var sourceType = type.CliType;
+			if (typeof(MValue).IsAssignableFrom(sourceType))
+			{
+				var deepCloneMethod = sourceType.GetMethod("DeepClone");
+				ilGenerator.Emit(OpCodes.Callvirt, deepCloneMethod);
+				if (!sourceType.IsAssignableFrom(deepCloneMethod.ReturnType))
+					ilGenerator.Emit(OpCodes.Castclass, sourceType);
+			}
 		}
 	}
 }

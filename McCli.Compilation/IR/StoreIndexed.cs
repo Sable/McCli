@@ -27,7 +27,7 @@ namespace McCli.Compilation.IR
 
 		public override void Accept(Visitor visitor)
 		{
-			visitor.VisitArrayStore(this);
+			visitor.VisitStoreIndexed(this);
 		}
 	}
 }

@@ -13,7 +13,7 @@ namespace McCli
 	public struct MArrayShape : IEquatable<MArrayShape>
 	{
 		#region Fields
-		public static readonly MArrayShape Zero = new MArrayShape(0, 0);
+		public static readonly MArrayShape Empty = new MArrayShape(0, 0);
 		public static readonly MArrayShape Scalar = new MArrayShape(1, 1);
 
 		private readonly int rowCount, columnCount;
@@ -45,7 +45,7 @@ namespace McCli
 			get { return dimensions == null ? 2 : dimensions.Length; }
 		}
 
-		public int TotalCount
+		public int Count
 		{
 			get
 			{
@@ -54,9 +54,14 @@ namespace McCli
 			}
 		}
 
+		public bool IsEmpty
+		{
+			get { return Count == 0; }
+		}
+
 		public bool IsScalar
 		{
-			get { return TotalCount == 1; }
+			get { return Count == 1; }
 		}
 		#endregion
 

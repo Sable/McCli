@@ -19,15 +19,15 @@ namespace McCli
 		#region Constructors
 		public MCellArray(MValue[] elements, MArrayShape shape) : base(shape)
 		{
-			Contract.Requires(elements != null && elements.Length >= shape.TotalCount);
+			Contract.Requires(elements != null && elements.Length >= shape.Count);
 			this.elements = elements;
 		}
 
 		public MCellArray(MArrayShape shape) : base(shape)
 		{
-			elements = new MValue[shape.TotalCount];
+			elements = new MValue[shape.Count];
 			for (int i = 0; i < elements.Length; ++i)
-				elements[i] = new MDenseArray<double>(MArrayShape.Zero);
+				elements[i] = new MDenseArray<double>(MArrayShape.Empty);
 		}
 		#endregion
 

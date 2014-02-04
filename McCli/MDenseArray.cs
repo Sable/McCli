@@ -32,14 +32,14 @@ namespace McCli
 		public MDenseArray(TScalar[] backingArray, MArrayShape shape)
 			: base(shape)
 		{
-			Contract.Requires(backingArray != null && backingArray.Length == shape.TotalCount);
+			Contract.Requires(backingArray != null && backingArray.Length == shape.Count);
 			this.elements = backingArray;
 		}
 
 		public MDenseArray(MArrayShape shape)
 			: base(shape)
 		{
-			elements = new TScalar[shape.TotalCount];
+			elements = new TScalar[shape.Count];
 		}
 
 		public MDenseArray(int rowCount, int columnCount)

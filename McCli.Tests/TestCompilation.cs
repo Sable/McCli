@@ -73,7 +73,7 @@ namespace McCli
 		}
 
 		[TestMethod]
-		public void TestCallParameterizedCall()
+		public void TestParameterizedCall()
 		{
 			var function = CompileFunction<Func<MArray<double>, MArray<double>, MArray<double>>>(
 				"identity", new[] { doubleArrayInput, doubleArrayInput2 }, doubleArrayOutput,
