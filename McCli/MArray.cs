@@ -75,8 +75,8 @@ namespace McCli
 		static MArray()
 		{
 			// Ensure the generic type is one that supports being in arrays.
-			var @class = MRepr.FromCliType(typeof(TScalar)).Class;
-			Contract.Assert(@class != null && (@class.ValidTypeLayers & MTypeLayers.Array) != 0);
+			var type = MType.FromCliType(typeof(TScalar));
+			Contract.Assert(type != null && type.IsPrimitive);
 		}
 		#endregion
 
@@ -85,12 +85,12 @@ namespace McCli
 		{
 			get
 			{
-				var scalarType = MRepr.FromCliType(typeof(TScalar));
-				return new MRepr(scalarType.Class, scalarType.Layers | TypeLayer);
+				var scalarType = MType.FromCliType(typeof(TScalar));
+				return new MRepr(scalarType, PrimitiveForm);
 			}
 		}
 
-		protected abstract MTypeLayers TypeLayer { get; }
+		protected abstract MPrimitiveForm PrimitiveForm { get; }
 		#endregion
 
 		#region Indexers

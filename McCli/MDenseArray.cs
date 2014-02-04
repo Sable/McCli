@@ -52,9 +52,9 @@ namespace McCli
 			get { return elements; }
 		}
 
-		protected override MTypeLayers TypeLayer
+		protected override MPrimitiveForm PrimitiveForm
 		{
-			get { return MTypeLayers.DenseArray; }
+			get { return MPrimitiveForm.DenseArray; }
 		}
 		#endregion
 

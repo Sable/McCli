@@ -55,7 +55,6 @@
     <Compile Include="MType.cs" />
     <Compile Include="MTypeLayers.cs" />
     <Compile Include="MTypeLookup.cs" />
-    <Compile Include="Operator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MArray.cs" />

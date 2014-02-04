@@ -47,6 +47,21 @@ namespace McCli
 		{
 			get { return @class.FixedSizeInBytes * 2; }
 		}
+
+		public MRepr ScalarRepr
+		{
+			get { return new MRepr(this, MPrimitiveForm.Scalar); }
+		}
+
+		public MRepr ArrayRepr
+		{
+			get { return new MRepr(this, MPrimitiveForm.Array); }
+		}
+
+		public MRepr DenseArrayRepr
+		{
+			get { return new MRepr(this, MPrimitiveForm.DenseArray); }
+		}
 		#endregion
 
 		#region Methods

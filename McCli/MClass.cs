@@ -40,36 +40,9 @@ namespace McCli
 		/// Gets the <see cref="MClassKinds"/> enumerant for this class.
 		/// </summary>
 		public abstract MClassKinds Kind { get; }
-
-		/// <summary>
-		/// Gets the type layers valid for this class.
-		/// </summary>
-		[Obsolete]
-		public abstract MTypeLayers ValidTypeLayers { get; }
-
-		/// <summary>
-		/// Gets the default type layers for values of this class.
-		/// </summary>
-		[Obsolete]
-		public virtual MTypeLayers DefaultTypeLayers
-		{
-			get { return MTypeLayers.None; }
-		}
 		#endregion
 
 		#region Methods
-		[Obsolete]
-		public MRepr AsType(MTypeLayers layers)
-		{
-			return new MRepr(this, layers);
-		}
-
-		[Obsolete]
-		public MRepr AsType()
-		{
-			return AsType(DefaultTypeLayers);
-		}
-
 		protected override sealed MClass GetClass()
 		{
 			return this;

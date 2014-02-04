@@ -35,11 +35,6 @@ namespace McCli
 		{
 			get { return 0; }
 		}
-
-		public override MTypeLayers ValidTypeLayers
-		{
-			get { return MTypeLayers.None; }
-		}
 		#endregion
 	}
 }

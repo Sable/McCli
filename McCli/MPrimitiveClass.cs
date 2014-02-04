@@ -87,43 +87,23 @@ namespace McCli
 			get { return (kind & MClassKinds.UnsignedIntegerMask) != 0; }
 		}
 
-		public override MTypeLayers ValidTypeLayers
+		public MRepr ScalarRepr
 		{
-			get
-			{
-				var layers = MTypeLayers.Array | MTypeLayers.DenseArray | MTypeLayers.SparseMatrix;
-				if (IsNumeric) layers |= MTypeLayers.Complex;
-				return layers;
-			}
+			get { return new MRepr(this, MPrimitiveForm.Scalar); }
 		}
 
-		public override MTypeLayers DefaultTypeLayers
+		public MRepr ArrayRepr
 		{
-			get { return MTypeLayers.DenseArray; }
+			get { return new MRepr(this, MPrimitiveForm.Array); }
+		}
+
+		public MRepr DenseArrayRepr
+		{
+			get { return new MRepr(this, MPrimitiveForm.DenseArray); }
 		}
 		#endregion
 
 		#region Methods
-		public MRepr AsScalarType()
-		{
-			return new MRepr(this, MTypeLayers.None);
-		}
-
-		public MRepr AsComplexType()
-		{
-			Contract.Requires((ValidTypeLayers & MTypeLayers.Complex) != 0);
-			return new MRepr(this, MTypeLayers.Complex);
-		}
-
-		public MRepr AsArrayType()
-		{
-			return new MRepr(this, MTypeLayers.Array);
-		}
-
-		public MRepr AsDenseArrayType()
-		{
-			return new MRepr(this, MTypeLayers.DenseArray);
-		}
 		#endregion
 	}
 }

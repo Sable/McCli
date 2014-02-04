@@ -14,89 +14,90 @@ namespace McCli
 	public struct MRepr : IEquatable<MRepr>
 	{
 		#region Fields
-		public static readonly MValue Any = default(MValue);
+		public static readonly MRepr Any = default(MRepr);
 		
-		private readonly MClass @class;
-		private readonly MTypeLayers layers;
+		private readonly MType type;
+		private readonly MPrimitiveForm primitiveForm;
 		#endregion
 
 		#region Constructors
-		public MRepr(MClass @class, MTypeLayers layers)
+		public MRepr(MType type, MPrimitiveForm primitiveForm)
 		{
-			Contract.Requires(@class == null || ((@class.ValidTypeLayers & layers) == layers));
+			Contract.Requires(type == null || !type.IsPrimitive || primitiveForm != null);
 
-			this.@class = @class;
-			this.layers = layers;
+			this.type = type;
+			this.primitiveForm = primitiveForm;
+		}
+
+		public MRepr(MType type)
+		{
+			this.type = type;
+			primitiveForm = type == null || !type.IsPrimitive ? null : MPrimitiveForm.Array;
 		}
 		#endregion
 
 		#region Properties
+		/// <summary>
+		/// Gets the type underlying this representation.
+		/// </summary>
+		public MType Type
+		{
+			get { return type; }
+		}
+
+		/// <summary>
+		/// Gets the MatLab class of values with this representation.
+		/// </summary>
 		public MClass Class
 		{
-			get { return @class; }
+			get { return type == null ? null : type.Class; }
 		}
 
+		/// <summary>
+		/// Gets a value indicating if this instance represents the "any" type.
+		/// </summary>
 		public bool IsAny
 		{
-			get { return @class == null; }
+			get { return type == null; }
 		}
 
-		public MTypeLayers Layers
+		/// <summary>
+		/// Gets a value indicating if this is a representation of a primitive type.
+		/// </summary>
+		public bool IsPrimitive
 		{
-			get { return layers; }
+			get { return primitiveForm != null; }
 		}
 
-		public bool IsComplex
+		/// <summary>
+		/// For primitives, returns the form in which it is represented.
+		/// </summary>
+		public MPrimitiveForm PrimitiveForm
 		{
-			get { return (layers & MTypeLayers.Complex) == MTypeLayers.Complex; }
+			get { return primitiveForm; }
+		}
+
+		public bool IsMValue
+		{
+			get { return primitiveForm == null || primitiveForm.IsArray; }
 		}
 
 		public bool IsArray
 		{
-			get { return (layers & MTypeLayers.Array) == MTypeLayers.Array; }
+			get { return primitiveForm != null && primitiveForm.IsArray; }
 		}
 
-		public bool IsDenseArray
+		public bool IsComplex
 		{
-			get { return (layers & MTypeLayers.DenseArray) == MTypeLayers.DenseArray; }
-		}
-
-		public bool IsSparseMatrix
-		{
-			get { return (layers & MTypeLayers.SparseMatrix) == MTypeLayers.SparseMatrix; }
-		}
-
-		public bool IsScalar
-		{
-			get { return @class != null && @class.CliType.IsValueType && (layers & MTypeLayers.Array) == 0; }
-		}
-
-		public bool IsBoxedAsMValue
-		{
-			get { return !IsScalar; }
-		}
-
-		public bool IsConcrete
-		{
-			get
-			{
-				return @class != null
-					&& ((layers & MTypeLayers.Array) == 0
-						|| (layers & (MTypeLayers.DenseArrayFlag | MTypeLayers.SparseMatrixFlag)) != 0);
-			}
+			get { return type != null && type.IsComplex; }
 		}
 
 		public Type CliType
 		{
 			get
 			{
-				if (@class == null) return typeof(MValue);
-
-				var cliType = @class.CliType;
-				if (IsComplex) cliType = typeof(MComplex<>).MakeGenericType(cliType);
-				if (IsDenseArray) cliType = typeof(MDenseArray<>).MakeGenericType(cliType);
-				else if (IsArray) cliType = typeof(MArray<>).MakeGenericType(cliType);
-				return cliType;
+				if (type == null) return typeof(MValue);
+				return primitiveForm == null ? type.CliType : primitiveForm.GetCliType(type);
 			}
 		}
 		#endregion
@@ -104,7 +105,7 @@ namespace McCli
 		#region Methods
 		public bool Equals(MRepr other)
 		{
-			return @class == other.@class && layers == other.layers;
+			return type == other.type && primitiveForm == other.primitiveForm;
 		}
 
 		public override bool Equals(object obj)
@@ -114,45 +115,41 @@ namespace McCli
 
 		public override int GetHashCode()
 		{
-			return (@class == null ? 0 : @class.GetHashCode()) ^ ((int)layers << 20);
+			return (type == null ? 0 : type.GetHashCode())
+				^ (primitiveForm == null ? 0 : primitiveForm.GetHashCode());
 		}
 
 		public override string ToString()
 		{
-			if (@class == null) return "any";
-			if (layers == MTypeLayers.None) return @class.Name;
-			return string.Format(CultureInfo.InvariantCulture, "{0} [{1}]", @class.Name, layers);
+			if (type == null) return "any";
+			return primitiveForm == null ? type.Name : (type.Name + ' ' + primitiveForm.Name);
 		}
 
 		public static MRepr FromCliType(Type type)
 		{
 			Contract.Requires(type != null);
 
-			var layers = MTypeLayers.None;
-			while (type.IsGenericType)
-			{
-				var genericTypeDefinition = type.GetGenericTypeDefinition();
-				if (genericTypeDefinition == typeof(MDenseArray<>))
-					layers |= MTypeLayers.DenseArray;
-				else if (genericTypeDefinition == typeof(MComplex<>))
-					layers |= MTypeLayers.Complex;
-				else if (genericTypeDefinition == typeof(MArray<>))
-					layers |= MTypeLayers.Array;
-				else
-					throw new ArgumentException("Not a valid MatLab type.", "type");
+			var mtype = MType.FromCliType(type);
+			if (mtype != null) return new MRepr(mtype, mtype.IsPrimitive ? MPrimitiveForm.Scalar : null);
 
-				type = type.GetGenericArguments()[0];
-			}
+			if (!type.IsGenericType) return Any;
 
-			var @class = MClass.FromCliType(type) as MClass;
-			if (@class == null && !typeof(MValue).IsAssignableFrom(type))
-				throw new ArgumentException("Not a valid MatLab type.", "type");
+			mtype = MType.FromCliType(type.GetGenericArguments()[0]);
+			if (mtype == null) return Any;
 
-			return new MRepr(@class, layers);
+			var genericTypeDefinition = type.GetGenericTypeDefinition();
+			if (genericTypeDefinition == typeof(MArray<>)) return new MRepr(mtype, MPrimitiveForm.Array);
+			if (genericTypeDefinition == typeof(MDenseArray<>)) return new MRepr(mtype, MPrimitiveForm.DenseArray);
+			return Any;
 		}
 		#endregion
 
 		#region Operators
+		public static implicit operator MRepr(MType type)
+		{
+			return new MRepr(type);
+		}
+
 		public static bool operator==(MRepr lhs, MRepr rhs)
 		{
 			return lhs.Equals(rhs);

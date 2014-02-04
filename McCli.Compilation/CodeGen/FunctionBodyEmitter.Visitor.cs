@@ -19,7 +19,7 @@ namespace McCli.Compilation.CodeGen
 				if (literal.Value is double)
 				{
 					ilGenerator.Emit(OpCodes.Ldc_R8, (double)literal.Value);
-					sourceType = MPrimitiveClass.Double.AsScalarType();
+					sourceType = MPrimitiveClass.Double.ScalarRepr;
 				}
 				else
 				{

@@ -149,11 +149,11 @@ namespace McCli.Compilation.CodeGen
 		{
 			if (source == target) return;
 
-			if (target.IsAny && source.IsBoxedAsMValue) return;
+			if (target.IsAny && source.IsMValue) return;
 
-			if (source.Class == target.Class
-				&& source.IsComplex == target.IsComplex
-				&& source.IsScalar && target.IsArray && !target.IsSparseMatrix)
+			if (source.Type == target.Type
+				&& source.PrimitiveForm == MPrimitiveForm.Scalar
+				&& target.PrimitiveForm == MPrimitiveForm.Array)
 			{
 				// Boxing to array
 				var boxMethod = typeof(MDenseArray<>)
