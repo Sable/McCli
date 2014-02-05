@@ -71,6 +71,34 @@ namespace McCli.Compilation
 			var key = new GroupKey(name, argumentTypes.Length);
 			return functions[key];
 		}
+
+		/// <summary>
+		/// Fixes the type arguments of a generic method implementing a MatLab function.
+		/// </summary>
+		/// <param name="method">The generic method for a MatLab function.</param>
+		/// <returns>A sequence of instantiation with the different MatLab types supported by the method.</returns>
+		public static IEnumerable<MethodInfo> InstantiateGenericMethod(MethodInfo method)
+		{
+			Contract.Requires(method != null && method.IsGenericMethodDefinition);
+
+			var genericArguments = method.GetGenericArguments();
+			Contract.Assert(genericArguments.Length == 1);
+
+			var genericMType = genericArguments[0].GetCustomAttribute<GenericMTypeAttribute>();
+			Contract.Assert(genericMType != null);
+
+			for (int i = 1; i < 0x40000000; i <<= 1)
+			{
+				var classKind = (MClassKinds)i;
+				if ((classKind & genericMType.ClassKinds) == 0) continue;
+
+				var @class = MClass.FromKind(classKind);
+				yield return method.MakeGenericMethod(@class.CliType);
+
+				if (genericMType.AllowComplex && (classKind & MClassKinds.SupportsComplexMask) != 0)
+					yield return method.MakeGenericMethod(((MPrimitiveClass)@class).Complex.CliType);
+			}
+		}
 		#endregion
 	}
 }

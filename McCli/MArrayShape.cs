@@ -63,6 +63,11 @@ namespace McCli
 		{
 			get { return Count == 1; }
 		}
+
+		public bool IsHigherDimensional
+		{
+			get { return dimensions != null && dimensions.Length > 2; }
+		}
 		#endregion
 
 		#region Methods

@@ -10,65 +10,221 @@ namespace McCli
 	public static class Builtins
 	{
 		#region Arithmetic operators
-		public static MArray<double> plus(MArray<double> a, MArray<double> b)
+		#region Additive
+		public static MArray<double> plus(MArray<double> lhs, MArray<double> rhs)
 		{
-			Contract.Requires(a != null);
-			Contract.Requires(b != null);
+			Contract.Requires(lhs != null);
+			Contract.Requires(rhs != null);
 
-			if (a.IsScalar) return plus(b, a[0]);
-			if (b.IsScalar) return plus(a, b[0]);
-			if (a.Shape != b.Shape) throw new MArrayShapeException();
+			if (lhs.IsScalar) return plus(rhs, lhs[0]);
+			if (rhs.IsScalar) return plus(lhs, rhs[0]);
+			if (lhs.Shape != rhs.Shape) throw new MArrayShapeException();
 
-			var c = new MDenseArray<double>(a.Shape);
-			for (int i = 0; i < a.Count; ++i)
-				c[i] = a[i] + b[i];
+			var c = new MDenseArray<double>(lhs.Shape);
+			for (int i = 0; i < lhs.Count; ++i)
+				c[i] = lhs[i] + rhs[i];
 			return c;
 		}
 
-		private static MArray<double> plus(MArray<double> a, double b)
+		private static MArray<double> plus(MArray<double> lhs, double rhs)
 		{
-			Contract.Requires(a != null);
+			Contract.Requires(lhs != null);
 
-			var c = new MDenseArray<double>(a.Shape);
-			for (int i = 0; i < a.Count; ++i)
-				c[i] = a[i] + b;
+			var c = new MDenseArray<double>(lhs.Shape);
+			for (int i = 0; i < lhs.Count; ++i)
+				c[i] = lhs[i] + rhs;
 			return c;
 		}
 
-		public static MArray<double> minus(MArray<double> a, MArray<double> b)
+		public static MArray<double> minus(MArray<double> lhs, MArray<double> rhs)
 		{
-			Contract.Requires(a != null);
-			Contract.Requires(b != null);
+			Contract.Requires(lhs != null);
+			Contract.Requires(rhs != null);
 
-			if (a.IsScalar) return minus(a[0], b);
-			if (b.IsScalar) return minus(a, b[0]);
-			if (a.Shape != b.Shape) throw new MArrayShapeException();
+			if (lhs.IsScalar) return minus(lhs[0], rhs);
+			if (rhs.IsScalar) return minus(lhs, rhs[0]);
+			if (lhs.Shape != rhs.Shape) throw new MArrayShapeException();
 
-			var c = new MDenseArray<double>(a.Shape);
-			for (int i = 0; i < a.Count; ++i)
-				c[i] = a[i] - b[i];
+			var c = new MDenseArray<double>(lhs.Shape);
+			for (int i = 0; i < lhs.Count; ++i)
+				c[i] = lhs[i] - rhs[i];
 			return c;
 		}
 
-		private static MArray<double> minus(MArray<double> a, double b)
+		private static MArray<double> minus(MArray<double> lhs, double rhs)
 		{
-			Contract.Requires(a != null);
+			Contract.Requires(lhs != null);
 
-			var c = new MDenseArray<double>(a.Shape);
-			for (int i = 0; i < a.Count; ++i)
-				c[i] = a[i] - b;
+			var c = new MDenseArray<double>(lhs.Shape);
+			for (int i = 0; i < lhs.Count; ++i)
+				c[i] = lhs[i] - rhs;
 			return c;
 		}
 
-		private static MArray<double> minus(double a, MArray<double> b)
+		private static MArray<double> minus(double lhs, MArray<double> rhs)
 		{
-			Contract.Requires(b != null);
+			Contract.Requires(rhs != null);
 
-			var c = new MDenseArray<double>(b.Shape);
-			for (int i = 0; i < b.Count; ++i)
-				c[i] = a - b[i];
+			var c = new MDenseArray<double>(rhs.Shape);
+			for (int i = 0; i < rhs.Count; ++i)
+				c[i] = lhs - rhs[i];
 			return c;
 		}
+
+		public static MArray<TScalar> uplus<TScalar>(MArray<TScalar> array)
+		{
+			Contract.Requires(array != null);
+			return array.DeepClone();
+		}
+
+		public static MDenseArray<double> uminus(MDenseArray<double> array)
+		{
+			Contract.Requires(array != null);
+
+			var result = new MDenseArray<double>(array.Shape);
+			for (int i = 0; i < array.Count; ++i)
+				result[i] = -array[i];
+			return result;
+		}
+		#endregion
+
+		#region Multiplicative
+		public static MDenseArray<double> times(MArray<double> lhs, MArray<double> rhs)
+		{
+			Contract.Requires(lhs != null);
+			Contract.Requires(rhs != null);
+
+			if (lhs.IsScalar) return times(rhs, lhs[0]);
+			if (rhs.IsScalar) return times(lhs, rhs[0]);
+			if (lhs.Shape != rhs.Shape) throw new MArrayShapeException();
+
+			var result = new MDenseArray<double>(lhs.Shape);
+			for (int i = 0; i < lhs.Count; ++i)
+				result[i] = lhs[i] * rhs[i];
+			return result;
+		}
+
+		private static MDenseArray<double> times(MArray<double> lhs, double rhs)
+		{
+			Contract.Requires(lhs != null);
+
+			var result = new MDenseArray<double>(lhs.Shape);
+			for (int i = 0; i < lhs.Count; ++i)
+				result[i] = lhs[i] * rhs;
+			return result;
+		}
+
+		public static MDenseArray<double> mtimes(MArray<double> lhs, MArray<double> rhs)
+		{
+			Contract.Requires(lhs != null);
+			Contract.Requires(rhs != null);
+
+			var lhsShape = lhs.Shape;
+			if (lhsShape.Rank > 2) throw new MArrayShapeException();
+
+			var rhsShape = rhs.Shape;
+			if (rhsShape.Rank > 2) throw new MArrayShapeException();
+
+			if (lhsShape.IsScalar) return times(rhs, lhs[0]);
+			if (rhsShape.IsScalar) return times(lhs, rhs[0]);
+			if (lhsShape.ColumnCount != rhsShape.RowCount) throw new MArrayShapeException();
+
+			var resultShape = new MArrayShape(lhsShape.RowCount, rhsShape.ColumnCount);
+			var result = new MDenseArray<double>(resultShape);
+
+			for (int column = 0; column < resultShape.ColumnCount; ++column)
+			{
+				for (int row = 0; row < resultShape.RowCount; ++row)
+				{
+					double value = 0;
+					for (int i = 0; i < lhsShape.ColumnCount; ++i)
+						value += lhs[row + i * resultShape.RowCount] * rhs[i + column * resultShape.RowCount];
+					result[row + column * resultShape.RowCount] = value;
+				}
+			}
+
+			return result;
+		}
+
+		public static MDenseArray<double> rdivide(MArray<double> lhs, MArray<double> rhs)
+		{
+			Contract.Requires(lhs != null);
+			Contract.Requires(rhs != null);
+			
+			if (lhs.IsScalar) return rdivide(lhs[0], rhs);
+			if (rhs.IsScalar) return rdivide(lhs, rhs[0]);
+			if (lhs.Shape != rhs.Shape) throw new MArrayShapeException();
+
+			var result = new MDenseArray<double>(lhs.Shape);
+			for (int i = 0; i < lhs.Count; ++i)
+				result[i] = lhs[i] / rhs[i];
+			return result;
+		}
+
+		private static MDenseArray<double> rdivide(MArray<double> lhs, double rhs)
+		{
+			Contract.Requires(lhs != null);
+
+			var result = new MDenseArray<double>(lhs.Shape);
+			for (int i = 0; i < lhs.Count; ++i)
+				result[i] = lhs[i] / rhs;
+			return result;
+		}
+
+		private static MDenseArray<double> rdivide(double lhs, MArray<double> rhs)
+		{
+			Contract.Requires(rhs != null);
+
+			var result = new MDenseArray<double>(rhs.Shape);
+			for (int i = 0; i < rhs.Count; ++i)
+				result[i] = lhs / rhs[i];
+			return result;
+		}
+
+		public static MDenseArray<double> ldivide(MArray<double> lhs, MArray<double> rhs)
+		{
+			Contract.Requires(lhs != null);
+			Contract.Requires(rhs != null);
+
+			return rdivide(rhs, lhs);
+		}
+		#endregion
+
+		#region Power
+		public static MDenseArray<double> power(MArray<double> @base, MArray<double> exponent)
+		{
+			Contract.Requires(@base != null);
+			Contract.Requires(exponent != null);
+
+			if (@base.IsScalar) 
+			if (exponent.IsScalar) return power(@base, exponent[0]);
+
+			var result = new MDenseArray<double>(@base.Shape);
+			for (int i = 0; i < @base.Count; ++i)
+				result[i] = Math.Pow(@base[i], exponent[i]);
+			return result;
+		}
+
+		private static MDenseArray<double> power(MArray<double> @base, double exponent)
+		{
+			Contract.Requires(@base != null);
+
+			var result = new MDenseArray<double>(@base.Shape);
+			for (int i = 0; i < @base.Count; ++i)
+				result[i] = Math.Pow(@base[i], exponent);
+			return result;
+		}
+
+		private static MDenseArray<double> power(double @base, MArray<double> exponent)
+		{
+			Contract.Requires(exponent != null);
+
+			var result = new MDenseArray<double>(exponent.Shape);
+			for (int i = 0; i < exponent.Count; ++i)
+				result[i] = Math.Pow(@base, exponent[i]);
+			return result;
+		}
+		#endregion
 		#endregion
 
 		#region Comparison
@@ -174,41 +330,41 @@ namespace McCli
 		#endregion
 
 		#region Complex
-		public static MComplex<TNumeric> complex<TNumeric>(TNumeric a) where TNumeric : struct
+		public static MComplex<TReal> complex<[AnyRealNumeric] TReal>(TReal a) where TReal : struct
 		{
-			return new MComplex<TNumeric>(a);
+			return new MComplex<TReal>(a);
 		}
 
-		public static MComplex<TNumeric> complex<TNumeric>(TNumeric a, TNumeric b) where TNumeric : struct
+		public static MComplex<TReal> complex<[AnyRealNumeric] TReal>(TReal a, TReal b) where TReal : struct
 		{
-			return new MComplex<TNumeric>(a, b);
+			return new MComplex<TReal>(a, b);
 		}
 
-		public static MComplex<TNumeric> i<TNumeric>() where TNumeric : struct
+		public static MComplex<double> i()
 		{
-			return new MComplex<TNumeric>(default(TNumeric), (TNumeric)Convert.ChangeType(1, typeof(TNumeric)));
+			return new MComplex<double>(0, 1);
 		}
 
-		public static MComplex<TNumeric> j<TNumeric>() where TNumeric : struct
+		public static MComplex<double> j()
 		{
-			return i<TNumeric>();
+			return new MComplex<double>(0, 1);
 		}
 
-		public static MArray<TNumeric> real<TNumeric>(MArray<MComplex<TNumeric>> array) where TNumeric : struct
+		public static MArray<TReal> real<[AnyRealNumeric] TReal>(MArray<MComplex<TReal>> array) where TReal : struct
 		{
 			Contract.Requires(array != null);
 
-			var result = new MDenseArray<TNumeric>(array.Shape);
+			var result = new MDenseArray<TReal>(array.Shape);
 			for (int i = 0; i < array.Count; ++i)
 				result[i] = array[i].RealPart;
 			return result;
 		}
 
-		public static MArray<TNumeric> imag<TNumeric>(MArray<MComplex<TNumeric>> array) where TNumeric : struct
+		public static MArray<TReal> imag<[AnyRealNumeric] TReal>(MArray<MComplex<TReal>> array) where TReal : struct
 		{
 			Contract.Requires(array != null);
 
-			var result = new MDenseArray<TNumeric>(array.Shape);
+			var result = new MDenseArray<TReal>(array.Shape);
 			for (int i = 0; i < array.Count; ++i)
 				result[i] = array[i].ImaginaryPart;
 			return result;

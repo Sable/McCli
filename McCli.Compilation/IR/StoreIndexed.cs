@@ -14,7 +14,7 @@ namespace McCli.Compilation.IR
 		public readonly Variable Value;
 		public readonly bool Cell;
 
-		public StoreIndexed(Variable array, ImmutableArray<Variable> indices, Variable value, bool cell)
+		public StoreIndexed(Variable array, ImmutableArray<Variable> indices, Variable value, bool cell = true)
 		{
 			Contract.Requires(array != null);
 			Contract.Requires(value != null);
