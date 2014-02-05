@@ -87,5 +87,20 @@ namespace McCli
 			Assert.AreEqual(43, result[0]);
 			Assert.AreEqual(667, result[1]);
 		}
+
+		[TestMethod]
+		public void TestArrayIndexing()
+		{
+			var function = CompileFunction<Func<MArray<double>, MArray<double>, MArray<double>>>(
+				"identity", new[] { doubleArrayInput, doubleArrayInput2 }, doubleArrayOutput,
+				new LoadCall(doubleArrayInput, new[] { doubleArrayInput2 }, ImmutableArray.Create(doubleArrayOutput)));
+
+			var arg1 = new MDenseArray<double>(2, 1);
+			arg1[0] = 42;
+			arg1[1] = 666;
+
+			Assert.AreEqual(arg1[0], function(arg1, 1.0).ToScalar());
+			Assert.AreEqual(arg1[1], function(arg1, 2.0).ToScalar());
+		}
 	}
 }

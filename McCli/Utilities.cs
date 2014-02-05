@@ -35,7 +35,7 @@ namespace McCli
 			// Otherwise, the expression is false.
 			Contract.Requires(value != null);
 
-			var type = value.Type;
+			var type = value.Repr;
 			if (type.IsComplex) return false;
 
 			if (type.IsArray)
@@ -65,6 +65,7 @@ namespace McCli
 			throw new NotImplementedException();
 		}
 
+		#region Subsref
 		public static MArray<TScalar> Subsref<TScalar>(MArray<TScalar> array, MArray<double> indices)
 		{
 			Contract.Requires(array != null);
@@ -84,5 +85,21 @@ namespace McCli
 		{
 			return array[index - 1];
 		}
+
+		public static void Subsasgn<TScalar>(MArray<TScalar> array, MArray<double> indices, MArray<TScalar> values)
+		{
+			Contract.Requires(array != null);
+			Contract.Requires(indices != null);
+
+			if (indices.IsEmpty && values.IsEmpty) return;
+
+			var indicesShape = indices.Shape;
+			Contract.Requires(indicesShape.ColumnCount == 1);
+			Contract.Assert(indicesShape == values.Shape);
+			
+			for (int i = 0; i < indicesShape.RowCount; ++i)
+				array[ToInt(indices[i]) - 1] = values[i];
+		}
+		#endregion
 	}
 }

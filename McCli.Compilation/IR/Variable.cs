@@ -24,9 +24,9 @@ namespace McCli.Compilation.IR
 		public readonly VariableKind Kind;
 
 		/// <summary>
-		/// The static type of this variable, if available.
+		/// The static representation of this variable, if available.
 		/// </summary>
-		public readonly MRepr StaticType;
+		public readonly MRepr StaticRepr;
 
 		/// <summary>
 		/// The constant value of this variable, if available.
@@ -43,10 +43,10 @@ namespace McCli.Compilation.IR
 			this.Kind = kind;
 		}
 
-		public Variable(string name, VariableKind kind, MRepr staticType)
+		public Variable(string name, VariableKind kind, MRepr staticRepr)
 			: this(name, kind)
 		{
-			this.StaticType = staticType;
+			this.StaticRepr = staticRepr;
 		}
 
 		public Variable(string name, VariableKind kind, MValue constantValue)
@@ -54,7 +54,7 @@ namespace McCli.Compilation.IR
 		{
 			Contract.Requires(constantValue != null);
 
-			this.StaticType = constantValue.Type;
+			this.StaticRepr = constantValue.Repr;
 			this.ConstantValue = constantValue;
 		}
 		#endregion

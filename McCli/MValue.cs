@@ -20,16 +20,16 @@ namespace McCli
 
 		#region Properties
 		/// <summary>
-		/// Gets the type of this value.
+		/// Gets the representation of this value.
 		/// </summary>
-		public abstract MRepr Type { get; }
+		public abstract MRepr Repr { get; }
 
 		/// <summary>
 		/// Gets the class of this value.
 		/// </summary>
 		public MClass Class
 		{
-			get { return Type.Class; }
+			get { return Repr.Class; }
 		}
 		#endregion
 

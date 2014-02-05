@@ -81,7 +81,7 @@ namespace McCli
 		#endregion
 
 		#region Properties
-		public override sealed MRepr Type
+		public override sealed MRepr Repr
 		{
 			get
 			{
@@ -114,6 +114,13 @@ namespace McCli
 		protected override object At(int index)
 		{
 			return this[index];
+		}
+		#endregion
+
+		#region Operators
+		public static implicit operator MArray<TScalar>(TScalar scalar)
+		{
+			return MDenseArray<TScalar>.CreateScalar(scalar);
 		}
 		#endregion
 	}

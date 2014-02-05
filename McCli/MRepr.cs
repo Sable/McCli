@@ -103,6 +103,14 @@ namespace McCli
 		#endregion
 
 		#region Methods
+		public MRepr WithPrimitiveForm(MPrimitiveForm form)
+		{
+			Contract.Requires(IsPrimitive);
+			Contract.Requires(form != null);
+
+			return new MRepr(type, form);
+		}
+
 		public bool Equals(MRepr other)
 		{
 			return type == other.type && primitiveForm == other.primitiveForm;

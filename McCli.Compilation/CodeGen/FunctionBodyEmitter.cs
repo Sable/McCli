@@ -62,15 +62,15 @@ namespace McCli.Compilation.CodeGen
 			{
 				var input = function.Inputs[i];
 				locals.Add(input, LocalLocation.Parameter(i));
-				inputDescriptorsBuilder[i] = new ParameterDescriptor(input.StaticType.CliType, ParameterAttributes.In, input.Name);
+				inputDescriptorsBuilder[i] = new ParameterDescriptor(input.StaticRepr.CliType, ParameterAttributes.In, input.Name);
 			}
 
 			// Create the method and get its IL generator
-			method = methodFactory(function.Name, inputDescriptorsBuilder.Complete(), function.Outputs[0].StaticType.CliType, out ilGenerator);
+			method = methodFactory(function.Name, inputDescriptorsBuilder.Complete(), function.Outputs[0].StaticRepr.CliType, out ilGenerator);
 
 			foreach (var output in function.Outputs)
 			{
-				var local = ilGenerator.DeclareLocal(output.StaticType.CliType);
+				var local = ilGenerator.DeclareLocal(output.StaticRepr.CliType);
 				locals.Add(output, LocalLocation.Variable(local.LocalIndex));
 			}
 		}
@@ -171,7 +171,7 @@ namespace McCli.Compilation.CodeGen
 			LocalLocation location;
 			if (!locals.TryGetValue(variable, out location))
 			{
-				var localBuilder = ilGenerator.DeclareLocal(variable.StaticType.CliType);
+				var localBuilder = ilGenerator.DeclareLocal(variable.StaticRepr.CliType);
 
 				// Dynamic methods do not support debug info
 				if (!(method is DynamicMethod))
