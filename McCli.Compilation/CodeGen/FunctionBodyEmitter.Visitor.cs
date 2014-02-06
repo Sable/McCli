@@ -105,6 +105,13 @@ namespace McCli.Compilation.CodeGen
 			}
 		}
 
+		public override void VisitStoreIndexed(StoreIndexed storeIndexed)
+		{
+			Contract.Assert(!storeIndexed.Cell);
+
+			base.VisitStoreIndexed(storeIndexed);
+		}
+
 		public override void VisitNode(IR.Node node)
 		{
 			throw new NotImplementedException();

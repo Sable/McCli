@@ -11,7 +11,7 @@ namespace McCli
 		[TestMethod]
 		public void TestBasicIndexing()
 		{
-			var array = new MDenseArray<double>(MArrayShape.Scalar);
+			var array = new MFullArray<double>(MArrayShape.Scalar);
 		}
 
 		public static void Test()

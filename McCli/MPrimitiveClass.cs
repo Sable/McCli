@@ -97,9 +97,9 @@ namespace McCli
 			get { return new MRepr(this, MPrimitiveForm.Array); }
 		}
 
-		public MRepr DenseArrayRepr
+		public MRepr FullArrayRepr
 		{
-			get { return new MRepr(this, MPrimitiveForm.DenseArray); }
+			get { return new MRepr(this, MPrimitiveForm.FullArray); }
 		}
 		#endregion
 

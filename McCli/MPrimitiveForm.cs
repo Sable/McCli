@@ -15,7 +15,7 @@ namespace McCli
 		#region Fields
 		public static readonly MPrimitiveForm Scalar = new ScalarForm();
 		public static readonly MPrimitiveForm Array = new ArrayForm("array", typeof(MArray<>), MClassKinds.PrimitiveMask);
-		public static readonly MPrimitiveForm DenseArray = new ArrayForm("dense array", typeof(MDenseArray<>), MClassKinds.PrimitiveMask);
+		public static readonly MPrimitiveForm FullArray = new ArrayForm("full array", typeof(MFullArray<>), MClassKinds.PrimitiveMask);
 
 		private readonly string name;
 		private readonly Type containerCliType;

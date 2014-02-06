@@ -104,7 +104,7 @@ namespace McCli
 			return this[0];
 		}
 
-		public abstract MDenseArray<TScalar> AsDense();
+		public abstract MFullArray<TScalar> AsFullArray();
 
 		public new MArray<TScalar> DeepClone()
 		{
@@ -120,7 +120,7 @@ namespace McCli
 		#region Operators
 		public static implicit operator MArray<TScalar>(TScalar scalar)
 		{
-			return MDenseArray<TScalar>.CreateScalar(scalar);
+			return MFullArray<TScalar>.CreateScalar(scalar);
 		}
 		#endregion
 	}

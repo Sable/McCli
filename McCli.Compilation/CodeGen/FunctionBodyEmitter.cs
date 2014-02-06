@@ -156,7 +156,7 @@ namespace McCli.Compilation.CodeGen
 				&& target.PrimitiveForm == MPrimitiveForm.Array)
 			{
 				// Boxing to array
-				var boxMethod = typeof(MDenseArray<>)
+				var boxMethod = typeof(MFullArray<>)
 					.MakeGenericType(source.CliType)
 					.GetMethod("CreateScalar");
 				ilGenerator.Emit(OpCodes.Call, boxMethod);

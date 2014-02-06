@@ -27,7 +27,7 @@ namespace McCli
 		{
 			elements = new MValue[shape.Count];
 			for (int i = 0; i < elements.Length; ++i)
-				elements[i] = new MDenseArray<double>(MArrayShape.Empty);
+				elements[i] = new MFullArray<double>(MArrayShape.Empty);
 		}
 		#endregion
 

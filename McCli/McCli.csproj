@@ -45,7 +45,7 @@
     <Compile Include="MClassKinds.cs" />
     <Compile Include="MComplex.cs" />
     <Compile Include="MComplexType.cs" />
-    <Compile Include="MDenseArray.cs" />
+    <Compile Include="MFullArray.cs" />
     <Compile Include="MFunctionHandleClass.cs" />
     <Compile Include="MPrimitiveClass.cs" />
     <Compile Include="Builtins.cs" />
@@ -53,7 +53,6 @@
     <Compile Include="MPrimitiveForm.Forms.cs" />
     <Compile Include="MRepr.cs" />
     <Compile Include="MType.cs" />
-    <Compile Include="MTypeLayers.cs" />
     <Compile Include="MTypeLookup.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

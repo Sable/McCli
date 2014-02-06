@@ -20,7 +20,7 @@ namespace McCli
 			if (rhs.IsScalar) return plus(lhs, rhs[0]);
 			if (lhs.Shape != rhs.Shape) throw new MArrayShapeException();
 
-			var c = new MDenseArray<double>(lhs.Shape);
+			var c = new MFullArray<double>(lhs.Shape);
 			for (int i = 0; i < lhs.Count; ++i)
 				c[i] = lhs[i] + rhs[i];
 			return c;
@@ -30,7 +30,7 @@ namespace McCli
 		{
 			Contract.Requires(lhs != null);
 
-			var c = new MDenseArray<double>(lhs.Shape);
+			var c = new MFullArray<double>(lhs.Shape);
 			for (int i = 0; i < lhs.Count; ++i)
 				c[i] = lhs[i] + rhs;
 			return c;
@@ -45,7 +45,7 @@ namespace McCli
 			if (rhs.IsScalar) return minus(lhs, rhs[0]);
 			if (lhs.Shape != rhs.Shape) throw new MArrayShapeException();
 
-			var c = new MDenseArray<double>(lhs.Shape);
+			var c = new MFullArray<double>(lhs.Shape);
 			for (int i = 0; i < lhs.Count; ++i)
 				c[i] = lhs[i] - rhs[i];
 			return c;
@@ -55,7 +55,7 @@ namespace McCli
 		{
 			Contract.Requires(lhs != null);
 
-			var c = new MDenseArray<double>(lhs.Shape);
+			var c = new MFullArray<double>(lhs.Shape);
 			for (int i = 0; i < lhs.Count; ++i)
 				c[i] = lhs[i] - rhs;
 			return c;
@@ -65,7 +65,7 @@ namespace McCli
 		{
 			Contract.Requires(rhs != null);
 
-			var c = new MDenseArray<double>(rhs.Shape);
+			var c = new MFullArray<double>(rhs.Shape);
 			for (int i = 0; i < rhs.Count; ++i)
 				c[i] = lhs - rhs[i];
 			return c;
@@ -77,11 +77,11 @@ namespace McCli
 			return array.DeepClone();
 		}
 
-		public static MDenseArray<double> uminus(MDenseArray<double> array)
+		public static MFullArray<double> uminus(MFullArray<double> array)
 		{
 			Contract.Requires(array != null);
 
-			var result = new MDenseArray<double>(array.Shape);
+			var result = new MFullArray<double>(array.Shape);
 			for (int i = 0; i < array.Count; ++i)
 				result[i] = -array[i];
 			return result;
@@ -89,7 +89,7 @@ namespace McCli
 		#endregion
 
 		#region Multiplicative
-		public static MDenseArray<double> times(MArray<double> lhs, MArray<double> rhs)
+		public static MFullArray<double> times(MArray<double> lhs, MArray<double> rhs)
 		{
 			Contract.Requires(lhs != null);
 			Contract.Requires(rhs != null);
@@ -98,23 +98,23 @@ namespace McCli
 			if (rhs.IsScalar) return times(lhs, rhs[0]);
 			if (lhs.Shape != rhs.Shape) throw new MArrayShapeException();
 
-			var result = new MDenseArray<double>(lhs.Shape);
+			var result = new MFullArray<double>(lhs.Shape);
 			for (int i = 0; i < lhs.Count; ++i)
 				result[i] = lhs[i] * rhs[i];
 			return result;
 		}
 
-		private static MDenseArray<double> times(MArray<double> lhs, double rhs)
+		private static MFullArray<double> times(MArray<double> lhs, double rhs)
 		{
 			Contract.Requires(lhs != null);
 
-			var result = new MDenseArray<double>(lhs.Shape);
+			var result = new MFullArray<double>(lhs.Shape);
 			for (int i = 0; i < lhs.Count; ++i)
 				result[i] = lhs[i] * rhs;
 			return result;
 		}
 
-		public static MDenseArray<double> mtimes(MArray<double> lhs, MArray<double> rhs)
+		public static MFullArray<double> mtimes(MArray<double> lhs, MArray<double> rhs)
 		{
 			Contract.Requires(lhs != null);
 			Contract.Requires(rhs != null);
@@ -130,7 +130,7 @@ namespace McCli
 			if (lhsShape.ColumnCount != rhsShape.RowCount) throw new MArrayShapeException();
 
 			var resultShape = new MArrayShape(lhsShape.RowCount, rhsShape.ColumnCount);
-			var result = new MDenseArray<double>(resultShape);
+			var result = new MFullArray<double>(resultShape);
 
 			for (int column = 0; column < resultShape.ColumnCount; ++column)
 			{
@@ -146,7 +146,7 @@ namespace McCli
 			return result;
 		}
 
-		public static MDenseArray<double> rdivide(MArray<double> lhs, MArray<double> rhs)
+		public static MFullArray<double> rdivide(MArray<double> lhs, MArray<double> rhs)
 		{
 			Contract.Requires(lhs != null);
 			Contract.Requires(rhs != null);
@@ -155,33 +155,33 @@ namespace McCli
 			if (rhs.IsScalar) return rdivide(lhs, rhs[0]);
 			if (lhs.Shape != rhs.Shape) throw new MArrayShapeException();
 
-			var result = new MDenseArray<double>(lhs.Shape);
+			var result = new MFullArray<double>(lhs.Shape);
 			for (int i = 0; i < lhs.Count; ++i)
 				result[i] = lhs[i] / rhs[i];
 			return result;
 		}
 
-		private static MDenseArray<double> rdivide(MArray<double> lhs, double rhs)
+		private static MFullArray<double> rdivide(MArray<double> lhs, double rhs)
 		{
 			Contract.Requires(lhs != null);
 
-			var result = new MDenseArray<double>(lhs.Shape);
+			var result = new MFullArray<double>(lhs.Shape);
 			for (int i = 0; i < lhs.Count; ++i)
 				result[i] = lhs[i] / rhs;
 			return result;
 		}
 
-		private static MDenseArray<double> rdivide(double lhs, MArray<double> rhs)
+		private static MFullArray<double> rdivide(double lhs, MArray<double> rhs)
 		{
 			Contract.Requires(rhs != null);
 
-			var result = new MDenseArray<double>(rhs.Shape);
+			var result = new MFullArray<double>(rhs.Shape);
 			for (int i = 0; i < rhs.Count; ++i)
 				result[i] = lhs / rhs[i];
 			return result;
 		}
 
-		public static MDenseArray<double> ldivide(MArray<double> lhs, MArray<double> rhs)
+		public static MFullArray<double> ldivide(MArray<double> lhs, MArray<double> rhs)
 		{
 			Contract.Requires(lhs != null);
 			Contract.Requires(rhs != null);
@@ -191,7 +191,7 @@ namespace McCli
 		#endregion
 
 		#region Power
-		public static MDenseArray<double> power(MArray<double> @base, MArray<double> exponent)
+		public static MFullArray<double> power(MArray<double> @base, MArray<double> exponent)
 		{
 			Contract.Requires(@base != null);
 			Contract.Requires(exponent != null);
@@ -199,27 +199,27 @@ namespace McCli
 			if (@base.IsScalar) 
 			if (exponent.IsScalar) return power(@base, exponent[0]);
 
-			var result = new MDenseArray<double>(@base.Shape);
+			var result = new MFullArray<double>(@base.Shape);
 			for (int i = 0; i < @base.Count; ++i)
 				result[i] = Math.Pow(@base[i], exponent[i]);
 			return result;
 		}
 
-		private static MDenseArray<double> power(MArray<double> @base, double exponent)
+		private static MFullArray<double> power(MArray<double> @base, double exponent)
 		{
 			Contract.Requires(@base != null);
 
-			var result = new MDenseArray<double>(@base.Shape);
+			var result = new MFullArray<double>(@base.Shape);
 			for (int i = 0; i < @base.Count; ++i)
 				result[i] = Math.Pow(@base[i], exponent);
 			return result;
 		}
 
-		private static MDenseArray<double> power(double @base, MArray<double> exponent)
+		private static MFullArray<double> power(double @base, MArray<double> exponent)
 		{
 			Contract.Requires(exponent != null);
 
-			var result = new MDenseArray<double>(exponent.Shape);
+			var result = new MFullArray<double>(exponent.Shape);
 			for (int i = 0; i < exponent.Count; ++i)
 				result[i] = Math.Pow(@base, exponent[i]);
 			return result;
@@ -244,12 +244,12 @@ namespace McCli
 		#endregion
 
 		#region Colon
-		public static MDenseArray<double> colon(double low, double high)
+		public static MFullArray<double> colon(double low, double high)
 		{
-			if (low > high) return new MDenseArray<double>(1, 0);
+			if (low > high) return new MFullArray<double>(1, 0);
 
 			var count = (int)(high - low) + 1;
-			var array = new MDenseArray<double>(1, count);
+			var array = new MFullArray<double>(1, count);
 			for (int i = 0; i < count; ++i)
 				array[i] = low + i;
 
@@ -264,17 +264,17 @@ namespace McCli
 			return 0;
 		}
 
-		public static MDenseArray<double> zeros(int n)
+		public static MFullArray<double> zeros(int n)
 		{
 			Contract.Requires(n >= 0);
 			return zeros(n, n);
 		}
 
-		public static MDenseArray<double> zeros(int sz1, int sz2)
+		public static MFullArray<double> zeros(int sz1, int sz2)
 		{
 			Contract.Requires(sz1 >= 0);
 			Contract.Requires(sz2 >= 0);
-			return new MDenseArray<double>(sz1, sz2);
+			return new MFullArray<double>(sz1, sz2);
 		}
 		#endregion
 
@@ -284,18 +284,18 @@ namespace McCli
 			return 1;
 		}
 
-		public static MDenseArray<double> ones(int n)
+		public static MFullArray<double> ones(int n)
 		{
 			Contract.Requires(n >= 0);
 			return ones(n, n);
 		}
 
-		public static MDenseArray<double> ones(int sz1, int sz2)
+		public static MFullArray<double> ones(int sz1, int sz2)
 		{
 			Contract.Requires(sz1 >= 0);
 			Contract.Requires(sz2 >= 0);
 
-			var result = new MDenseArray<double>(sz1, sz2);
+			var result = new MFullArray<double>(sz1, sz2);
 			var array = result.BackingArray;
 			for (int i = 0; i < array.Length; ++i)
 				array[i] = 1;
@@ -309,18 +309,18 @@ namespace McCli
 			return 1;
 		}
 
-		public static MDenseArray<double> eye(int n)
+		public static MFullArray<double> eye(int n)
 		{
 			Contract.Requires(n >= 0);
 			return eye(n, n);
 		}
 
-		public static MDenseArray<double> eye(int sz1, int sz2)
+		public static MFullArray<double> eye(int sz1, int sz2)
 		{
 			Contract.Requires(sz1 >= 0);
 			Contract.Requires(sz2 >= 0);
 
-			var result = new MDenseArray<double>(sz1, sz2);
+			var result = new MFullArray<double>(sz1, sz2);
 			var array = result.BackingArray;
 			for (int i = 0; i < array.Length; ++i)
 				array[i] = (i / sz1) == (i % sz1) ? 1 : 0;
@@ -354,7 +354,7 @@ namespace McCli
 		{
 			Contract.Requires(array != null);
 
-			var result = new MDenseArray<TReal>(array.Shape);
+			var result = new MFullArray<TReal>(array.Shape);
 			for (int i = 0; i < array.Count; ++i)
 				result[i] = array[i].RealPart;
 			return result;
@@ -364,7 +364,7 @@ namespace McCli
 		{
 			Contract.Requires(array != null);
 
-			var result = new MDenseArray<TReal>(array.Shape);
+			var result = new MFullArray<TReal>(array.Shape);
 			for (int i = 0; i < array.Count; ++i)
 				result[i] = array[i].ImaginaryPart;
 			return result;

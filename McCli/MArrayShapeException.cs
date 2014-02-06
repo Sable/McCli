@@ -9,5 +9,6 @@ namespace McCli
 	public sealed class MArrayShapeException : ArgumentException
 	{
 		public MArrayShapeException() : base("Invalid array shape.") { }
+		public MArrayShapeException(string message) : base(message) { }
 	}
 }

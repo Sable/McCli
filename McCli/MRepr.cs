@@ -147,7 +147,7 @@ namespace McCli
 
 			var genericTypeDefinition = type.GetGenericTypeDefinition();
 			if (genericTypeDefinition == typeof(MArray<>)) return new MRepr(mtype, MPrimitiveForm.Array);
-			if (genericTypeDefinition == typeof(MDenseArray<>)) return new MRepr(mtype, MPrimitiveForm.DenseArray);
+			if (genericTypeDefinition == typeof(MFullArray<>)) return new MRepr(mtype, MPrimitiveForm.FullArray);
 			return Any;
 		}
 		#endregion

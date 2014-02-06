@@ -8,41 +8,41 @@ using System.Threading.Tasks;
 namespace McCli
 {
 	/// <summary>
-	/// Non-generic interface to access the backing array of a dense array.
+	/// Non-generic interface to access the backing array of a full array.
 	/// </summary>
-	public interface IMDenseArray
+	public interface IMFullArray
 	{
 		/// <summary>
-		/// Gets the backing array of the dense array.
+		/// Gets the backing array of the full array.
 		/// </summary>
 		Array BackingArray { get; }
 	}
 
 	/// <summary>
-	/// Strongly typed base class for all MatLab arrays.
+	/// The default MatLab array type, full or dense (contiguous) arrays.
 	/// </summary>
 	/// <typeparam name="TScalar">The scalar type of the array elements.</typeparam>
-	public sealed class MDenseArray<TScalar> : MArray<TScalar>, IMDenseArray
+	public sealed class MFullArray<TScalar> : MArray<TScalar>, IMFullArray
 	{
 		#region Fields
 		private TScalar[] elements;
 		#endregion
 
 		#region Constructors
-		public MDenseArray(TScalar[] backingArray, MArrayShape shape)
+		public MFullArray(TScalar[] backingArray, MArrayShape shape)
 			: base(shape)
 		{
 			Contract.Requires(backingArray != null && backingArray.Length == shape.Count);
 			this.elements = backingArray;
 		}
 
-		public MDenseArray(MArrayShape shape)
+		public MFullArray(MArrayShape shape)
 			: base(shape)
 		{
 			elements = new TScalar[shape.Count];
 		}
 
-		public MDenseArray(int rowCount, int columnCount)
+		public MFullArray(int rowCount, int columnCount)
 			: this(new MArrayShape(rowCount, columnCount)) { }
 		#endregion
 
@@ -54,7 +54,7 @@ namespace McCli
 
 		protected override MPrimitiveForm PrimitiveForm
 		{
-			get { return MPrimitiveForm.DenseArray; }
+			get { return MPrimitiveForm.FullArray; }
 		}
 		#endregion
 
@@ -67,12 +67,12 @@ namespace McCli
 		#endregion
 
 		#region Methods
-		public new MDenseArray<TScalar> DeepClone()
+		public new MFullArray<TScalar> DeepClone()
 		{
-			return new MDenseArray<TScalar>((TScalar[])elements.Clone(), shape);
+			return new MFullArray<TScalar>((TScalar[])elements.Clone(), shape);
 		}
 
-		public override MDenseArray<TScalar> AsDense()
+		public override MFullArray<TScalar> AsFullArray()
 		{
 			return this;
 		}
@@ -87,14 +87,24 @@ namespace McCli
 			return DeepClone();
 		}
 
-		public static MDenseArray<TScalar> CreateScalar(TScalar value)
+		public static MFullArray<TScalar> CreateScalar(TScalar value)
 		{
-			return new MDenseArray<TScalar>(new[] { value }, MArrayShape.Scalar);
+			return new MFullArray<TScalar>(new[] { value }, MArrayShape.Scalar);
+		}
+
+		public static MFullArray<TScalar> CreateRowVector(params TScalar[] values)
+		{
+			return new MFullArray<TScalar>(values, MArrayShape.RowVector(values.Length));
+		}
+
+		public static MFullArray<TScalar> CreateColumnVector(params TScalar[] values)
+		{
+			return new MFullArray<TScalar>(values, MArrayShape.ColumnVector(values.Length));
 		}
 		#endregion
 
 		#region Explicit Members
-		Array IMDenseArray.BackingArray
+		Array IMFullArray.BackingArray
 		{
 			get { return elements; }
 		}

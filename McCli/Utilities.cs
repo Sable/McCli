@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace McCli
 {
+	/// <summary>
+	/// Miscellaneous functions that complement MatLab builtins.
+	/// </summary>
 	public static class Utilities
 	{
 		public static bool IsIntegralFloat(double value)
@@ -43,7 +46,7 @@ namespace McCli
 				int count = ((MArray)value).Count;
 				if (count == 0) return false;
 				
-				var doubleArray = value as MDenseArray<double>;
+				var doubleArray = value as MFullArray<double>;
 				if (doubleArray != null)
 				{
 					for (int i = 0; i < count; ++i)
@@ -52,7 +55,7 @@ namespace McCli
 					return true;
 				}
 
-				var logicalArray = value as MDenseArray<bool>;
+				var logicalArray = value as MFullArray<bool>;
 				if (logicalArray != null)
 				{
 					for (int i = 0; i < count; ++i)
@@ -65,17 +68,27 @@ namespace McCli
 			throw new NotImplementedException();
 		}
 
-		#region Subsref
+		public static string AsString(MFullArray<char> array)
+		{
+			Contract.Requires(array != null);
+
+			var shape = array.Shape;
+			if (!shape.IsRowVector) throw new MArrayShapeException();
+
+			return new string(array.BackingArray, 0, shape.ColumnCount);
+		}
+
+		#region Subsref/Subsasgn
 		public static MArray<TScalar> Subsref<TScalar>(MArray<TScalar> array, MArray<double> indices)
 		{
 			Contract.Requires(array != null);
 			Contract.Requires(indices != null);
 
 			var indicesShape = indices.Shape;
-			if (indicesShape.IsEmpty) return new MDenseArray<TScalar>(MArrayShape.Empty);
+			if (indicesShape.IsEmpty) return new MFullArray<TScalar>(MArrayShape.Empty);
 			Contract.Assert(indicesShape.ColumnCount == 1);
 
-			var result = new MDenseArray<TScalar>(new MArrayShape(indicesShape.RowCount, 1));
+			var result = new MFullArray<TScalar>(new MArrayShape(indicesShape.RowCount, 1));
 			for (int i = 0; i < indicesShape.RowCount; ++i)
 				result[i] = Subsref(array, ToInt(indices[i]));
 			return result;
@@ -84,6 +97,21 @@ namespace McCli
 		private static TScalar Subsref<TScalar>(MArray<TScalar> array, int index)
 		{
 			return array[index - 1];
+		}
+
+		public static MArray<TScalar> Subsref<TScalar>(MArray<TScalar> array, MArray<bool> mask)
+		{
+			Contract.Requires(array != null);
+			Contract.Requires(mask != null);
+
+			if (mask.Shape != array.Shape) throw new MArrayShapeException("The logical indexing mask must have the same shape as the array.");
+
+			var values = new List<TScalar>();
+			for (int i = 0; i < mask.Count; ++i)
+				if (mask[i])
+					values.Add(array[i]);
+
+			return MFullArray<TScalar>.CreateColumnVector(values.ToArray());
 		}
 
 		public static void Subsasgn<TScalar>(MArray<TScalar> array, MArray<double> indices, MArray<TScalar> values)

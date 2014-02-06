@@ -44,7 +44,7 @@ namespace McCli
 				new[] { doubleArrayInput }, doubleArrayOutput,
 				new Copy(doubleArrayInput, doubleArrayOutput));
 
-			var argument = MDenseArray<double>.CreateScalar(42);
+			var argument = MFullArray<double>.CreateScalar(42);
 			var result = function(argument);
 
 			Assert.AreEqual(argument.Shape, result.Shape);
@@ -80,10 +80,10 @@ namespace McCli
 				new[] { doubleArrayInput, doubleArrayInput2 }, doubleArrayOutput,
 				new StaticCall("plus", new[] { doubleArrayInput, doubleArrayInput2 }, doubleArrayOutput));
 
-			var arg1 = new MDenseArray<double>(2, 1);
+			var arg1 = new MFullArray<double>(2, 1);
 			arg1[0] = 42;
 			arg1[1] = 666;
-			var result = function(arg1, MDenseArray<double>.CreateScalar(1));
+			var result = function(arg1, MFullArray<double>.CreateScalar(1));
 			Assert.AreEqual(arg1.Shape, result.Shape);
 			Assert.AreEqual(43, result[0]);
 			Assert.AreEqual(667, result[1]);
@@ -96,7 +96,7 @@ namespace McCli
 				new[] { doubleArrayInput, doubleArrayInput2 }, doubleArrayOutput,
 				new LoadCall(doubleArrayInput, doubleArrayInput2, doubleArrayOutput));
 
-			var arg1 = new MDenseArray<double>(2, 1);
+			var arg1 = new MFullArray<double>(2, 1);
 			arg1[0] = 42;
 			arg1[1] = 666;
 
@@ -112,7 +112,7 @@ namespace McCli
 				new StoreIndexed(doubleArrayInput, doubleArrayInput2, doubleArrayInput3),
 				new Copy(doubleArrayOutput, doubleArrayInput));
 
-			var array = MDenseArray<double>.CreateScalar(42);
+			var array = MFullArray<double>.CreateScalar(42);
 			
 			var result = function(array, 1, 666);
 			Assert.IsTrue(result.IsScalar);
