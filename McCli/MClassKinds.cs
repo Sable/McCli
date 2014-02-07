@@ -30,7 +30,7 @@ namespace McCli
 		Logical = 1 << 10,
 		Char = 1 << 11,
 
-		CellArray = 1 << 12,
+		Cell = 1 << 12,
 		Struct = 1 << 13,
 		FunctionHandle = 1 << 14,
 

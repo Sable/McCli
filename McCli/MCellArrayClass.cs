@@ -18,7 +18,7 @@ namespace McCli
 		#region Properties
 		public override MClassKinds Kind
 		{
-			get { return MClassKinds.CellArray; }
+			get { return MClassKinds.Cell; }
 		}
 
 		public override string Name

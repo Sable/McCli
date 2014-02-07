@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace McCli
 {
+	/// <summary>
+	/// Provides implementation of some of MatLab's built-in functions.
+	/// </summary>
 	public static class Builtins
 	{
 		#region Arithmetic operators
@@ -228,6 +231,66 @@ namespace McCli
 		#endregion
 
 		#region Comparison
+		public static MArray<bool> eq(MArray<double> a, MArray<double> b)
+		{
+			CheckMatchingShapes_ScalarExpand(ref a, ref b);
+
+			var result = new MFullArray<bool>(a.Shape);
+			for (int i = 0; i < result.Count; ++i)
+				result[i] = a[i] == b[i];
+			return result;
+		}
+
+		public static MArray<bool> ne(MArray<double> a, MArray<double> b)
+		{
+			CheckMatchingShapes_ScalarExpand(ref a, ref b);
+
+			var result = new MFullArray<bool>(a.Shape);
+			for (int i = 0; i < result.Count; ++i)
+				result[i] = a[i] != b[i];
+			return result;
+		}
+
+		public static MArray<bool> gt(MArray<double> a, MArray<double> b)
+		{
+			CheckMatchingShapes_ScalarExpand(ref a, ref b);
+
+			var result = new MFullArray<bool>(a.Shape);
+			for (int i = 0; i < result.Count; ++i)
+				result[i] = a[i] > b[i];
+			return result;
+		}
+
+		public static MArray<bool> lt(MArray<double> a, MArray<double> b)
+		{
+			CheckMatchingShapes_ScalarExpand(ref a, ref b);
+
+			var result = new MFullArray<bool>(a.Shape);
+			for (int i = 0; i < result.Count; ++i)
+				result[i] = a[i] < b[i];
+			return result;
+		}
+
+		public static MArray<bool> ge(MArray<double> a, MArray<double> b)
+		{
+			CheckMatchingShapes_ScalarExpand(ref a, ref b);
+
+			var result = new MFullArray<bool>(a.Shape);
+			for (int i = 0; i < result.Count; ++i)
+				result[i] = a[i] >= b[i];
+			return result;
+		}
+
+		public static MArray<bool> le(MArray<double> a, MArray<double> b)
+		{
+			CheckMatchingShapes_ScalarExpand(ref a, ref b);
+
+			var result = new MFullArray<bool>(a.Shape);
+			for (int i = 0; i < result.Count; ++i)
+				result[i] = a[i] <= b[i];
+			return result;
+		}
+
 		public static bool isequal(MArray<double> a, MArray<double> b)
 		{
 			Contract.Requires(a != null);
@@ -240,6 +303,48 @@ namespace McCli
 					return false;
 
 			return true;
+		}
+		#endregion
+
+		#region Rounding
+		public static MArray<double> floor(MArray<double> array)
+		{
+			Contract.Requires(array != null);
+
+			var result = new MFullArray<double>(array.Shape);
+			for (int i = 0; i < result.Count; ++i)
+				result[i] = Math.Floor(array[i]);
+			return result;
+		}
+
+		public static MArray<double> ceil(MArray<double> array)
+		{
+			Contract.Requires(array != null);
+
+			var result = new MFullArray<double>(array.Shape);
+			for (int i = 0; i < result.Count; ++i)
+				result[i] = Math.Ceiling(array[i]);
+			return result;
+		}
+
+		public static MArray<double> round(MArray<double> array)
+		{
+			Contract.Requires(array != null);
+
+			var result = new MFullArray<double>(array.Shape);
+			for (int i = 0; i < result.Count; ++i)
+				result[i] = Math.Round(array[i], MidpointRounding.AwayFromZero);
+			return result;
+		}
+
+		public static MArray<double> fix(MArray<double> array)
+		{
+			Contract.Requires(array != null);
+
+			var result = new MFullArray<double>(array.Shape);
+			for (int i = 0; i < result.Count; ++i)
+				result[i] = Math.Truncate(array[i]);
+			return result;
 		}
 		#endregion
 
@@ -329,6 +434,42 @@ namespace McCli
 		#endregion
 		#endregion
 
+		#region Array Size
+		public static double numel(MArray array)
+		{
+			Contract.Requires(array != null);
+			return array.Count;
+		}
+
+		public static double ndims(MArray array)
+		{
+			Contract.Requires(array != null);
+			return array.Shape.Rank;
+		}
+
+		public static MFullArray<double> size(MArray array)
+		{
+			Contract.Requires(array != null);
+
+			var shape = array.Shape;
+			var result = new MFullArray<double>(MArrayShape.RowVector(shape.Rank));
+			for (int i = 0; i < shape.Rank; ++i)
+				result[i] = shape.GetSize(i);
+			return result;
+		}
+
+		public static double length(MArray array)
+		{
+			Contract.Requires(array != null);
+
+			var shape = array.Shape;
+			int result = 0;
+			for (int i = 0; i < shape.Rank; ++i)
+				result = Math.Max(result, shape.GetSize(i));
+			return result;
+		}
+		#endregion
+
 		#region Complex
 		public static MComplex<TReal> complex<[AnyRealNumeric] TReal>(TReal a) where TReal : struct
 		{
@@ -368,6 +509,20 @@ namespace McCli
 			for (int i = 0; i < array.Count; ++i)
 				result[i] = array[i].ImaginaryPart;
 			return result;
+		}
+		#endregion
+
+		#region Private utilities
+		private static void CheckMatchingShapes_ScalarExpand<TScalar>(ref MArray<TScalar> first, ref MArray<TScalar> second)
+		{
+			Contract.Requires(first != null);
+			Contract.Requires(second != null);
+
+			if (first.Shape == second.Shape) return;
+
+			if (first.IsScalar) first = MFullArray<TScalar>.Expand(first[0], second.Shape);
+			else if (second.IsScalar) second = MFullArray<TScalar>.Expand(second[0], first.Shape);
+			else throw new MArrayShapeException();
 		}
 		#endregion
 	}

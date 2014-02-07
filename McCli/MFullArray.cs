@@ -87,6 +87,13 @@ namespace McCli
 			return DeepClone();
 		}
 
+		public static MFullArray<TScalar> Expand(TScalar value, MArrayShape shape)
+		{
+			var array = new TScalar[shape.Count];
+			for (int i = 0; i < array.Length; ++i) array[i] = value;
+			return new MFullArray<TScalar>(array, shape);
+		}
+
 		public static MFullArray<TScalar> CreateScalar(TScalar value)
 		{
 			return new MFullArray<TScalar>(new[] { value }, MArrayShape.Scalar);

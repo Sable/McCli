@@ -45,4 +45,9 @@ namespace McCli
 	{
 		public AnyRealNumericAttribute() : base(MClassKinds.NumericMask, allowComplex: false) { }
 	}
+
+	public sealed class AnyArrayableAttribute : GenericMTypeAttribute
+	{
+		public AnyArrayableAttribute() : base(MClassKinds.NumericMask | MClassKinds.Struct | MClassKinds.Cell, allowComplex: true) { }
+	}
 }
