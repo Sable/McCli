@@ -33,9 +33,9 @@ namespace McCli
 
 		public static bool IsTrue(MValue value)
 		{
-			// An evaluated expression is true when the result is nonempty
+			// "An evaluated expression is true when the result is nonempty
 			// and contains all nonzero elements (logical or real numeric).
-			// Otherwise, the expression is false.
+			// Otherwise, the expression is false."
 			Contract.Requires(value != null);
 
 			var type = value.Repr;
@@ -50,7 +50,7 @@ namespace McCli
 				if (doubleArray != null)
 				{
 					for (int i = 0; i < count; ++i)
-						if (doubleArray[i] != 0)
+						if (doubleArray[i] == 0)
 							return false;
 					return true;
 				}

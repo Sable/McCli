@@ -109,14 +109,45 @@ namespace McCli.Compilation.CodeGen
 		{
 			Contract.Assert(!storeIndexed.Cell);
 
-			base.VisitStoreIndexed(storeIndexed);
+			throw new NotImplementedException();
+		}
+
+		public override void VisitIf(If @if)
+		{
+			if (@if.Then.Length == 0 && @if.Else.Length == 0) return;
+
+			EmitLoad(@if.Condition);
+			EmitConversion(@if.Condition.StaticRepr, MRepr.Any);
+			ilGenerator.Emit(OpCodes.Call, typeof(Utilities).GetMethod("IsTrue"));
+
+			var endLabel = ilGenerator.DefineLabel();
+			if (@if.Then.Length == 0)
+			{
+				ilGenerator.Emit(OpCodes.Brtrue, endLabel);
+				EmitStatements(@if.Else);
+			}
+			else if (@if.Else.Length == 0)
+			{
+				ilGenerator.Emit(OpCodes.Brfalse, endLabel);
+				EmitStatements(@if.Then);
+			}
+			else
+			{
+				var elseLabel = ilGenerator.DefineLabel();
+				ilGenerator.Emit(OpCodes.Brfalse, elseLabel);
+				EmitStatements(@if.Then);
+				ilGenerator.Emit(OpCodes.Br, endLabel);
+				ilGenerator.MarkLabel(elseLabel);
+				EmitStatements(@if.Else);
+			}
+
+			ilGenerator.MarkLabel(endLabel);
 		}
 
 		public override void VisitNode(IR.Node node)
 		{
 			throw new NotImplementedException();
 		}
-
 
 		private void EmitCloneIfBoxed(MRepr type)
 		{

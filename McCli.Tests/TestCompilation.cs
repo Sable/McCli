@@ -13,6 +13,7 @@ namespace McCli
 	[TestClass]
 	public sealed class TestCompilation
 	{
+		private static readonly Variable anyInput = new Variable("input", VariableKind.Input, MRepr.Any);
 		private static readonly Variable doubleArrayInput = new Variable("input", VariableKind.Input, MPrimitiveClass.Double.ArrayRepr);
 		private static readonly Variable doubleArrayInput2 = new Variable("input2", VariableKind.Input, MPrimitiveClass.Double.ArrayRepr);
 		private static readonly Variable doubleArrayInput3 = new Variable("input3", VariableKind.Input, MPrimitiveClass.Double.ArrayRepr);
@@ -118,6 +119,24 @@ namespace McCli
 			Assert.IsTrue(result.IsScalar);
 			Assert.AreEqual(42.0, array[0]);
 			Assert.AreEqual(666.0, result[0]);
+		}
+
+		[TestMethod]
+		public void TestIf()
+		{
+			const double trueDouble = 42;
+			const double falseDouble = 666;
+
+			var function = CompileFunction<Func<MValue, MArray<double>>>(
+				new[] { anyInput }, doubleArrayOutput,
+				new If(anyInput,
+					new Literal(doubleArrayOutput, trueDouble),
+					new Literal(doubleArrayOutput, falseDouble)));
+
+			Assert.AreEqual(trueDouble, function(MFullArray<double>.CreateScalar(1)).ToScalar());
+			Assert.AreEqual(falseDouble, function(MFullArray<double>.CreateScalar(0)).ToScalar());
+			Assert.AreEqual(falseDouble, function(MFullArray<double>.CreateRowVector(0, 0, 1, 0)).ToScalar());
+			Assert.AreEqual(trueDouble, function(MFullArray<double>.CreateRowVector(1, 1, 1, 1)).ToScalar());
 		}
 	}
 }

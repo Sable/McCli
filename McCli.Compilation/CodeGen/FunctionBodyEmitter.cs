@@ -90,11 +90,15 @@ namespace McCli.Compilation.CodeGen
 
 		public void Emit()
 		{
-			foreach (var statement in function.Body)
-				statement.Accept(this);
-
+			EmitStatements(function.Body);
 			EmitLoad(function.Outputs[0]);
 			ilGenerator.Emit(OpCodes.Ret);
+		}
+
+		private void EmitStatements(ImmutableArray<Statement> statements)
+		{
+			foreach (var statement in statements)
+				statement.Accept(this);
 		}
 		
 		private void EmitLoad(Variable variable)

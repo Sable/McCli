@@ -12,6 +12,31 @@ namespace McCli
 	/// </summary>
 	public static class Builtins
 	{
+		#region Classes
+		public static string @class(MValue value)
+		{
+			Contract.Requires(value != null);
+			return value.Class.Name;
+		}
+
+		public static bool isa(MValue value, MFullArray<char> className)
+		{
+			Contract.Requires(value != null);
+			Contract.Requires(className != null);
+
+			var @class = value.Class;
+			var classNameString = Utilities.AsString(className);
+			if (@class.Name == classNameString) return true;
+
+			// "categories"
+			var classKind = @class.Kind;
+			if (classNameString == "numeric" && (classKind & MClassKinds.NumericMask) != 0) return true;
+			if (classNameString == "float" && (classKind & MClassKinds.FloatMask) != 0) return true;
+			if (classNameString == "integer" && (classKind & MClassKinds.IntegerMask) != 0) return true;
+			return false;
+		}
+		#endregion
+
 		#region Arithmetic operators
 		#region Additive
 		public static MArray<double> plus(MArray<double> lhs, MArray<double> rhs)
@@ -432,6 +457,8 @@ namespace McCli
 			return result;
 		}
 		#endregion
+
+		// TODO: true, false
 		#endregion
 
 		#region Array Size
