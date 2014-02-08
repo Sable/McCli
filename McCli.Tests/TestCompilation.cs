@@ -18,6 +18,9 @@ namespace McCli
 		private static readonly Variable doubleArrayInput2 = new Variable("input2", VariableKind.Input, MPrimitiveClass.Double.ArrayRepr);
 		private static readonly Variable doubleArrayInput3 = new Variable("input3", VariableKind.Input, MPrimitiveClass.Double.ArrayRepr);
 		private static readonly Variable doubleArrayOutput = new Variable("output", VariableKind.Output, MPrimitiveClass.Double.ArrayRepr);
+		private static readonly Variable doubleArrayLocal = new Variable("doubles", VariableKind.Local, MPrimitiveClass.Double.ArrayRepr);
+		private static readonly Variable logicalArrayLocal = new Variable("logicals", VariableKind.Local, MPrimitiveClass.Logical.ArrayRepr);
+		private static readonly Variable logicalArrayOutput = new Variable("output", VariableKind.Output, MPrimitiveClass.Logical.ArrayRepr);
 		private FunctionLookup functionLookup;
 
 		[TestInitialize]
@@ -72,6 +75,16 @@ namespace McCli
 
 			var result = function();
 			Assert.AreEqual(result.ToScalar(), 42.0);
+		}
+
+		[TestMethod]
+		public void TestLogicalLiteral()
+		{
+			var function = CompileFunction<Func<MArray<bool>>>(
+				null, logicalArrayOutput,
+				new Literal(logicalArrayOutput, true));
+
+			Assert.AreEqual(true, function().ToScalar());
 		}
 
 		[TestMethod]
@@ -137,6 +150,67 @@ namespace McCli
 			Assert.AreEqual(falseDouble, function(MFullArray<double>.CreateScalar(0)).ToScalar());
 			Assert.AreEqual(falseDouble, function(MFullArray<double>.CreateRowVector(0, 0, 1, 0)).ToScalar());
 			Assert.AreEqual(trueDouble, function(MFullArray<double>.CreateRowVector(1, 1, 1, 1)).ToScalar());
+		}
+
+		[TestMethod]
+		public void TestWhile()
+		{
+			// y = x;
+			// while (y < 100) y *= x;
+
+			var function = CompileFunction<Func<MArray<double>, MArray<double>>>(
+				new[] { doubleArrayInput }, doubleArrayOutput,
+				new Copy(doubleArrayInput, doubleArrayOutput),
+				new Literal(doubleArrayLocal, 100.0),
+				new StaticCall("lt", new[] { doubleArrayOutput, doubleArrayLocal }, logicalArrayLocal),
+				new While(logicalArrayLocal, new[]
+				{
+					new StaticCall("times", new[] { doubleArrayOutput, doubleArrayInput }, doubleArrayOutput),
+					new StaticCall("lt", new[] { doubleArrayOutput, doubleArrayLocal }, logicalArrayLocal)
+				}));
+
+			Assert.AreEqual(125.0, function(MFullArray<double>.CreateScalar(5)).ToScalar());
+			Assert.AreEqual(100.0, function(MFullArray<double>.CreateScalar(10)).ToScalar());
+			Assert.AreEqual(101.0, function(MFullArray<double>.CreateScalar(101)).ToScalar());
+		}
+
+		[TestMethod]
+		public void TestBreak()
+		{
+			// while (42) break;
+			// return 42;
+
+			var function = CompileFunction<Func<MArray<double>>>(
+				null, doubleArrayOutput,
+				new Literal(doubleArrayOutput, 42.0),
+				new While(doubleArrayOutput, new Jump(JumpKind.Break)));
+
+			Assert.AreEqual(42.0, function().ToScalar());
+		}
+
+		[TestMethod]
+		public void TestBreaksInNestedWhiles()
+		{
+			// x = 42;
+			// while (x)
+			// {
+			//   while (x) break;
+			//   x = 666;
+			//   break;
+			// }
+			// return x;
+
+			var function = CompileFunction<Func<MArray<double>>>(
+				null, doubleArrayOutput,
+				new Literal(doubleArrayOutput, 42.0),
+				new While(doubleArrayOutput, new Statement[]
+				{
+					new While(doubleArrayOutput, new Jump(JumpKind.Break)),
+					new Literal(doubleArrayOutput, 666.0),
+					new Jump(JumpKind.Break)
+				}));
+
+			Assert.AreEqual(666.0, function().ToScalar());
 		}
 	}
 }

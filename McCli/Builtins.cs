@@ -35,6 +35,8 @@ namespace McCli
 			if (classNameString == "integer" && (classKind & MClassKinds.IntegerMask) != 0) return true;
 			return false;
 		}
+
+		// TODO: is*
 		#endregion
 
 		#region Arithmetic operators
@@ -495,6 +497,8 @@ namespace McCli
 				result = Math.Max(result, shape.GetSize(i));
 			return result;
 		}
+
+		// TODO: iscolumn, isrow, ismatrix, isscalar, isvector, isempty
 		#endregion
 
 		#region Complex

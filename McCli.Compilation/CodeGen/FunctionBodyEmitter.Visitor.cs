@@ -12,22 +12,36 @@ namespace McCli.Compilation.CodeGen
 {
 	partial class FunctionBodyEmitter : Visitor
 	{
+		#region Fields
+		private Label? continueTargetLabel;
+		private Label? breakTargetLabel;
+		#endregion
+
+		#region Methods
 		public override void VisitLiteral(Literal literal)
 		{
 			using (BeginEmitStore(literal.Target))
 			{
-				MRepr sourceType;
-				if (literal.Value is double)
+				var sourceRepr = MRepr.FromCliType(literal.Value.GetType());
+				if (sourceRepr.IsPrimitive && !sourceRepr.IsComplex)
 				{
-					ilGenerator.Emit(OpCodes.Ldc_R8, (double)literal.Value);
-					sourceType = MPrimitiveClass.Double.ScalarRepr;
+					if (sourceRepr.Type == MPrimitiveClass.Double) ilGenerator.Emit(OpCodes.Ldc_R8, (double)literal.Value);
+					else if (sourceRepr.Type == MPrimitiveClass.Single) ilGenerator.Emit(OpCodes.Ldc_R4, (float)literal.Value);
+					else if (sourceRepr.Type == MPrimitiveClass.UInt64) ilGenerator.Emit(OpCodes.Ldc_I8, unchecked((long)(ulong)literal.Value));
+					else if (sourceRepr.Type == MPrimitiveClass.Int64) ilGenerator.Emit(OpCodes.Ldc_I8, (long)literal.Value);
+					else
+					{
+						// Should be convertible to int
+						int value = unchecked((int)Convert.ToInt64(literal.Value));
+						ilGenerator.Emit(OpCodes.Ldc_I4, value); // TODO: Use short form opcodes if possible
+					}
 				}
 				else
 				{
 					throw new NotImplementedException();
 				}
 
-				EmitConversion(sourceType, literal.Target.StaticRepr);
+				EmitConversion(sourceRepr, literal.Target.StaticRepr);
 			}
 		}
 
@@ -144,6 +158,51 @@ namespace McCli.Compilation.CodeGen
 			ilGenerator.MarkLabel(endLabel);
 		}
 
+		public override void VisitWhile(While @while)
+		{
+			var previousContinueTargetLabel = continueTargetLabel;
+			var previousBreakTargetLabel = breakTargetLabel;
+
+			continueTargetLabel = ilGenerator.DefineLabel();
+			breakTargetLabel = ilGenerator.DefineLabel();
+
+			// Condition
+			ilGenerator.MarkLabel(continueTargetLabel.Value);
+			EmitLoad(@while.Condition);
+			EmitConversion(@while.Condition.StaticRepr, MRepr.Any);
+			ilGenerator.Emit(OpCodes.Call, typeof(Utilities).GetMethod("IsTrue"));
+			ilGenerator.Emit(OpCodes.Brfalse, breakTargetLabel.Value);
+
+			// Body
+			EmitStatements(@while.Body);
+			ilGenerator.Emit(OpCodes.Br, continueTargetLabel.Value);
+
+			// End
+			ilGenerator.MarkLabel(breakTargetLabel.Value);
+
+			continueTargetLabel = previousContinueTargetLabel;
+			breakTargetLabel = previousBreakTargetLabel;
+		}
+
+		public override void VisitJump(Jump jump)
+		{
+			if (jump.Kind == JumpKind.Continue)
+			{
+				Contract.Assert(continueTargetLabel.HasValue);
+				ilGenerator.Emit(OpCodes.Br, continueTargetLabel.Value);
+			}
+			else if (jump.Kind == JumpKind.Break)
+			{
+				Contract.Assert(breakTargetLabel.HasValue);
+				ilGenerator.Emit(OpCodes.Br, breakTargetLabel.Value);
+			}
+			else
+			{
+				// TODO: Support return
+				throw new NotImplementedException();
+			}
+		}
+
 		public override void VisitNode(IR.Node node)
 		{
 			throw new NotImplementedException();
@@ -160,5 +219,6 @@ namespace McCli.Compilation.CodeGen
 					ilGenerator.Emit(OpCodes.Castclass, sourceType);
 			}
 		}
+		#endregion
 	}
 }

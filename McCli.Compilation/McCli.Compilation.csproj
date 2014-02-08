@@ -41,6 +41,8 @@
     <Compile Include="CodeGen\MethodFactory.cs" />
     <Compile Include="FunctionInfo.cs" />
     <Compile Include="FunctionTable.cs" />
+    <Compile Include="IR\Jump.cs" />
+    <Compile Include="IR\JumpKind.cs" />
     <Compile Include="IR\StoreIndexed.cs" />
     <Compile Include="IR\Expression.cs" />
     <Compile Include="IR\Copy.cs" />
@@ -54,6 +56,7 @@
     <Compile Include="IR\Node.cs" />
     <Compile Include="IR\Statement.cs" />
     <Compile Include="IR\Visitor.cs" />
+    <Compile Include="IR\While.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="IR\VariableKind.cs" />
   </ItemGroup>

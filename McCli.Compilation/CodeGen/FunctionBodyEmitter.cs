@@ -155,19 +155,25 @@ namespace McCli.Compilation.CodeGen
 
 			if (target.IsAny && source.IsMValue) return;
 
-			if (source.Type == target.Type
-				&& source.PrimitiveForm == MPrimitiveForm.Scalar
-				&& target.PrimitiveForm == MPrimitiveForm.Array)
+			if (source.Type == target.Type)
 			{
-				// Boxing to array
-				var boxMethod = typeof(MFullArray<>)
-					.MakeGenericType(source.CliType)
-					.GetMethod("CreateScalar");
-				ilGenerator.Emit(OpCodes.Call, boxMethod);
-				return;
+				if (source.PrimitiveForm == MPrimitiveForm.Scalar
+					&& (target.PrimitiveForm == MPrimitiveForm.Array || target.IsAny))
+				{
+					// Boxing to array
+					var boxMethod = typeof(MFullArray<>)
+						.MakeGenericType(source.CliType)
+						.GetMethod("CreateScalar");
+					ilGenerator.Emit(OpCodes.Call, boxMethod);
+					return;
+				}
+
+				// Upcast
+				if (source.PrimitiveForm.IsArray && (target.IsArray || target.IsAny)) return;
 			}
 
-			throw new NotImplementedException();
+			throw new NotImplementedException(
+				string.Format("Conversion from {0} to {1}.", source, target));
 		}
 
 		private LocalLocation GetLocalLocation(Variable variable)
