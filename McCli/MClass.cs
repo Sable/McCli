@@ -27,7 +27,7 @@ namespace McCli
 		public static readonly MPrimitiveClass UInt64 = new MPrimitiveClass(MClassKinds.UInt64, typeof(ulong));
 		public static readonly MPrimitiveClass Char = new MPrimitiveClass(MClassKinds.Char, typeof(char));
 		public static readonly MPrimitiveClass Logical = new MPrimitiveClass(MClassKinds.Logical, typeof(bool));
-		public static readonly MCellArrayClass CellArray = new MCellArrayClass();
+		public static readonly MCellClass Cell = new MCellClass();
 		//public static readonly MFunctionHandleClass FunctionHandle = new MFunctionHandleClass();
 		#endregion
 

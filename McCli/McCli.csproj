@@ -37,10 +37,12 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EmptyArray.cs" />
     <Compile Include="MArrayShape.cs" />
     <Compile Include="MArrayShapeException.cs" />
+    <Compile Include="MCell.cs" />
     <Compile Include="MCellArray.cs" />
-    <Compile Include="MCellArrayClass.cs" />
+    <Compile Include="MCellClass.cs" />
     <Compile Include="MClass.cs" />
     <Compile Include="MClassKinds.cs" />
     <Compile Include="MComplex.cs" />

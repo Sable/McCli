@@ -17,7 +17,7 @@ namespace McCli
 				return value;
 			}
 
-			public override MArray ToArray(object value)
+			public override MValue ToArray(object value)
 			{
 				throw new NotImplementedException();
 			}
@@ -33,7 +33,7 @@ namespace McCli
 				throw new NotImplementedException();
 			}
 
-			public override MArray ToArray(object value)
+			public override MValue ToArray(object value)
 			{
 				throw new NotImplementedException();
 			}

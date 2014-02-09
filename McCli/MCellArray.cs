@@ -10,14 +10,15 @@ namespace McCli
 	/// <summary>
 	/// Represents a MatLab cell array.
 	/// </summary>
-	public sealed class MCellArray : MArray
+	public sealed class MCellArray : MArray<MCell>
 	{
 		#region Fields
-		private MValue[] elements;
+		private MCell[] elements;
 		#endregion
 
 		#region Constructors
-		public MCellArray(MValue[] elements, MArrayShape shape) : base(shape)
+		public MCellArray(MCell[] elements, MArrayShape shape)
+			: base(shape)
 		{
 			Contract.Requires(elements != null && elements.Length >= shape.Count);
 			this.elements = elements;
@@ -25,7 +26,7 @@ namespace McCli
 
 		public MCellArray(MArrayShape shape) : base(shape)
 		{
-			elements = new MValue[shape.Count];
+			elements = new MCell[shape.Count];
 			for (int i = 0; i < elements.Length; ++i)
 				elements[i] = new MFullArray<double>(MArrayShape.Empty);
 		}
@@ -34,39 +35,40 @@ namespace McCli
 		#region Properties
 		public override MRepr Repr
 		{
-			get { return MClass.CellArray; }
+			get { return MClass.Cell; }
 		}
 		#endregion
 
 		#region Indexers
-		public new MValue this[int index]
+		public new MCell this[int index]
 		{
-			get { return elements[index]; }
-			set
-			{
-				Contract.Requires(value != null);
-				elements[index] = value;
-			}
+			get { return elements[index].Initialize(); }
+			set { elements[index] = value; }
 		}
 		#endregion
 
 		#region Methods
 		public new MCellArray DeepClone()
 		{
-			var cloneElements = new MValue[elements.Length];
+			var cloneElements = new MCell[elements.Length];
 			for (int i = 0; i < elements.Length; ++i)
 				cloneElements[i] = elements[i].DeepClone();
 			return new MCellArray(cloneElements, shape);
 		}
 
-		protected override object At(int index)
-		{
-			return elements[index];
-		}
-
 		protected override MValue DoDeepClone()
 		{
 			return DeepClone();
+		}
+
+		protected override MCell GetAt(int index)
+		{
+			return this[index];
+		}
+
+		protected override void SetAt(int index, MCell value)
+		{
+			this[index] = value;
 		}
 		#endregion
 	}

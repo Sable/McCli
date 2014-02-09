@@ -37,7 +37,12 @@ namespace McCli
 			var type = containerCliType;
 			while (type != null && type != typeof(object))
 			{
-				if (type == typeof(MArray)) isArray = true;
+				if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(MArray<>))
+				{
+					isArray = true;
+					break;
+				}
+
 				type = type.BaseType;
 			}
 		}
@@ -118,11 +123,11 @@ namespace McCli
 		}
 
 		/// <summary>
-		/// Converts a value in this form to a array form, (identity if the value is already an array).
+		/// Converts a value in this form to a array form, (identity if the form already represents an array).
 		/// </summary>
 		/// <param name="value">The value to be converted.</param>
 		/// <returns>The corresponding value in array form.</returns>
-		public abstract MArray ToArray(object value);
+		public abstract MValue ToArray(object value);
 
 		/// <summary>
 		/// Constructs a value in this from from a scalar value.

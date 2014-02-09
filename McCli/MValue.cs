@@ -12,10 +12,14 @@ namespace McCli
 	public abstract class MValue
 	{
 		#region Fields
+		protected MArrayShape shape;
 		#endregion
 
 		#region Constructors
-		internal MValue() { }
+		internal MValue(MArrayShape shape)
+		{
+			this.shape = shape;
+		}
 		#endregion
 
 		#region Properties
@@ -30,6 +34,46 @@ namespace McCli
 		public MClass Class
 		{
 			get { return Repr.Class; }
+		}
+
+		/// <summary>
+		/// Gets the shape of this value.
+		/// </summary>
+		public MArrayShape Shape
+		{
+			get { return shape; }
+		}
+
+		/// <summary>
+		/// Gets the number of elements in this value.
+		/// </summary>
+		public int Count
+		{
+			get { return shape.Count; }
+		}
+
+		/// <summary>
+		/// Gets a value indicating if this value contains a single element.
+		/// </summary>
+		public bool IsScalar
+		{
+			get { return shape.IsScalar; }
+		}
+
+		/// <summary>
+		/// Gets a value indicating if this value is an empty array.
+		/// </summary>
+		public bool IsEmptyArray
+		{
+			get { return shape.IsEmpty; }
+		}
+
+		/// <summary>
+		/// Gets a value indicating if this value is an array with more than two dimensions.
+		/// </summary>
+		public bool IsHigherDimensional
+		{
+			get { return shape.IsHigherDimensional; }
 		}
 		#endregion
 

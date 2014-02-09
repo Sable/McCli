@@ -43,7 +43,7 @@ namespace McCli
 
 			if (type.IsArray)
 			{
-				int count = ((MArray)value).Count;
+				int count = value.Count;
 				if (count == 0) return false;
 				
 				var doubleArray = value as MFullArray<double>;
@@ -119,7 +119,7 @@ namespace McCli
 			Contract.Requires(array != null);
 			Contract.Requires(indices != null);
 
-			if (indices.IsEmpty && values.IsEmpty) return;
+			if (indices.IsEmptyArray && values.IsEmptyArray) return;
 
 			var indicesShape = indices.Shape;
 			Contract.Requires(indicesShape.ColumnCount == 1);

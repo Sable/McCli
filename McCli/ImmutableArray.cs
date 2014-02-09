@@ -16,7 +16,7 @@ namespace McCli
 	public partial struct ImmutableArray<T> : IList<T>, IReadOnlyList<T>
 	{
 		#region Fields
-		public static readonly ImmutableArray<T> Empty = CreateNoClone(new T[0]);
+		public static readonly ImmutableArray<T> Empty = CreateNoClone(EmptyArray<T>.Rank1);
 
 		internal readonly T[] array;
 		private readonly int length;

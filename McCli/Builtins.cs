@@ -150,10 +150,10 @@ namespace McCli
 			Contract.Requires(rhs != null);
 
 			var lhsShape = lhs.Shape;
-			if (lhsShape.Rank > 2) throw new MArrayShapeException();
+			if (lhsShape.DimensionCount > 2) throw new MArrayShapeException();
 
 			var rhsShape = rhs.Shape;
-			if (rhsShape.Rank > 2) throw new MArrayShapeException();
+			if (rhsShape.DimensionCount > 2) throw new MArrayShapeException();
 
 			if (lhsShape.IsScalar) return times(rhs, lhs[0]);
 			if (rhsShape.IsScalar) return times(lhs, rhs[0]);
@@ -460,40 +460,40 @@ namespace McCli
 		}
 		#endregion
 
-		// TODO: true, false
+		// TODO: true, false, diag
 		#endregion
 
 		#region Array Size
-		public static double numel(MArray array)
+		public static double numel(MValue value)
 		{
-			Contract.Requires(array != null);
-			return array.Count;
+			Contract.Requires(value != null);
+			return value.Count;
 		}
 
-		public static double ndims(MArray array)
+		public static double ndims(MValue value)
 		{
-			Contract.Requires(array != null);
-			return array.Shape.Rank;
+			Contract.Requires(value != null);
+			return value.Shape.DimensionCount;
 		}
 
-		public static MFullArray<double> size(MArray array)
+		public static MFullArray<double> size(MValue value)
 		{
-			Contract.Requires(array != null);
+			Contract.Requires(value != null);
 
-			var shape = array.Shape;
-			var result = new MFullArray<double>(MArrayShape.RowVector(shape.Rank));
-			for (int i = 0; i < shape.Rank; ++i)
+			var shape = value.Shape;
+			var result = new MFullArray<double>(MArrayShape.RowVector(shape.DimensionCount));
+			for (int i = 0; i < shape.DimensionCount; ++i)
 				result[i] = shape.GetSize(i);
 			return result;
 		}
 
-		public static double length(MArray array)
+		public static double length(MValue value)
 		{
-			Contract.Requires(array != null);
+			Contract.Requires(value != null);
 
-			var shape = array.Shape;
+			var shape = value.Shape;
 			int result = 0;
-			for (int i = 0; i < shape.Rank; ++i)
+			for (int i = 0; i < shape.DimensionCount; ++i)
 				result = Math.Max(result, shape.GetSize(i));
 			return result;
 		}
@@ -551,8 +551,8 @@ namespace McCli
 
 			if (first.Shape == second.Shape) return;
 
-			if (first.IsScalar) first = MFullArray<TScalar>.Expand(first[0], second.Shape);
-			else if (second.IsScalar) second = MFullArray<TScalar>.Expand(second[0], first.Shape);
+			if (first.IsScalar) first = MFullArray<TScalar>.ExpandScalar(first[0], second.Shape);
+			else if (second.IsScalar) second = MFullArray<TScalar>.ExpandScalar(second[0], first.Shape);
 			else throw new MArrayShapeException();
 		}
 		#endregion

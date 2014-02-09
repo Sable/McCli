@@ -8,113 +8,57 @@ using System.Threading.Tasks;
 namespace McCli
 {
 	/// <summary>
-	/// Base class for all MatLab arrays,
-	/// including numeric types, strings and such.
-	/// </summary>
-	public abstract class MArray : MValue
-	{
-		#region Fields
-		protected MArrayShape shape;
-		#endregion
-
-		#region Constructors
-		internal MArray(MArrayShape shape)
-		{
-			this.shape = shape;
-		}
-		#endregion
-
-		#region Properties
-		public MArrayShape Shape
-		{
-			get { return shape; }
-		}
-
-		public int Count
-		{
-			get { return shape.Count; }
-		}
-
-		public bool IsEmpty
-		{
-			get { return Count == 0; }
-		}
-
-		public bool IsScalar
-		{
-			get { return shape.IsScalar; }
-		}
-		#endregion
-
-		#region Indexers
-		public object this[int index]
-		{
-			get { return At(index); }
-		}
-		#endregion
-
-		#region Methods
-		public new MArray DeepClone()
-		{
-			return (MArray)DoDeepClone();
-		}
-
-		protected abstract object At(int index);
-		#endregion
-	}
-
-	/// <summary>
 	/// Strongly-typed base class for MatLab arrays.
 	/// </summary>
 	/// <typeparam name="TScalar">The type of the array elements.</typeparam>
-	public abstract class MArray<TScalar> : MArray
+	public abstract class MArray<TScalar> : MValue
 	{
+		#region Fields
+		protected static readonly MType type;
+		#endregion
+
 		#region Constructors
 		internal MArray(MArrayShape shape) : base(shape) {}
 
 		static MArray()
 		{
 			// Ensure the generic type is one that supports being in arrays.
-			var type = MType.FromCliType(typeof(TScalar));
+			type = MType.FromCliType(typeof(TScalar));
 			Contract.Assert(type != null && type.IsPrimitive);
 		}
 		#endregion
 
-		#region Properties
-		public override sealed MRepr Repr
-		{
-			get
-			{
-				var scalarType = MType.FromCliType(typeof(TScalar));
-				return new MRepr(scalarType, PrimitiveForm);
-			}
-		}
-
-		protected abstract MPrimitiveForm PrimitiveForm { get; }
-		#endregion
-
 		#region Indexers
-		public new abstract TScalar this[int index] { get; set; }
+		/// <summary>
+		/// Accesses an element in this array from its index.
+		/// </summary>
+		/// <param name="index">The linearized, zero-based index.</param>
+		/// <returns>The element at that index.</returns>
+		public TScalar this[int index]
+		{
+			get { return GetAt(index); }
+			set { SetAt(index, value); }
+		}
 		#endregion
 
 		#region Methods
+		/// <summary>
+		/// Obtains the only value in a 1x1 array.
+		/// </summary>
+		/// <returns>The scalar in this array.</returns>
 		public TScalar ToScalar()
 		{
-			if (!IsScalar) throw new InvalidCastException();
+			if (!IsScalar) throw new MArrayShapeException();
 			return this[0];
 		}
-
-		public abstract MFullArray<TScalar> AsFullArray();
 
 		public new MArray<TScalar> DeepClone()
 		{
 			return (MArray<TScalar>)DoDeepClone();
 		}
 
-		protected override object At(int index)
-		{
-			return this[index];
-		}
+		protected abstract TScalar GetAt(int index);
+		protected abstract void SetAt(int index, TScalar value);
 		#endregion
 
 		#region Operators

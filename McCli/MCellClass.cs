@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 namespace McCli
 {
 	/// <summary>
-	/// Represents the MatLab class of cell arrays.
+	/// Represents the MatLab class of cells (and cell arrays).
 	/// </summary>
-	public sealed class MCellArrayClass : MClass
+	public sealed class MCellClass : MClass
 	{
 		#region Constructors
-		internal MCellArrayClass() { }
+		internal MCellClass() { }
 		#endregion
 
 		#region Properties
@@ -28,7 +28,7 @@ namespace McCli
 
 		public override Type CliType
 		{
-			get { return typeof(MCellArray); }
+			get { return typeof(MCell); }
 		}
 
 		public override int FixedSizeInBytes

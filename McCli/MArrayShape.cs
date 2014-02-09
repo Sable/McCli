@@ -40,7 +40,7 @@ namespace McCli
 			get { return columnCount; }
 		}
 
-		public int Rank
+		public int DimensionCount
 		{
 			get { return dimensions == null ? 2 : dimensions.Length; }
 		}
@@ -83,8 +83,8 @@ namespace McCli
 		#region Methods
 		public bool Equals(MArrayShape other)
 		{
-			if (Rank != other.Rank) return false;
-			if (Rank > 2) throw new NotImplementedException();
+			if (DimensionCount != other.DimensionCount) return false;
+			if (DimensionCount > 2) throw new NotImplementedException();
 
 			return rowCount == other.rowCount && columnCount == other.columnCount;
 		}
@@ -101,7 +101,7 @@ namespace McCli
 
 		public int GetSize(int dimensionIndex)
 		{
-			Contract.Requires(dimensionIndex >= 0 && dimensionIndex < Rank);
+			Contract.Requires(dimensionIndex >= 0 && dimensionIndex < DimensionCount);
 			if (dimensionIndex == 0) return rowCount;
 			if (dimensionIndex == 1) return columnCount;
 			throw new NotImplementedException();

@@ -25,6 +25,8 @@ namespace McCli
 	public sealed class MFullArray<TScalar> : MArray<TScalar>, IMFullArray
 	{
 		#region Fields
+		private static readonly MRepr repr;
+
 		private TScalar[] elements;
 		#endregion
 
@@ -44,6 +46,11 @@ namespace McCli
 
 		public MFullArray(int rowCount, int columnCount)
 			: this(new MArrayShape(rowCount, columnCount)) { }
+
+		static MFullArray()
+		{
+			repr = new MRepr(MArray<TScalar>.type, MPrimitiveForm.FullArray);
+		}
 		#endregion
 
 		#region Properties
@@ -52,14 +59,14 @@ namespace McCli
 			get { return elements; }
 		}
 
-		protected override MPrimitiveForm PrimitiveForm
+		public override MRepr Repr
 		{
-			get { return MPrimitiveForm.FullArray; }
+			get { return repr; }
 		}
 		#endregion
 
 		#region Indexers
-		public override TScalar this[int index]
+		public new TScalar this[int index]
 		{
 			get { return elements[index]; }
 			set { elements[index] = value; }
@@ -72,26 +79,31 @@ namespace McCli
 			return new MFullArray<TScalar>((TScalar[])elements.Clone(), shape);
 		}
 
-		public override MFullArray<TScalar> AsFullArray()
-		{
-			return this;
-		}
-
-		protected override object At(int index)
-		{
-			return this[index];
-		}
-
 		protected override MValue DoDeepClone()
 		{
 			return DeepClone();
 		}
 
-		public static MFullArray<TScalar> Expand(TScalar value, MArrayShape shape)
+		protected override TScalar GetAt(int index)
+		{
+			return this[index];
+		}
+
+		protected override void SetAt(int index, TScalar value)
+		{
+			this[index] = value;
+		}
+
+		public static MFullArray<TScalar> ExpandScalar(TScalar value, MArrayShape shape)
 		{
 			var array = new TScalar[shape.Count];
 			for (int i = 0; i < array.Length; ++i) array[i] = value;
 			return new MFullArray<TScalar>(array, shape);
+		}
+
+		public static MFullArray<TScalar> CreateEmpty()
+		{
+			return new MFullArray<TScalar>(EmptyArray<TScalar>.Rank1, MArrayShape.Empty);
 		}
 
 		public static MFullArray<TScalar> CreateScalar(TScalar value)
