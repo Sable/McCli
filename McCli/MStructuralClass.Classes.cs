@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace McCli
 {
-	partial class MPrimitiveForm
+	partial class MStructuralClass
 	{
-		private sealed class ScalarForm : MPrimitiveForm
+		private sealed class ScalarClass : MStructuralClass
 		{
-			internal ScalarForm() : base("scalar", null, MClassKinds.PrimitiveMask, supportsComplex: true) { }
+			internal ScalarClass() : base("scalar", null, MClassKinds.PrimitiveMask, supportsComplex: true) { }
 
 			public override object FromScalar(object value)
 			{
@@ -23,9 +23,9 @@ namespace McCli
 			}
 		}
 
-		private sealed class ArrayForm : MPrimitiveForm
+		private sealed class ArrayClass : MStructuralClass
 		{
-			internal ArrayForm(string name, Type containerCliType, MClassKinds supportedClassKinds)
+			internal ArrayClass(string name, Type containerCliType, MClassKinds supportedClassKinds)
 				: base(name, containerCliType, supportedClassKinds, supportsComplex: true) { }
 
 			public override object FromScalar(object value)

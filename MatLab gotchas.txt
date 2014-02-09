@@ -9,4 +9,6 @@ Structs
 	Default field value is empty double array
 	StructArray.Field returns a comma separated list
 	Field names have an order
+For
+	Creates a copy of its iteration array
 Undefined function '---' for input arguments of type '---'

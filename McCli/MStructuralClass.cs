@@ -8,24 +8,25 @@ using System.Threading.Tasks;
 namespace McCli
 {
 	/// <summary>
-	/// Identifies a representation of a primitive type (including complex numbers).
+	/// Identifies how a value of a MatLab class (real or complex) is stored.
 	/// </summary>
-	public abstract partial class MPrimitiveForm
+	public abstract partial class MStructuralClass
 	{
 		#region Fields
-		public static readonly MPrimitiveForm Scalar = new ScalarForm();
-		public static readonly MPrimitiveForm Array = new ArrayForm("array", typeof(MArray<>), MClassKinds.PrimitiveMask);
-		public static readonly MPrimitiveForm FullArray = new ArrayForm("full array", typeof(MFullArray<>), MClassKinds.PrimitiveMask);
+		public static readonly MStructuralClass Scalar = new ScalarClass();
+		public static readonly MStructuralClass Array = new ArrayClass("array", typeof(MArray<>), MClassKinds.PrimitiveMask);
+		public static readonly MStructuralClass FullArray = new ArrayClass("full array", typeof(MFullArray<>), MClassKinds.PrimitiveMask);
 
 		private readonly string name;
 		private readonly Type containerCliType;
 		private readonly bool isArray;
+		private readonly bool isMValue;
 		private readonly MClassKinds supportedClassKinds;
 		private readonly bool supportsComplex;
 		#endregion
 
 		#region Constructors
-		private MPrimitiveForm(string name, Type containerCliType, MClassKinds supportedClassKinds, bool supportsComplex)
+		private MStructuralClass(string name, Type containerCliType, MClassKinds supportedClassKinds, bool supportsComplex)
 		{
 			Contract.Requires(name != null);
 
@@ -38,10 +39,9 @@ namespace McCli
 			while (type != null && type != typeof(object))
 			{
 				if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(MArray<>))
-				{
 					isArray = true;
-					break;
-				}
+				else if (type == typeof(MValue))
+					isMValue = true;
 
 				type = type.BaseType;
 			}
@@ -50,7 +50,7 @@ namespace McCli
 
 		#region Properties
 		/// <summary>
-		/// Gets the name of this form.
+		/// Gets the name of this structural class.
 		/// </summary>
 		public string Name
 		{
@@ -58,7 +58,7 @@ namespace McCli
 		}
 
 		/// <summary>
-		/// Gets the Common Language Infrastructure container type that represents values in this form, if any.
+		/// Gets the Common Language Infrastructure container type that represents values with this structural class, if any.
 		/// </summary>
 		public Type ContainerCliType
 		{
@@ -66,7 +66,15 @@ namespace McCli
 		}
 
 		/// <summary>
-		/// Gets a value indicating if this form is an array form.
+		/// Gets a value indicating if values with this structural class are <see cref="MValue"/>s.
+		/// </summary>
+		public bool IsMValue
+		{
+			get { return isMValue; }
+		}
+
+		/// <summary>
+		/// Gets a value indicating if values with this structural class are <see cref="MArray{T}"/>s.
 		/// </summary>
 		public bool IsArray
 		{
@@ -74,7 +82,7 @@ namespace McCli
 		}
 
 		/// <summary>
-		/// Gets a mask of class kinds supported by this form.
+		/// Gets a mask of class kinds supported by this structural class.
 		/// </summary>
 		public MClassKinds SupportedClassKinds
 		{
@@ -82,7 +90,7 @@ namespace McCli
 		}
 
 		/// <summary>
-		/// Gets a value indicating if this form supports complex numbers.
+		/// Gets a value indicating if this structural class supports complex numbers.
 		/// </summary>
 		public bool SupportsComplex
 		{
@@ -92,10 +100,10 @@ namespace McCli
 
 		#region Methods
 		/// <summary>
-		/// Determines if a given type can be represented in this form.
+		/// Determines if a given type can be represented with this structural class.
 		/// </summary>
 		/// <param name="type">The type to be tested.</param>
-		/// <returns>A value indicating if the type can be represented in this form.</returns>
+		/// <returns>A value indicating if the type can be represented with this structural class.</returns>
 		[Pure]
 		public bool SupportsType(MType type)
 		{
@@ -106,9 +114,9 @@ namespace McCli
 		}
 
 		/// <summary>
-		/// Gets the Common Language Infrastructure type for this form of a given type.
+		/// Gets the Common Language Infrastructure type for this structural class of a given type.
 		/// </summary>
-		/// <param name="type">The type to be wrapped in this form.</param>
+		/// <param name="type">The type to be wrapped in this structural class.</param>
 		/// <returns>The resulting CLI type.</returns>
 		[Pure]
 		public Type GetCliType(MType type)
@@ -123,17 +131,18 @@ namespace McCli
 		}
 
 		/// <summary>
-		/// Converts a value in this form to a array form, (identity if the form already represents an array).
+		/// Converts a value with this structural class to an array structural class,
+		/// (identity if this structural class already represents an array).
 		/// </summary>
 		/// <param name="value">The value to be converted.</param>
-		/// <returns>The corresponding value in array form.</returns>
+		/// <returns>The corresponding value with an array structural class.</returns>
 		public abstract MValue ToArray(object value);
 
 		/// <summary>
-		/// Constructs a value in this from from a scalar value.
+		/// Constructs a value with this structural class from a scalar value.
 		/// </summary>
 		/// <param name="value">The scalar value.</param>
-		/// <returns>The corresponding value in this form.</returns>
+		/// <returns>The corresponding value with this structural class.</returns>
 		public abstract object FromScalar(object value);
 
 		public override string ToString()

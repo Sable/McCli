@@ -104,7 +104,7 @@ namespace McCli.Compilation.CodeGen
 					if (method.IsGenericMethodDefinition)
 						method = method.MakeGenericMethod(subjectType.Type.CliType);
 
-					var arrayType = subjectType.WithPrimitiveForm(MPrimitiveForm.Array);
+					var arrayType = subjectType.WithStructuralClass(MStructuralClass.Array);
 					EmitConversion(subjectType, arrayType);
 
 					foreach (var argument in loadCall.Arguments)
@@ -186,26 +186,33 @@ namespace McCli.Compilation.CodeGen
 
 		public override void VisitJump(Jump jump)
 		{
-			if (jump.Kind == JumpKind.Continue)
+			Label targetLabel;
+			switch(jump.Kind)
 			{
-				Contract.Assert(continueTargetLabel.HasValue);
-				ilGenerator.Emit(OpCodes.Br, continueTargetLabel.Value);
+				case JumpKind.Continue:
+					Contract.Assert(continueTargetLabel.HasValue);
+					targetLabel = continueTargetLabel.Value;
+					break;
+
+				case JumpKind.Break:
+					Contract.Assert(breakTargetLabel.HasValue);
+					targetLabel = breakTargetLabel.Value;
+					break;
+
+				case JumpKind.Return:
+					targetLabel = returnTargetLabel;
+					break;
+
+				default:
+					throw new NotImplementedException();
 			}
-			else if (jump.Kind == JumpKind.Break)
-			{
-				Contract.Assert(breakTargetLabel.HasValue);
-				ilGenerator.Emit(OpCodes.Br, breakTargetLabel.Value);
-			}
-			else
-			{
-				// TODO: Support return
-				throw new NotImplementedException();
-			}
+
+			ilGenerator.Emit(OpCodes.Br, targetLabel);
 		}
 
 		public override void VisitNode(IR.Node node)
 		{
-			throw new NotImplementedException();
+			throw new NotImplementedException(string.Format("Visiting {0} IR nodes.", node.GetType().Name));
 		}
 
 		private void EmitCloneIfBoxed(MRepr type)

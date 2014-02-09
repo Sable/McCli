@@ -63,9 +63,25 @@ namespace McCli
 		/// <summary>
 		/// Gets a value indicating if this value is an empty array.
 		/// </summary>
-		public bool IsEmptyArray
+		public bool IsEmpty
 		{
 			get { return shape.IsEmpty; }
+		}
+
+		/// <summary>
+		/// Gets a value indicating if this value has a column vector shape.
+		/// </summary>
+		public bool IsColumnVector
+		{
+			get { return shape.IsColumnVector; }
+		}
+
+		/// <summary>
+		/// Gets a value indicating if this value has a row vector shape.
+		/// </summary>
+		public bool IsRowVector
+		{
+			get { return shape.IsRowVector; }
 		}
 
 		/// <summary>

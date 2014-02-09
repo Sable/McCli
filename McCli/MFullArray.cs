@@ -49,7 +49,7 @@ namespace McCli
 
 		static MFullArray()
 		{
-			repr = new MRepr(MArray<TScalar>.type, MPrimitiveForm.FullArray);
+			repr = new MRepr(MArray<TScalar>.type, MStructuralClass.FullArray);
 		}
 		#endregion
 

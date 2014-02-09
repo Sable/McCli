@@ -66,12 +66,17 @@ namespace McCli
 
 		public bool IsRowVector
 		{
-			get { return columnCount == Count; }
+			get { return rowCount == 1 && !IsHigherDimensional; }
 		}
 
 		public bool IsColumnVector
 		{
-			get { return rowCount == Count; }
+			get { return columnCount == 1 && !IsHigherDimensional; }
+		}
+
+		public bool IsVector
+		{
+			get { return (rowCount == 1 || columnCount == 1) && !IsHigherDimensional; }
 		}
 
 		public bool IsHigherDimensional

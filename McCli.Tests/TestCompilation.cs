@@ -42,7 +42,7 @@ namespace McCli
 		}
 
 		[TestMethod]
-		public void TestCopyIRNode()
+		public void TestCopyAssignment()
 		{
 			var function = CompileFunction<Func<MArray<double>, MArray<double>>>(
 				new[] { doubleArrayInput }, doubleArrayOutput,

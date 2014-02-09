@@ -41,6 +41,7 @@ namespace McCli.Compilation.CodeGen
 		private readonly MethodInfo method;
 		private readonly ILGenerator ilGenerator;
 		private readonly Dictionary<Variable, LocalLocation> locals = new Dictionary<Variable, LocalLocation>();
+		private Label returnTargetLabel;
 		#endregion
 
 		#region Constructors
@@ -90,7 +91,11 @@ namespace McCli.Compilation.CodeGen
 
 		public void Emit()
 		{
+			returnTargetLabel = ilGenerator.DefineLabel();
+
 			EmitStatements(function.Body);
+
+			ilGenerator.MarkLabel(returnTargetLabel);
 			EmitLoad(function.Outputs[0]);
 			ilGenerator.Emit(OpCodes.Ret);
 		}
@@ -157,8 +162,8 @@ namespace McCli.Compilation.CodeGen
 
 			if (source.Type == target.Type)
 			{
-				if (source.PrimitiveForm == MPrimitiveForm.Scalar
-					&& (target.PrimitiveForm == MPrimitiveForm.Array || target.IsAny))
+				if (source.StructuralClass == MStructuralClass.Scalar
+					&& (target.StructuralClass == MStructuralClass.Array || target.IsAny))
 				{
 					// Boxing to array
 					var boxMethod = typeof(MFullArray<>)
@@ -169,7 +174,7 @@ namespace McCli.Compilation.CodeGen
 				}
 
 				// Upcast
-				if (source.PrimitiveForm.IsArray && (target.IsArray || target.IsAny)) return;
+				if (source.StructuralClass.IsArray && (target.IsArray || target.IsAny)) return;
 			}
 
 			throw new NotImplementedException(

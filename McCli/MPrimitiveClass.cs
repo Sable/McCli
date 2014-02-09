@@ -89,17 +89,17 @@ namespace McCli
 
 		public MRepr ScalarRepr
 		{
-			get { return new MRepr(this, MPrimitiveForm.Scalar); }
+			get { return new MRepr(this, MStructuralClass.Scalar); }
 		}
 
 		public MRepr ArrayRepr
 		{
-			get { return new MRepr(this, MPrimitiveForm.Array); }
+			get { return new MRepr(this, MStructuralClass.Array); }
 		}
 
 		public MRepr FullArrayRepr
 		{
-			get { return new MRepr(this, MPrimitiveForm.FullArray); }
+			get { return new MRepr(this, MStructuralClass.FullArray); }
 		}
 		#endregion
 

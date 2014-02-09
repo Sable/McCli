@@ -51,8 +51,8 @@
     <Compile Include="MFunctionHandleClass.cs" />
     <Compile Include="MPrimitiveClass.cs" />
     <Compile Include="Builtins.cs" />
-    <Compile Include="MPrimitiveForm.cs" />
-    <Compile Include="MPrimitiveForm.Forms.cs" />
+    <Compile Include="MStructuralClass.cs" />
+    <Compile Include="MStructuralClass.Classes.cs" />
     <Compile Include="MRepr.cs" />
     <Compile Include="MType.cs" />
     <Compile Include="MTypeLookup.cs" />

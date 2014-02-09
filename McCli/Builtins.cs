@@ -36,12 +36,82 @@ namespace McCli
 			return false;
 		}
 
+		public static bool iscell(MValue value)
+		{
+			Contract.Requires(value != null);
+			return value.Class == MClass.Cell;
+		}
+
+		public static bool ischar(MValue value)
+		{
+			Contract.Requires(value != null);
+			return value.Class == MClass.Char;
+		}
+
+		public static bool islogical(MValue value)
+		{
+			Contract.Requires(value != null);
+			return value.Class == MClass.Logical;
+		}
+
+		public static bool isfloat(MValue value)
+		{
+			Contract.Requires(value != null);
+			return (value.Class.Kind & MClassKinds.FloatMask) != 0;
+		}
+
+		public static bool isinteger(MValue value)
+		{
+			Contract.Requires(value != null);
+			return (value.Class.Kind & MClassKinds.IntegerMask) != 0;
+		}
+
+		public static bool isnumeric(MValue value)
+		{
+			Contract.Requires(value != null);
+			return (value.Class.Kind & MClassKinds.NumericMask) != 0;
+		}
+
+		public static bool isreal(MValue value)
+		{
+			Contract.Requires(value != null);
+			return !value.Repr.Type.IsComplex;
+		}
+
+		public static bool ischar(char value) { return true; }
+		public static bool islogical(bool value) { return true; }
+
 		// TODO: is*
 		#endregion
 
-		#region Arithmetic operators
+		#region Execution Environment
+		public static bool ispc()
+		{
+			var platform = Environment.OSVersion.Platform;
+			return platform == PlatformID.Win32NT
+				|| platform == PlatformID.Win32Windows
+				|| platform == PlatformID.Win32S;
+		}
+
+		public static bool isunix()
+		{
+			return Environment.OSVersion.Platform == PlatformID.Unix;
+		}
+
+		public static bool ismac()
+		{
+			return Environment.OSVersion.Platform == PlatformID.MacOSX;
+		}
+
+		public static bool isstudent()
+		{
+			return false; // !
+		}
+		#endregion
+
+		#region Arithmetic
 		#region Additive
-		public static MArray<double> plus(MArray<double> lhs, MArray<double> rhs)
+		public static MFullArray<double> plus(MArray<double> lhs, MArray<double> rhs)
 		{
 			Contract.Requires(lhs != null);
 			Contract.Requires(rhs != null);
@@ -56,7 +126,7 @@ namespace McCli
 			return c;
 		}
 
-		private static MArray<double> plus(MArray<double> lhs, double rhs)
+		private static MFullArray<double> plus(MArray<double> lhs, double rhs)
 		{
 			Contract.Requires(lhs != null);
 
@@ -66,7 +136,7 @@ namespace McCli
 			return c;
 		}
 
-		public static MArray<double> minus(MArray<double> lhs, MArray<double> rhs)
+		public static MFullArray<double> minus(MArray<double> lhs, MArray<double> rhs)
 		{
 			Contract.Requires(lhs != null);
 			Contract.Requires(rhs != null);
@@ -81,7 +151,7 @@ namespace McCli
 			return c;
 		}
 
-		private static MArray<double> minus(MArray<double> lhs, double rhs)
+		private static MFullArray<double> minus(MArray<double> lhs, double rhs)
 		{
 			Contract.Requires(lhs != null);
 
@@ -91,7 +161,7 @@ namespace McCli
 			return c;
 		}
 
-		private static MArray<double> minus(double lhs, MArray<double> rhs)
+		private static MFullArray<double> minus(double lhs, MArray<double> rhs)
 		{
 			Contract.Requires(rhs != null);
 
@@ -107,7 +177,7 @@ namespace McCli
 			return array.DeepClone();
 		}
 
-		public static MFullArray<double> uminus(MFullArray<double> array)
+		public static MArray<double> uminus(MArray<double> array)
 		{
 			Contract.Requires(array != null);
 
@@ -333,6 +403,7 @@ namespace McCli
 		}
 		#endregion
 
+		#region Floating Point Stuff
 		#region Rounding
 		public static MArray<double> floor(MArray<double> array)
 		{
@@ -375,6 +446,39 @@ namespace McCli
 		}
 		#endregion
 
+		#region Finite/Infinity/NaN testing
+		public static MArray<bool> isfinite(MArray<double> array)
+		{
+			Contract.Requires(array != null);
+
+			var result = new MFullArray<bool>(array.Shape);
+			for (int i = 0; i < array.Count; ++i)
+				result[i] = !double.IsNaN(array[i]) && !double.IsInfinity(array[i]);
+			return result;
+		}
+
+		public static MArray<bool> isinf(MArray<double> array)
+		{
+			Contract.Requires(array != null);
+
+			var result = new MFullArray<bool>(array.Shape);
+			for (int i = 0; i < array.Count; ++i)
+				result[i] = double.IsInfinity(array[i]);
+			return result;
+		}
+
+		public static MArray<bool> isnan(MArray<double> array)
+		{
+			Contract.Requires(array != null);
+
+			var result = new MFullArray<bool>(array.Shape);
+			for (int i = 0; i < array.Count; ++i)
+				result[i] = double.IsNaN(array[i]);
+			return result;
+		}
+		#endregion
+		#endregion
+
 		#region Colon
 		public static MFullArray<double> colon(double low, double high)
 		{
@@ -390,6 +494,8 @@ namespace McCli
 		#endregion
 
 		#region Array Creation
+		// TODO: numerical coercion for those (can call zeros(int16(4)))
+
 		#region Zeroes
 		public static double zeros()
 		{
@@ -426,12 +532,7 @@ namespace McCli
 		{
 			Contract.Requires(sz1 >= 0);
 			Contract.Requires(sz2 >= 0);
-
-			var result = new MFullArray<double>(sz1, sz2);
-			var array = result.BackingArray;
-			for (int i = 0; i < array.Length; ++i)
-				array[i] = 1;
-			return result;
+			return MFullArray<double>.ExpandScalar(1, new MArrayShape(sz1, sz2));
 		}
 		#endregion
 
@@ -460,10 +561,19 @@ namespace McCli
 		}
 		#endregion
 
-		// TODO: true, false, diag
+		#region True/False
+		public static bool @true() { return true; }
+
+		public static bool @false() { return false; }
+
+		// TODO: Sized true/false
 		#endregion
 
-		#region Array Size
+		// TODO: diag
+		#endregion
+
+		#region Array Shape
+		#region Size & Counting
 		public static double numel(MValue value)
 		{
 			Contract.Requires(value != null);
@@ -497,8 +607,45 @@ namespace McCli
 				result = Math.Max(result, shape.GetSize(i));
 			return result;
 		}
+		#endregion
 
-		// TODO: iscolumn, isrow, ismatrix, isscalar, isvector, isempty
+		#region Shape Testing
+		public static bool isempty(MValue value)
+		{
+			Contract.Requires(value != null);
+			return value.IsEmpty;
+		}
+
+		public static bool isscalar(MValue value)
+		{
+			Contract.Requires(value != null);
+			return value.IsScalar;
+		}
+
+		public static bool iscolumn(MValue value)
+		{
+			Contract.Requires(value != null);
+			return value.IsColumnVector;
+		}
+
+		public static bool isrow(MValue value)
+		{
+			Contract.Requires(value != null);
+			return value.IsRowVector;
+		}
+
+		public static bool isvector(MValue value)
+		{
+			Contract.Requires(value != null);
+			return value.Shape.IsVector;
+		}
+
+		public static bool ismatrix(MValue value)
+		{
+			Contract.Requires(value != null);
+			return !value.IsHigherDimensional;
+		}
+		#endregion
 		#endregion
 
 		#region Complex

@@ -17,22 +17,22 @@ namespace McCli
 		public static readonly MRepr Any = default(MRepr);
 		
 		private readonly MType type;
-		private readonly MPrimitiveForm primitiveForm;
+		private readonly MStructuralClass structuralClass;
 		#endregion
 
 		#region Constructors
-		public MRepr(MType type, MPrimitiveForm primitiveForm)
+		public MRepr(MType type, MStructuralClass structuralClass)
 		{
-			Contract.Requires(type == null || !type.IsPrimitive || primitiveForm != null);
+			Contract.Requires(type == null || structuralClass != null);
 
 			this.type = type;
-			this.primitiveForm = primitiveForm;
+			this.structuralClass = structuralClass;
 		}
 
 		public MRepr(MType type)
 		{
 			this.type = type;
-			primitiveForm = type == null || !type.IsPrimitive ? null : MPrimitiveForm.Array;
+			structuralClass = type == null ? null : MStructuralClass.Array;
 		}
 		#endregion
 
@@ -66,25 +66,25 @@ namespace McCli
 		/// </summary>
 		public bool IsPrimitive
 		{
-			get { return primitiveForm != null; }
+			get { return structuralClass != null; }
 		}
 
 		/// <summary>
-		/// For primitives, returns the form in which it is represented.
+		/// Gets the structural class of value representations.
 		/// </summary>
-		public MPrimitiveForm PrimitiveForm
+		public MStructuralClass StructuralClass
 		{
-			get { return primitiveForm; }
+			get { return structuralClass; }
 		}
 
 		public bool IsMValue
 		{
-			get { return primitiveForm == null || primitiveForm.IsArray; }
+			get { return structuralClass == null || structuralClass.IsMValue; }
 		}
 
 		public bool IsArray
 		{
-			get { return primitiveForm != null && primitiveForm.IsArray; }
+			get { return structuralClass != null && structuralClass.IsArray; }
 		}
 
 		public bool IsComplex
@@ -97,23 +97,23 @@ namespace McCli
 			get
 			{
 				if (type == null) return typeof(MValue);
-				return primitiveForm == null ? type.CliType : primitiveForm.GetCliType(type);
+				return structuralClass == null ? type.CliType : structuralClass.GetCliType(type);
 			}
 		}
 		#endregion
 
 		#region Methods
-		public MRepr WithPrimitiveForm(MPrimitiveForm form)
+		public MRepr WithStructuralClass(MStructuralClass structuralClass)
 		{
 			Contract.Requires(IsPrimitive);
-			Contract.Requires(form != null);
+			Contract.Requires(structuralClass != null);
 
-			return new MRepr(type, form);
+			return new MRepr(type, structuralClass);
 		}
 
 		public bool Equals(MRepr other)
 		{
-			return type == other.type && primitiveForm == other.primitiveForm;
+			return type == other.type && structuralClass == other.structuralClass;
 		}
 
 		public override bool Equals(object obj)
@@ -124,13 +124,13 @@ namespace McCli
 		public override int GetHashCode()
 		{
 			return (type == null ? 0 : type.GetHashCode())
-				^ (primitiveForm == null ? 0 : primitiveForm.GetHashCode());
+				^ (structuralClass == null ? 0 : structuralClass.GetHashCode());
 		}
 
 		public override string ToString()
 		{
 			if (type == null) return "any";
-			return primitiveForm == null ? type.Name : (type.Name + ' ' + primitiveForm.Name);
+			return structuralClass == null ? type.Name : (type.Name + ' ' + structuralClass.Name);
 		}
 
 		public static MRepr FromCliType(Type type)
@@ -138,7 +138,7 @@ namespace McCli
 			Contract.Requires(type != null);
 
 			var mtype = MType.FromCliType(type);
-			if (mtype != null) return new MRepr(mtype, mtype.IsPrimitive ? MPrimitiveForm.Scalar : null);
+			if (mtype != null) return new MRepr(mtype, mtype.IsPrimitive ? MStructuralClass.Scalar : null);
 
 			if (!type.IsGenericType) return Any;
 
@@ -146,8 +146,8 @@ namespace McCli
 			if (mtype == null) return Any;
 
 			var genericTypeDefinition = type.GetGenericTypeDefinition();
-			if (genericTypeDefinition == typeof(MArray<>)) return new MRepr(mtype, MPrimitiveForm.Array);
-			if (genericTypeDefinition == typeof(MFullArray<>)) return new MRepr(mtype, MPrimitiveForm.FullArray);
+			if (genericTypeDefinition == typeof(MArray<>)) return new MRepr(mtype, MStructuralClass.Array);
+			if (genericTypeDefinition == typeof(MFullArray<>)) return new MRepr(mtype, MStructuralClass.FullArray);
 			return Any;
 		}
 		#endregion

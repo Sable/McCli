@@ -119,7 +119,7 @@ namespace McCli
 			Contract.Requires(array != null);
 			Contract.Requires(indices != null);
 
-			if (indices.IsEmptyArray && values.IsEmptyArray) return;
+			if (indices.IsEmpty && values.IsEmpty) return;
 
 			var indicesShape = indices.Shape;
 			Contract.Requires(indicesShape.ColumnCount == 1);
