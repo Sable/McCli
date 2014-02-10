@@ -41,6 +41,7 @@
     <Compile Include="CodeGen\MethodFactory.cs" />
     <Compile Include="FunctionInfo.cs" />
     <Compile Include="FunctionTable.cs" />
+    <Compile Include="IR\For.cs" />
     <Compile Include="IR\Jump.cs" />
     <Compile Include="IR\JumpKind.cs" />
     <Compile Include="IR\StoreIndexed.cs" />
