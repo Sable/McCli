@@ -52,7 +52,7 @@ namespace McCli.Compilation.CodeGen
 			using (BeginEmitStore(copy.Target))
 			{
 				EmitLoad(copy.Value);
-				EmitCloneIfBoxed(copy.Value.StaticRepr);
+				EmitCloneIfNeeded(copy.Value.StaticRepr);
 
 				EmitConversion(copy.Value.StaticRepr, copy.Target.StaticRepr);
 			}
@@ -95,7 +95,7 @@ namespace McCli.Compilation.CodeGen
 				if (loadCall.Arguments.Length == 0)
 				{
 					// "foo = array()", same as "foo = array"
-					EmitCloneIfBoxed(loadCall.Subject.StaticRepr);
+					EmitCloneIfNeeded(loadCall.Subject.StaticRepr);
 				}
 				else
 				{
@@ -160,9 +160,9 @@ namespace McCli.Compilation.CodeGen
 
 		public override void VisitWhile(While @while)
 		{
+			// Declare loop labels, preserving parent ones
 			var previousContinueTargetLabel = continueTargetLabel;
 			var previousBreakTargetLabel = breakTargetLabel;
-
 			continueTargetLabel = ilGenerator.DefineLabel();
 			breakTargetLabel = ilGenerator.DefineLabel();
 
@@ -180,6 +180,78 @@ namespace McCli.Compilation.CodeGen
 			// End
 			ilGenerator.MarkLabel(breakTargetLabel.Value);
 
+			// Restore parent loop labels
+			continueTargetLabel = previousContinueTargetLabel;
+			breakTargetLabel = previousBreakTargetLabel;
+		}
+
+		public override void VisitFor(For @for)
+		{
+			var collectionRepr = @for.Collection.StaticRepr;
+			Contract.Assert(collectionRepr.StructuralClass == MStructuralClass.Array);
+			
+			// TODO: pool temporaries
+
+			// Declare loop labels, preserving parent ones
+			var previousContinueTargetLabel = continueTargetLabel;
+			var previousBreakTargetLabel = breakTargetLabel;
+			continueTargetLabel = ilGenerator.DefineLabel();
+			breakTargetLabel = ilGenerator.DefineLabel();
+			var conditionLabel = ilGenerator.DefineLabel();
+
+			// arrayCopy = clone(array)
+			var arrayCopyLocal = ilGenerator.DeclareLocal(collectionRepr.CliType);
+			EmitLoad(@for.Collection);
+			EmitCloneIfNeeded(collectionRepr);
+			ilGenerator.Emit(OpCodes.Stloc, arrayCopyLocal);
+
+			// count = slicecount(arrayCopy)
+			var countLocal = ilGenerator.DeclareLocal(typeof(int));
+			ilGenerator.Emit(OpCodes.Ldloc, arrayCopyLocal);
+			ilGenerator.Emit(OpCodes.Call, typeof(Utilities).GetMethod("GetForSliceCount"));
+			ilGenerator.Emit(OpCodes.Stloc, countLocal);
+
+			// index = 0
+			var indexLocal = ilGenerator.DeclareLocal(typeof(int));
+			ilGenerator.Emit(OpCodes.Ldc_I4_0);
+			ilGenerator.Emit(OpCodes.Stloc, indexLocal);
+
+			// condition:
+			ilGenerator.MarkLabel(conditionLabel);
+
+			// if (index >= count) goto break;
+			ilGenerator.Emit(OpCodes.Ldloc, indexLocal);
+			ilGenerator.Emit(OpCodes.Ldloc, countLocal);
+			ilGenerator.Emit(OpCodes.Clt);
+			ilGenerator.Emit(OpCodes.Brfalse, breakTargetLabel.Value);
+
+			// slice = getslice(arrayCopy, index)
+			using (BeginEmitStore(@for.Iterator))
+			{
+				ilGenerator.Emit(OpCodes.Ldloc, arrayCopyLocal);
+				ilGenerator.Emit(OpCodes.Ldloc, indexLocal);
+				ilGenerator.Emit(OpCodes.Call, typeof(Utilities).GetMethod("GetForSlice").MakeGenericMethod(collectionRepr.Type.CliType));
+			}
+
+			// body
+			EmitStatements(@for.Body);
+
+			// continue:
+			ilGenerator.MarkLabel(continueTargetLabel.Value);
+
+			// index++
+			ilGenerator.Emit(OpCodes.Ldloc, indexLocal);
+			ilGenerator.Emit(OpCodes.Ldc_I4_1);
+			ilGenerator.Emit(OpCodes.Add);
+			ilGenerator.Emit(OpCodes.Stloc, indexLocal);
+			
+			// goto condition
+			ilGenerator.Emit(OpCodes.Br, conditionLabel);
+
+			// break:
+			ilGenerator.MarkLabel(breakTargetLabel.Value);
+
+			// Restore parent loop labels
 			continueTargetLabel = previousContinueTargetLabel;
 			breakTargetLabel = previousBreakTargetLabel;
 		}
@@ -215,7 +287,7 @@ namespace McCli.Compilation.CodeGen
 			throw new NotImplementedException(string.Format("Visiting {0} IR nodes.", node.GetType().Name));
 		}
 
-		private void EmitCloneIfBoxed(MRepr type)
+		private void EmitCloneIfNeeded(MRepr type)
 		{
 			var sourceType = type.CliType;
 			if (typeof(MValue).IsAssignableFrom(sourceType))

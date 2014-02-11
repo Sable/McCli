@@ -22,6 +22,9 @@ namespace McCli.Compilation.IR
 			this.Body = body;
 		}
 
+		public While(Variable condition, params Statement[] body)
+			: this(condition, ImmutableArray.Create(body)) { }
+
 		public override void Accept(Visitor visitor)
 		{
 			visitor.VisitWhile(this);

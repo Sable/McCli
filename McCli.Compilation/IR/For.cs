@@ -26,6 +26,9 @@ namespace McCli.Compilation.IR
 			this.Body = body;
 		}
 
+		public For(Variable iterator, Variable collection, params Statement[] body)
+			: this(iterator, collection, ImmutableArray.Create(body)) { }
+
 		public override void Accept(Visitor visitor)
 		{
 			visitor.VisitFor(this);

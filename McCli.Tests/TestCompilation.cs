@@ -18,7 +18,8 @@ namespace McCli
 		private static readonly Variable doubleArrayInput2 = new Variable("input2", VariableKind.Input, MPrimitiveClass.Double.ArrayRepr);
 		private static readonly Variable doubleArrayInput3 = new Variable("input3", VariableKind.Input, MPrimitiveClass.Double.ArrayRepr);
 		private static readonly Variable doubleArrayOutput = new Variable("output", VariableKind.Output, MPrimitiveClass.Double.ArrayRepr);
-		private static readonly Variable doubleArrayLocal = new Variable("doubles", VariableKind.Local, MPrimitiveClass.Double.ArrayRepr);
+		private static readonly Variable doubleArrayLocal1 = new Variable("double1", VariableKind.Local, MPrimitiveClass.Double.ArrayRepr);
+		private static readonly Variable doubleArrayLocal2 = new Variable("double2", VariableKind.Local, MPrimitiveClass.Double.ArrayRepr);
 		private static readonly Variable logicalArrayLocal = new Variable("logicals", VariableKind.Local, MPrimitiveClass.Logical.ArrayRepr);
 		private static readonly Variable logicalArrayOutput = new Variable("output", VariableKind.Output, MPrimitiveClass.Logical.ArrayRepr);
 		private FunctionLookup functionLookup;
@@ -44,6 +45,8 @@ namespace McCli
 		[TestMethod]
 		public void TestCopyAssignment()
 		{
+			// result = copy(x): result = clone(x)
+
 			var function = CompileFunction<Func<MArray<double>, MArray<double>>>(
 				new[] { doubleArrayInput }, doubleArrayOutput,
 				new Copy(doubleArrayInput, doubleArrayOutput));
@@ -53,6 +56,7 @@ namespace McCli
 
 			Assert.AreEqual(argument.Shape, result.Shape);
 			Assert.AreEqual(argument[0], result[0]);
+			Assert.AreNotSame(argument, result);
 		}
 
 		[TestMethod]
@@ -161,13 +165,12 @@ namespace McCli
 			var function = CompileFunction<Func<MArray<double>, MArray<double>>>(
 				new[] { doubleArrayInput }, doubleArrayOutput,
 				new Copy(doubleArrayInput, doubleArrayOutput),
-				new Literal(doubleArrayLocal, 100.0),
-				new StaticCall("lt", new[] { doubleArrayOutput, doubleArrayLocal }, logicalArrayLocal),
-				new While(logicalArrayLocal, new[]
-				{
+				new Literal(doubleArrayLocal1, 100.0),
+				new StaticCall("lt", new[] { doubleArrayOutput, doubleArrayLocal1 }, logicalArrayLocal),
+				new While(logicalArrayLocal, 
 					new StaticCall("times", new[] { doubleArrayOutput, doubleArrayInput }, doubleArrayOutput),
-					new StaticCall("lt", new[] { doubleArrayOutput, doubleArrayLocal }, logicalArrayLocal)
-				}));
+					new StaticCall("lt", new[] { doubleArrayOutput, doubleArrayLocal1 }, logicalArrayLocal)
+				));
 
 			Assert.AreEqual(125.0, function(MFullArray<double>.CreateScalar(5)).ToScalar());
 			Assert.AreEqual(100.0, function(MFullArray<double>.CreateScalar(10)).ToScalar());
@@ -203,14 +206,40 @@ namespace McCli
 			var function = CompileFunction<Func<MArray<double>>>(
 				null, doubleArrayOutput,
 				new Literal(doubleArrayOutput, 42.0),
-				new While(doubleArrayOutput, new Statement[]
-				{
+				new While(doubleArrayOutput, 
 					new While(doubleArrayOutput, new Jump(JumpKind.Break)),
 					new Literal(doubleArrayOutput, 666.0),
 					new Jump(JumpKind.Break)
-				}));
+				));
 
 			Assert.AreEqual(666.0, function().ToScalar());
+		}
+
+		[TestMethod]
+		public void TestForLoop()
+		{
+			// total = sum(values)
+			// total = 0;
+			// for value = values
+			// {
+			//   total = total + value
+			// }
+			// return total;
+
+			var valuesInput = doubleArrayInput;
+			var totalOutput = doubleArrayOutput;
+			var valueVariable = doubleArrayLocal1;
+
+			var function = CompileFunction<Func<MArray<double>, MArray<double>>>(
+				new[] { valuesInput }, totalOutput,
+				new Literal(totalOutput, 0.0),
+				new For(valueVariable, valuesInput,
+					new StaticCall("plus", new[] { totalOutput, valueVariable }, totalOutput)
+				));
+
+			Assert.AreEqual(0.0, function(MFullArray<double>.CreateEmpty()).ToScalar());
+			Assert.AreEqual(42.0, function(MFullArray<double>.CreateScalar(42.0)).ToScalar());
+			Assert.AreEqual(2.0, function(MFullArray<double>.CreateRowVector(1.0, 1.0)).ToScalar());
 		}
 	}
 }

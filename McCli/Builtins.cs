@@ -78,10 +78,8 @@ namespace McCli
 			return !value.Repr.Type.IsComplex;
 		}
 
-		public static bool ischar(char value) { return true; }
-		public static bool islogical(bool value) { return true; }
-
-		// TODO: is*
+		// TODO: When overloading is implemented,
+		// add concrete-type versions of the is*** type checking builtins above
 		#endregion
 
 		#region Execution Environment
@@ -325,6 +323,9 @@ namespace McCli
 			return result;
 		}
 		#endregion
+
+		// TODO: matrix multiplication, solves, transpose
+		// TODO: vector dot and cross products
 		#endregion
 
 		#region Comparison

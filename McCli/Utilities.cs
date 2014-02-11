@@ -78,6 +78,30 @@ namespace McCli
 			return new string(array.BackingArray, 0, shape.ColumnCount);
 		}
 
+		#region For Loops
+		public static int GetForSliceCount(MValue value)
+		{
+			Contract.Requires(value != null);
+			var shape = value.Shape;
+			var count = shape.Count;
+			return count == 0 ? 0 : (count / shape.RowCount);
+		}
+
+		public static MArray<TScalar> GetForSlice<[AnyArrayable] TScalar>(MArray<TScalar> array, int index)
+		{
+			Contract.Requires(array != null);
+
+			var arrayShape = array.Shape;
+			Contract.Assert(!arrayShape.IsHigherDimensional);
+
+			int baseArrayIndex = arrayShape.RowCount * index;
+			var slice = new MFullArray<TScalar>(new MArrayShape(arrayShape.RowCount, 1));
+			for (int i = 0; i < arrayShape.RowCount; ++i)
+				slice[i] = array[baseArrayIndex + i];
+			return slice;
+		}
+		#endregion
+
 		#region Subsref/Subsasgn
 		public static MArray<TScalar> Subsref<TScalar>(MArray<TScalar> array, MArray<double> indices)
 		{
