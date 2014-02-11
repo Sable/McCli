@@ -34,9 +34,14 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cli\IntegerOperandForm.cs" />
+    <Compile Include="Cli\LoadConstantOpcode.cs" />
+    <Compile Include="LocationReferenceKind.cs" />
+    <Compile Include="Cli\VariableReferenceOpcode.cs" />
+    <Compile Include="Cli\Opcode.cs" />
     <Compile Include="ILGeneratorExtensions.cs" />
-    <Compile Include="LocalKind.cs" />
-    <Compile Include="LocalLocation.cs" />
+    <Compile Include="VariableKind.cs" />
+    <Compile Include="VariableLocation.cs" />
     <Compile Include="ParameterDescriptor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StackEntryType.cs" />

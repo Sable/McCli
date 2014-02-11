@@ -6,10 +6,10 @@ using System.Text;
 namespace CliKit
 {
 	/// <summary>
-	/// Specifies the a kind of local as either a parameter or a local variable.
+	/// Specifies the a kind of variable as either a parameter or a local variable.
 	/// </summary>
 	[Serializable]
-	public enum LocalKind
+	public enum VariableKind
 	{
 		/// <summary>
 		/// Denotes a formal method parameter.
@@ -19,6 +19,6 @@ namespace CliKit
 		/// <summary>
 		/// Denotes a local variable used in the body of a method.
 		/// </summary>
-		Variable
+		Local
 	}
 }

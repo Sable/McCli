@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
+using VariableKind = McCli.Compilation.IR.VariableKind;
 
 namespace McCli.Compilation.CodeGen
 {
@@ -40,7 +41,7 @@ namespace McCli.Compilation.CodeGen
 		private readonly FunctionLookup functionLookup;
 		private readonly MethodInfo method;
 		private readonly ILGenerator ilGenerator;
-		private readonly Dictionary<Variable, LocalLocation> locals = new Dictionary<Variable, LocalLocation>();
+		private readonly Dictionary<Variable, VariableLocation> locals = new Dictionary<Variable, VariableLocation>();
 		private Label returnTargetLabel;
 		#endregion
 
@@ -62,7 +63,7 @@ namespace McCli.Compilation.CodeGen
 			for (int i = 0; i < function.Inputs.Length; ++i)
 			{
 				var input = function.Inputs[i];
-				locals.Add(input, LocalLocation.Parameter(i));
+				locals.Add(input, VariableLocation.Parameter(i));
 				inputDescriptorsBuilder[i] = new ParameterDescriptor(input.StaticRepr.CliType, ParameterAttributes.In, input.Name);
 			}
 
@@ -72,7 +73,7 @@ namespace McCli.Compilation.CodeGen
 			foreach (var output in function.Outputs)
 			{
 				var local = ilGenerator.DeclareLocal(output.StaticRepr.CliType);
-				locals.Add(output, LocalLocation.Variable(local.LocalIndex));
+				locals.Add(output, VariableLocation.Local(local.LocalIndex));
 			}
 		}
 		#endregion
@@ -181,9 +182,9 @@ namespace McCli.Compilation.CodeGen
 				string.Format("Conversion from {0} to {1}.", source, target));
 		}
 
-		private LocalLocation GetLocalLocation(Variable variable)
+		private VariableLocation GetLocalLocation(Variable variable)
 		{
-			LocalLocation location;
+			VariableLocation location;
 			if (!locals.TryGetValue(variable, out location))
 			{
 				var localBuilder = ilGenerator.DeclareLocal(variable.StaticRepr.CliType);
@@ -192,7 +193,7 @@ namespace McCli.Compilation.CodeGen
 				if (!(method is DynamicMethod))
 					localBuilder.SetLocalSymInfo(variable.Name);
 				
-				location = LocalLocation.Variable(localBuilder.LocalIndex);
+				location = VariableLocation.Local(localBuilder.LocalIndex);
 				locals.Add(variable, location);
 			}
 

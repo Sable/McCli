@@ -7,10 +7,10 @@ using System.Text;
 namespace CliKit
 {
 	/// <summary>
-	/// Identifies a local's location as either an indexed parameter or an indexed local variable.
+	/// Identifies a variable's location as either an indexed parameter or an indexed local variable.
 	/// </summary>
 	[Serializable]
-	public struct LocalLocation : IEquatable<LocalLocation>
+	public struct VariableLocation : IEquatable<VariableLocation>
 	{
 		#region Instance
 		#region Fields
@@ -19,7 +19,7 @@ namespace CliKit
 		#endregion
 
 		#region Constructors
-		public LocalLocation(LocalKind kind, int index)
+		public VariableLocation(VariableKind kind, int index)
 		{
 			Contract.Requires(index >= 0 && index < ushort.MaxValue);
 			
@@ -35,19 +35,19 @@ namespace CliKit
 		#endregion
 
 		#region Properties
-		public LocalKind Kind
+		public VariableKind Kind
 		{
-			get { return (LocalKind)kind; }
+			get { return (VariableKind)kind; }
 		}
 
 		public bool IsParameter
 		{
-			get { return Kind == LocalKind.Parameter; }
+			get { return Kind == VariableKind.Parameter; }
 		}
 
-		public bool IsVariable
+		public bool IsLocal
 		{
-			get { return Kind == LocalKind.Variable; }
+			get { return Kind == VariableKind.Local; }
 		}
 
 		public int Index
@@ -57,7 +57,7 @@ namespace CliKit
 		#endregion
 
 		#region Methods
-		public bool Equals(LocalLocation other)
+		public bool Equals(VariableLocation other)
 		{
 			return kind == other.kind && index == other.index;
 		}
@@ -69,35 +69,35 @@ namespace CliKit
 
 		public override bool Equals(object obj)
 		{
-			return obj is LocalLocation && Equals((LocalLocation)obj);
+			return obj is VariableLocation && Equals((VariableLocation)obj);
 		}
 		#endregion
 		#endregion
 
 		#region Static
 		#region Fields
-		public static readonly LocalLocation This = Parameter(0);
+		public static readonly VariableLocation This = Parameter(0);
 		#endregion
 
 		#region Methods
-		public static LocalLocation Parameter(int index)
+		public static VariableLocation Parameter(int index)
 		{
-			return new LocalLocation(LocalKind.Parameter, index);
+			return new VariableLocation(VariableKind.Parameter, index);
 		}
 
-		public static LocalLocation Variable(int index)
+		public static VariableLocation Local(int index)
 		{
-			return new LocalLocation(LocalKind.Variable, index);
+			return new VariableLocation(VariableKind.Local, index);
 		}
 		#endregion
 
 		#region Operators
-		public static bool operator==(LocalLocation lhs, LocalLocation rhs)
+		public static bool operator==(VariableLocation lhs, VariableLocation rhs)
 		{
 			return lhs.Equals(rhs);
 		}
 
-		public static bool operator !=(LocalLocation lhs, LocalLocation rhs)
+		public static bool operator !=(VariableLocation lhs, VariableLocation rhs)
 		{
 			return !lhs.Equals(rhs);
 		}
