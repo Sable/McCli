@@ -34,11 +34,17 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Cli\IntegerOperandForm.cs" />
-    <Compile Include="Cli\LoadConstantOpcode.cs" />
+    <Compile Include="Cil\BranchOpcode.cs" />
+    <Compile Include="Cil\CallKind.cs" />
+    <Compile Include="Cil\CallOpcode.cs" />
+    <Compile Include="Cil\Comparison.cs" />
+    <Compile Include="Cil\ComparisonOpcode.cs" />
+    <Compile Include="Cil\FieldReferenceOpcode.cs" />
+    <Compile Include="Cil\IntegerOperandForm.cs" />
+    <Compile Include="Cil\LoadConstantOpcode.cs" />
     <Compile Include="LocationReferenceKind.cs" />
-    <Compile Include="Cli\VariableReferenceOpcode.cs" />
-    <Compile Include="Cli\Opcode.cs" />
+    <Compile Include="Cil\VariableReferenceOpcode.cs" />
+    <Compile Include="Cil\Opcode.cs" />
     <Compile Include="ILGeneratorExtensions.cs" />
     <Compile Include="VariableKind.cs" />
     <Compile Include="VariableLocation.cs" />

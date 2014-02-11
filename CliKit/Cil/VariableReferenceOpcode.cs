@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Emit = System.Reflection.Emit;
 
-namespace CliKit.Cli
+namespace CliKit.Cil
 {
 	/// <summary>
 	/// An opcode that refers to a variable

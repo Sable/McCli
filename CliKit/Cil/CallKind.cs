@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CliKit.Cli
+namespace CliKit.Cil
 {
-	public enum IntegerOperandForm
+	public enum CallKind
 	{
-		Normal,
-		Short,
-		Constant
+		EarlyBound,
+		Virtual,
+		Indirect
 	}
 }

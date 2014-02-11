@@ -5,16 +5,31 @@ using System.Text;
 using System.Threading.Tasks;
 using Emit = System.Reflection.Emit;
 
-namespace CliKit.Cli
+namespace CliKit.Cil
 {
 	/// <summary>
 	/// Abstract base class for CLI opcodes.
 	/// Instances are immutable and reference comparable.
 	/// </summary>
-	public abstract class Opcode
+	public class Opcode
 	{
 		#region Fields
-		// TODO: Support ret, call, brtrue, brfalse, br, clt, add, callvirt, castclass
+		// TODO: Support ret, add, castclass
+		public static readonly BranchOpcode Br = new BranchOpcode(Emit.OpCodes.Br);
+		public static readonly BranchOpcode Br_S = new BranchOpcode(Emit.OpCodes.Br_S);
+		public static readonly BranchOpcode Brfalse = new BranchOpcode(Emit.OpCodes.Brfalse);
+		public static readonly BranchOpcode Brfalse_S = new BranchOpcode(Emit.OpCodes.Brfalse_S);
+		public static readonly BranchOpcode Brtrue = new BranchOpcode(Emit.OpCodes.Brtrue);
+		public static readonly BranchOpcode Brtrue_S = new BranchOpcode(Emit.OpCodes.Brtrue_S);
+		public static readonly CallOpcode Call = new CallOpcode(Emit.OpCodes.Call);
+		public static readonly CallOpcode Calli = new CallOpcode(Emit.OpCodes.Calli);
+		public static readonly CallOpcode Callvirt = new CallOpcode(Emit.OpCodes.Callvirt);
+		public static readonly Opcode Castclass = new Opcode(Emit.OpCodes.Castclass);
+		public static readonly ComparisonOpcode Ceq = new ComparisonOpcode(Emit.OpCodes.Ceq, Comparison.Equal);
+		public static readonly ComparisonOpcode Cgt = new ComparisonOpcode(Emit.OpCodes.Cgt, Comparison.GreaterThan);
+		public static readonly ComparisonOpcode Cgt_Un = new ComparisonOpcode(Emit.OpCodes.Cgt_Un, Comparison.GreaterThan_Unsigned);
+		public static readonly ComparisonOpcode Clt = new ComparisonOpcode(Emit.OpCodes.Clt, Comparison.LessThan);
+		public static readonly ComparisonOpcode Clt_Un = new ComparisonOpcode(Emit.OpCodes.Clt_Un, Comparison.LessThan_Unsigned);
 		public static readonly VariableReferenceOpcode Ldarg = new VariableReferenceOpcode(Emit.OpCodes.Ldarg);
 		public static readonly VariableReferenceOpcode Ldarg_0 = new VariableReferenceOpcode(Emit.OpCodes.Ldarg_0);
 		public static readonly VariableReferenceOpcode Ldarg_1 = new VariableReferenceOpcode(Emit.OpCodes.Ldarg_1);
@@ -38,6 +53,8 @@ namespace CliKit.Cli
 		public static readonly LoadConstantOpcode Ldc_I8 = new LoadConstantOpcode(Emit.OpCodes.Ldc_I8);
 		public static readonly LoadConstantOpcode Ldc_R4 = new LoadConstantOpcode(Emit.OpCodes.Ldc_R4);
 		public static readonly LoadConstantOpcode Ldc_R8 = new LoadConstantOpcode(Emit.OpCodes.Ldc_R8);
+		public static readonly FieldReferenceOpcode Ldfld = new FieldReferenceOpcode(Emit.OpCodes.Ldfld);
+		public static readonly FieldReferenceOpcode Ldflda = new FieldReferenceOpcode(Emit.OpCodes.Ldflda);
 		public static readonly VariableReferenceOpcode Ldloc = new VariableReferenceOpcode(Emit.OpCodes.Ldloc);
 		public static readonly VariableReferenceOpcode Ldloc_0 = new VariableReferenceOpcode(Emit.OpCodes.Ldloc_0);
 		public static readonly VariableReferenceOpcode Ldloc_1 = new VariableReferenceOpcode(Emit.OpCodes.Ldloc_1);
@@ -46,10 +63,15 @@ namespace CliKit.Cli
 		public static readonly VariableReferenceOpcode Ldloc_S = new VariableReferenceOpcode(Emit.OpCodes.Ldloc_S);
 		public static readonly VariableReferenceOpcode Ldloca = new VariableReferenceOpcode(Emit.OpCodes.Ldloca);
 		public static readonly VariableReferenceOpcode Ldloca_S = new VariableReferenceOpcode(Emit.OpCodes.Ldloca_S);
+		public static readonly FieldReferenceOpcode Ldsfld = new FieldReferenceOpcode(Emit.OpCodes.Ldsfld);
+		public static readonly FieldReferenceOpcode Ldsflda = new FieldReferenceOpcode(Emit.OpCodes.Ldsflda);
+		public static readonly Opcode Ret = new Opcode(Emit.OpCodes.Ret);
 		public static readonly VariableReferenceOpcode Starg = new VariableReferenceOpcode(Emit.OpCodes.Starg);
 		public static readonly VariableReferenceOpcode Starg_S = new VariableReferenceOpcode(Emit.OpCodes.Starg_S);
+		public static readonly FieldReferenceOpcode Stfld = new FieldReferenceOpcode(Emit.OpCodes.Stfld);
 		public static readonly VariableReferenceOpcode Stloc = new VariableReferenceOpcode(Emit.OpCodes.Stloc);
 		public static readonly VariableReferenceOpcode Stloc_S = new VariableReferenceOpcode(Emit.OpCodes.Stloc_S);
+		public static readonly FieldReferenceOpcode Stsfld = new FieldReferenceOpcode(Emit.OpCodes.Stsfld);
 
 		protected Emit.OpCode opcode;
 		#endregion

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Emit = System.Reflection.Emit;
 
-namespace CliKit.Cli
+namespace CliKit.Cil
 {
 	public sealed class LoadConstantOpcode : Opcode
 	{
