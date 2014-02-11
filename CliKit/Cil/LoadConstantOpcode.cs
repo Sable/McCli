@@ -36,6 +36,7 @@ namespace CliKit.Cil
 		{
 			get
 			{
+				if (opcode.OperandType == Emit.OperandType.InlineString) return StackEntryKind.ObjectReference;
 				if (opcode.Name[4] == 'R') return StackEntryKind.FloatingPoint;
 				return opcode.Name[5] == '4' ? StackEntryKind.Int32 : StackEntryKind.Int64;
 			}

@@ -15,6 +15,30 @@ namespace CliKit.Cil
 	{
 		#region Fields
 		// TODO: Support ret, add, castclass
+		public static readonly ArithmeticOpcode Add = new ArithmeticOpcode(Emit.OpCodes.Add, ArithmeticOperation.Addition);
+		public static readonly ArithmeticOpcode Add_Ovf = new ArithmeticOpcode(Emit.OpCodes.Add_Ovf, ArithmeticOperation.Addition_OverflowCheck);
+		public static readonly ArithmeticOpcode Add_Ovf_Un = new ArithmeticOpcode(Emit.OpCodes.Add_Ovf_Un, ArithmeticOperation.Addition_UnsignedWithOverflowCheck);
+		public static readonly ArithmeticOpcode And = new ArithmeticOpcode(Emit.OpCodes.And, ArithmeticOperation.BitwiseAnd);
+		public static readonly BranchOpcode Beq = new BranchOpcode(Emit.OpCodes.Beq, Comparison.Equal);
+		public static readonly BranchOpcode Beq_S = new BranchOpcode(Emit.OpCodes.Beq_S, Comparison.Equal);
+		public static readonly BranchOpcode Bge = new BranchOpcode(Emit.OpCodes.Bge, Comparison.GreaterThanOrEqual);
+		public static readonly BranchOpcode Bge_S = new BranchOpcode(Emit.OpCodes.Bge_S, Comparison.GreaterThanOrEqual);
+		public static readonly BranchOpcode Bge_Un = new BranchOpcode(Emit.OpCodes.Bge_Un, Comparison.GreaterThanOrEqual_Unsigned);
+		public static readonly BranchOpcode Bge_Un_S = new BranchOpcode(Emit.OpCodes.Bge_Un_S, Comparison.GreaterThanOrEqual_Unsigned);
+		public static readonly BranchOpcode Bgt = new BranchOpcode(Emit.OpCodes.Bgt, Comparison.GreaterThan);
+		public static readonly BranchOpcode Bgt_S = new BranchOpcode(Emit.OpCodes.Bgt_S, Comparison.GreaterThan);
+		public static readonly BranchOpcode Bgt_Un = new BranchOpcode(Emit.OpCodes.Bgt_Un, Comparison.GreaterThan_Unsigned);
+		public static readonly BranchOpcode Bgt_Un_S = new BranchOpcode(Emit.OpCodes.Bgt_Un_S, Comparison.GreaterThan_Unsigned);
+		public static readonly BranchOpcode Ble = new BranchOpcode(Emit.OpCodes.Ble, Comparison.LessThanOrEqual);
+		public static readonly BranchOpcode Ble_S = new BranchOpcode(Emit.OpCodes.Ble_S, Comparison.LessThanOrEqual);
+		public static readonly BranchOpcode Ble_Un = new BranchOpcode(Emit.OpCodes.Ble_Un, Comparison.LessThanOrEqual_Unsigned);
+		public static readonly BranchOpcode Ble_Un_S = new BranchOpcode(Emit.OpCodes.Ble_Un_S, Comparison.LessThanOrEqual_Unsigned);
+		public static readonly BranchOpcode Blt = new BranchOpcode(Emit.OpCodes.Blt, Comparison.LessThan);
+		public static readonly BranchOpcode Blt_S = new BranchOpcode(Emit.OpCodes.Blt_S, Comparison.LessThan);
+		public static readonly BranchOpcode Blt_Un = new BranchOpcode(Emit.OpCodes.Blt_Un, Comparison.LessThan_Unsigned);
+		public static readonly BranchOpcode Blt_Un_S = new BranchOpcode(Emit.OpCodes.Blt_Un_S, Comparison.LessThan_Unsigned);
+		public static readonly BranchOpcode Bne_Un = new BranchOpcode(Emit.OpCodes.Bne_Un, Comparison.NotEqual_Unsigned);
+		public static readonly BranchOpcode Bne_Un_S = new BranchOpcode(Emit.OpCodes.Bne_Un_S, Comparison.NotEqual_Unsigned);
 		public static readonly BranchOpcode Br = new BranchOpcode(Emit.OpCodes.Br);
 		public static readonly BranchOpcode Br_S = new BranchOpcode(Emit.OpCodes.Br_S);
 		public static readonly BranchOpcode Brfalse = new BranchOpcode(Emit.OpCodes.Brfalse);
@@ -30,6 +54,9 @@ namespace CliKit.Cil
 		public static readonly ComparisonOpcode Cgt_Un = new ComparisonOpcode(Emit.OpCodes.Cgt_Un, Comparison.GreaterThan_Unsigned);
 		public static readonly ComparisonOpcode Clt = new ComparisonOpcode(Emit.OpCodes.Clt, Comparison.LessThan);
 		public static readonly ComparisonOpcode Clt_Un = new ComparisonOpcode(Emit.OpCodes.Clt_Un, Comparison.LessThan_Unsigned);
+		public static readonly ArithmeticOpcode Div = new ArithmeticOpcode(Emit.OpCodes.Div, ArithmeticOperation.Division);
+		public static readonly ArithmeticOpcode Div_Un = new ArithmeticOpcode(Emit.OpCodes.Div_Un, ArithmeticOperation.Division_Unsigned);
+		public static readonly CallOpcode Jmp = new CallOpcode(Emit.OpCodes.Jmp);
 		public static readonly VariableReferenceOpcode Ldarg = new VariableReferenceOpcode(Emit.OpCodes.Ldarg);
 		public static readonly VariableReferenceOpcode Ldarg_0 = new VariableReferenceOpcode(Emit.OpCodes.Ldarg_0);
 		public static readonly VariableReferenceOpcode Ldarg_1 = new VariableReferenceOpcode(Emit.OpCodes.Ldarg_1);
@@ -65,13 +92,30 @@ namespace CliKit.Cil
 		public static readonly VariableReferenceOpcode Ldloca_S = new VariableReferenceOpcode(Emit.OpCodes.Ldloca_S);
 		public static readonly FieldReferenceOpcode Ldsfld = new FieldReferenceOpcode(Emit.OpCodes.Ldsfld);
 		public static readonly FieldReferenceOpcode Ldsflda = new FieldReferenceOpcode(Emit.OpCodes.Ldsflda);
+		public static readonly LoadConstantOpcode Ldstr = new LoadConstantOpcode(Emit.OpCodes.Ldstr);
+		public static readonly ArithmeticOpcode Mul = new ArithmeticOpcode(Emit.OpCodes.Mul, ArithmeticOperation.Multiplication);
+		public static readonly ArithmeticOpcode Mul_Ovf = new ArithmeticOpcode(Emit.OpCodes.Mul_Ovf, ArithmeticOperation.Multiplication_OverflowCheck);
+		public static readonly ArithmeticOpcode Mul_Ovf_Un = new ArithmeticOpcode(Emit.OpCodes.Mul_Ovf_Un, ArithmeticOperation.Multiplication_UnsignedWithOverflowCheck);
+		public static readonly ArithmeticOpcode Neg = new ArithmeticOpcode(Emit.OpCodes.Neg, ArithmeticOperation.Negate);
+		public static readonly CallOpcode Newobj = new CallOpcode(Emit.OpCodes.Newobj);
+		public static readonly ArithmeticOpcode Not = new ArithmeticOpcode(Emit.OpCodes.Not, ArithmeticOperation.BitwiseNot);
+		public static readonly ArithmeticOpcode Or = new ArithmeticOpcode(Emit.OpCodes.Or, ArithmeticOperation.BitwiseOr);
+		public static readonly ArithmeticOpcode Rem = new ArithmeticOpcode(Emit.OpCodes.Rem, ArithmeticOperation.Remainder);
+		public static readonly ArithmeticOpcode Rem_Un = new ArithmeticOpcode(Emit.OpCodes.Rem_Un, ArithmeticOperation.Remainder_Unsigned);
 		public static readonly Opcode Ret = new Opcode(Emit.OpCodes.Ret);
+		public static readonly ArithmeticOpcode Shl = new ArithmeticOpcode(Emit.OpCodes.Shl, ArithmeticOperation.BitShiftLeft);
+		public static readonly ArithmeticOpcode Shr = new ArithmeticOpcode(Emit.OpCodes.Shr, ArithmeticOperation.BitShiftRight);
+		public static readonly ArithmeticOpcode Shr_Un = new ArithmeticOpcode(Emit.OpCodes.Shr_Un, ArithmeticOperation.BitShiftRight_Unsigned);
 		public static readonly VariableReferenceOpcode Starg = new VariableReferenceOpcode(Emit.OpCodes.Starg);
 		public static readonly VariableReferenceOpcode Starg_S = new VariableReferenceOpcode(Emit.OpCodes.Starg_S);
 		public static readonly FieldReferenceOpcode Stfld = new FieldReferenceOpcode(Emit.OpCodes.Stfld);
 		public static readonly VariableReferenceOpcode Stloc = new VariableReferenceOpcode(Emit.OpCodes.Stloc);
 		public static readonly VariableReferenceOpcode Stloc_S = new VariableReferenceOpcode(Emit.OpCodes.Stloc_S);
 		public static readonly FieldReferenceOpcode Stsfld = new FieldReferenceOpcode(Emit.OpCodes.Stsfld);
+		public static readonly ArithmeticOpcode Sub = new ArithmeticOpcode(Emit.OpCodes.Sub, ArithmeticOperation.Subtraction);
+		public static readonly ArithmeticOpcode Sub_Ovf = new ArithmeticOpcode(Emit.OpCodes.Sub_Ovf, ArithmeticOperation.Subtraction_OverflowCheck);
+		public static readonly ArithmeticOpcode Sub_Ovf_Un = new ArithmeticOpcode(Emit.OpCodes.Sub_Ovf_Un, ArithmeticOperation.Subtraction_UnsignedWithOverflowCheck);
+		public static readonly ArithmeticOpcode Xor = new ArithmeticOpcode(Emit.OpCodes.Xor, ArithmeticOperation.BitwiseXor);
 
 		protected Emit.OpCode opcode;
 		#endregion

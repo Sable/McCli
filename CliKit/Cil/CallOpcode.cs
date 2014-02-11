@@ -23,6 +23,8 @@ namespace CliKit.Cil
 					case 0x28: return CallKind.EarlyBound;
 					case 0x29: return CallKind.Indirect;
 					case 0x6F: return CallKind.Virtual;
+					case 0x27: return CallKind.Jump;
+					case 0x73: return CallKind.Constructor;
 					default: throw new InvalidOperationException();
 				}
 			}

@@ -16,30 +16,42 @@ namespace CliKit.Cil
 		LessThanOrEqual,
 		LessThan,
 
-		GreaterThanOrEqual_Unsigned,
-		GreaterThanOrEqual_Unordered = GreaterThanOrEqual_Unsigned,
-		GreaterThan_Unsigned,
-		GreaterThan_Ordered = GreaterThan_Unsigned,
-		LessThanOrEqual_Unsigned,
-		LessThanOrEqual_Ordered = LessThanOrEqual_Unsigned,
-		LessThan_Unsigned,
-		LessThan_Unordered = LessThan_Unsigned,
+		OperationMask = 0xF,
+
+		UnsignedFlag = 0x10,
+		UnorderedFlag = UnsignedFlag,
+
+		NotEqual_Unsigned = NotEqual | UnsignedFlag,
+		NotEqual_Unordered = NotEqual | UnorderedFlag,
+		GreaterThanOrEqual_Unsigned = GreaterThanOrEqual | UnsignedFlag,
+		GreaterThanOrEqual_Unordered = GreaterThanOrEqual | UnorderedFlag,
+		GreaterThan_Unsigned = GreaterThan | UnsignedFlag,
+		GreaterThan_Unordered = GreaterThan | UnorderedFlag,
+		LessThanOrEqual_Unsigned = LessThanOrEqual | UnsignedFlag,
+		LessThanOrEqual_Unordered = LessThanOrEqual | UnorderedFlag,
+		LessThan_Unsigned = LessThan | UnsignedFlag,
+		LessThan_Unordered = LessThan | UnorderedFlag,
 	}
 
 	public static class ComparisonExtensions
 	{
 		public static bool HasCompareOpcode(this Comparison comparison)
 		{
-			return comparison == Comparison.Equal
-				|| comparison == Comparison.GreaterThan
-				|| comparison == Comparison.LessThan
-				|| comparison == Comparison.GreaterThan_Unsigned
-				|| comparison == Comparison.LessThan_Unsigned;
+			switch (comparison & Comparison.OperationMask)
+			{
+				case Comparison.Equal:
+				case Comparison.GreaterThan:
+				case Comparison.LessThan:
+					return true;
+
+				default:
+					return false;
+			}
 		}
 
 		public static bool IsUnsignedOrUnordered(this Comparison comparison)
 		{
-			return comparison >= Comparison.GreaterThan_Unsigned;
+			return (comparison & (Comparison.UnsignedFlag | Comparison.UnorderedFlag)) != 0;
 		}
 	}
 }

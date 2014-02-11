@@ -10,6 +10,8 @@ namespace CliKit.Cil
 	{
 		EarlyBound,
 		Virtual,
-		Indirect
+		Indirect,
+		Jump,
+		Constructor
 	}
 }
