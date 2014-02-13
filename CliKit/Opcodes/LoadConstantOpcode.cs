@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Emit = System.Reflection.Emit;
 
-namespace CliKit.Cil
+namespace CliKit
 {
 	public sealed class LoadConstantOpcode : Opcode
 	{
@@ -32,13 +32,29 @@ namespace CliKit.Cil
 		#endregion
 
 		#region Properties
-		public StackEntryKind Kind
+		public DataTypes ConstantDataType
 		{
 			get
 			{
-				if (opcode.OperandType == Emit.OperandType.InlineString) return StackEntryKind.ObjectReference;
-				if (opcode.Name[4] == 'R') return StackEntryKind.FloatingPoint;
-				return opcode.Name[5] == '4' ? StackEntryKind.Int32 : StackEntryKind.Int64;
+				switch (opcode.OperandType)
+				{
+					case Emit.OperandType.ShortInlineI: return DataTypes.Int8;
+					case Emit.OperandType.InlineI: return DataTypes.Int32;
+					case Emit.OperandType.InlineI8: return DataTypes.Int64;
+					case Emit.OperandType.InlineR: return DataTypes.Float64;
+					case Emit.OperandType.ShortInlineR: return DataTypes.Float32;
+					case Emit.OperandType.InlineString: return DataTypes.ObjectReference;
+					case Emit.OperandType.InlineNone: break;
+					default: throw new NotSupportedException();
+				}
+
+				// No operand, can be an int or null
+				switch (opcode.StackBehaviourPush)
+				{
+					case Emit.StackBehaviour.Pushi: return DataTypes.Int32;
+					case Emit.StackBehaviour.Push1: return DataTypes.ObjectReference; // Ldnull
+					default: throw new NotSupportedException();
+				}
 			}
 		}
 

@@ -34,26 +34,37 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Cil\ArithmeticOpcode.cs" />
-    <Compile Include="Cil\ArithmeticOperation.cs" />
-    <Compile Include="Cil\BranchOpcode.cs" />
-    <Compile Include="Cil\CallKind.cs" />
-    <Compile Include="Cil\CallOpcode.cs" />
-    <Compile Include="Cil\Comparison.cs" />
-    <Compile Include="Cil\ComparisonOpcode.cs" />
-    <Compile Include="Cil\FieldReferenceOpcode.cs" />
-    <Compile Include="Cil\IntegerOperandForm.cs" />
-    <Compile Include="Cil\LoadConstantOpcode.cs" />
+    <Compile Include="ArithmeticOperation.cs" />
+    <Compile Include="CallKind.cs" />
+    <Compile Include="Comparison.cs" />
+    <Compile Include="Opcodes\ConversionOpcode.cs" />
+    <Compile Include="RefletionEmitEnums.cs" />
+    <Compile Include="Instruction.cs" />
+    <Compile Include="IntegerOperandForm.cs" />
     <Compile Include="LocationReferenceKind.cs" />
-    <Compile Include="Cil\VariableReferenceOpcode.cs" />
-    <Compile Include="Cil\Opcode.cs" />
     <Compile Include="ILGeneratorExtensions.cs" />
+    <Compile Include="Numeric64.cs" />
+    <Compile Include="DataTypes.cs" />
+    <Compile Include="Opcode.cs" />
+    <Compile Include="Opcodes\ArithmeticOpcode.cs" />
+    <Compile Include="Opcodes\BranchOpcode.cs" />
+    <Compile Include="Opcodes\CallOpcode.cs" />
+    <Compile Include="Opcodes\ComparisonOpcode.cs" />
+    <Compile Include="Opcodes\ElementReferenceOpcode.cs" />
+    <Compile Include="Opcodes\FieldReferenceOpcode.cs" />
+    <Compile Include="Opcodes\IndirectReferenceOpcode.cs" />
+    <Compile Include="Opcodes\LoadConstantOpcode.cs" />
+    <Compile Include="Opcodes\VariableReferenceOpcode.cs" />
+    <Compile Include="Operand.cs" />
     <Compile Include="VariableKind.cs" />
     <Compile Include="VariableLocation.cs" />
     <Compile Include="ParameterDescriptor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="StackEntryType.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Remaining Opcodes.txt" />
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

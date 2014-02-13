@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Emit = System.Reflection.Emit;
 
-namespace CliKit.Cil
+namespace CliKit
 {
 	public sealed class FieldReferenceOpcode : Opcode
 	{
@@ -16,16 +16,7 @@ namespace CliKit.Cil
 		#region Properties
 		public LocationReferenceKind ReferenceKind
 		{
-			get
-			{
-				switch (opcode.StackBehaviourPush)
-				{
-					case Emit.StackBehaviour.Push1: return LocationReferenceKind.Load;
-					case Emit.StackBehaviour.Pushref: return LocationReferenceKind.LoadAddress;
-					case Emit.StackBehaviour.Push0: return LocationReferenceKind.Store;
-					default: throw new NotImplementedException();
-				}
-			}
+			get { return ReflectionEmitEnums.GetLocationReferenceKind(ref opcode); }
 		}
 
 		public bool Static

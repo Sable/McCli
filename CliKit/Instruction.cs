@@ -4,14 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CliKit.Cil
+namespace CliKit
 {
-	public enum CallKind
+	public struct Instruction
 	{
-		EarlyBound,
-		Virtual,
-		Indirect,
-		Jump,
-		Constructor
+		#region Fields
+		private readonly Opcode opcode;
+		#endregion
 	}
 }

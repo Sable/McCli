@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Emit = System.Reflection.Emit;
 
-namespace CliKit.Cil
+namespace CliKit
 {
 	public sealed class ComparisonOpcode : Opcode
 	{

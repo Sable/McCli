@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Emit = System.Reflection.Emit;
 
-namespace CliKit.Cil
+namespace CliKit
 {
 	/// <summary>
 	/// An opcode that refers to a variable
@@ -24,16 +24,7 @@ namespace CliKit.Cil
 
 		public LocationReferenceKind ReferenceKind
 		{
-			get
-			{
-				switch (opcode.StackBehaviourPush)
-				{
-					case Emit.StackBehaviour.Push1: return LocationReferenceKind.Load;
-					case Emit.StackBehaviour.Push0: return LocationReferenceKind.Store;
-					case Emit.StackBehaviour.Pushref: return LocationReferenceKind.LoadAddress;
-					default: throw new NotImplementedException();
-				}
-			}
+			get { return ReflectionEmitEnums.GetLocationReferenceKind(ref opcode); }
 		}
 
 		public IntegerOperandForm OperandForm

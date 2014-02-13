@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace CliKit.Cil
+namespace CliKit
 {
 	[Serializable]
 	public enum Comparison
