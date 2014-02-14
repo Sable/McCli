@@ -13,7 +13,7 @@ namespace CliKit
 	public sealed class ElementReferenceOpcode : Opcode
 	{
 		#region Fields
-		private readonly DataTypes dataType;
+		private readonly DataType? dataType;
 		#endregion
 
 		#region Constructors
@@ -22,7 +22,7 @@ namespace CliKit
 			string name = opcode.Name;
 			int dotIndex = name.LastIndexOf('.');
 			if (dotIndex >= 0)
-				dataType = DataTypesEnum.TryParseNameInOpcode(name.Substring(dotIndex + 1));
+				dataType = DataTypeEnum.TryParseNameInOpcode(name.Substring(dotIndex + 1));
 		}
 		#endregion
 
@@ -36,10 +36,9 @@ namespace CliKit
 		}
 
 		/// <summary>
-		/// Gets the CLI data type specified by this opcode.
-		/// <see cref="DataTypes.None"/> indicate a dependence on the array type.
+		/// Gets the CLI data type specified by this opcode, if any.
 		/// </summary>
-		public DataTypes DataType
+		public DataType? DataType
 		{
 			get { return dataType; }
 		}

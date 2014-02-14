@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection.Emit;
 using System.Text;
@@ -221,14 +222,116 @@ namespace CliKit
 			get { return opcode.Value; }
 		}
 
-		public byte FirstCodeByte
+		/// <summary>
+		/// Gets the first byte of this opcode's value.
+		/// </summary>
+		public byte FirstByte
 		{
 			get { return unchecked((byte)Code); }
 		}
 
-		public bool HasTwoCodeBytes
+		/// <summary>
+		/// Gets the second byte of this opcode's value.
+		/// </summary>
+		public byte SecondByte
 		{
-			get { return IsFirstOfTwoBytes(FirstCodeByte); }
+			get
+			{
+				Contract.Requires(HasTwoBytes);
+				return unchecked((byte)(Code >> 8));
+			}
+		}
+
+		/// <summary>
+		/// Gets a value indicating if this opcode's value is encoded on two bytes.
+		/// </summary>
+		public bool HasTwoBytes
+		{
+			get { return IsFirstOfTwoBytes(FirstByte); }
+		}
+
+		/// <summary>
+		/// Gets the number of values popped from the evaluation stack by this opcode,
+		/// or <c>null</c> if this opcode pops a variable number of values.
+		/// </summary>
+		public int? PopCount
+		{
+			get { return -ReflectionEmitEnums.GetStackDelta(opcode.StackBehaviourPop); }
+		}
+
+		/// <summary>
+		/// Gets the number of values pushed on the evaluation stack by this opcode,
+		/// or <c>null</c> if this opcode pushes a variable number of values.
+		/// </summary>
+		public int? PushCount
+		{
+			get { return ReflectionEmitEnums.GetStackDelta(opcode.StackBehaviourPush); }
+		}
+
+		/// <summary>
+		/// Gets the change in evaluation stack depth incurred by the execution of an instruction
+		/// with this opcode, or <c>null</c> if this opcode pushes or pops a variable number of values.
+		/// </summary>
+		public int? StackDepthDelta
+		{
+			get
+			{
+				return ReflectionEmitEnums.GetStackDelta(opcode.StackBehaviourPop)
+					+ ReflectionEmitEnums.GetStackDelta(opcode.StackBehaviourPush);
+			}
+		}
+
+		/// <summary>
+		/// Gets the size in bytes of any inline operand this opcode may have.
+		/// Returns <c>null</c> if the opcode has a variable-sized inline operand.
+		/// </summary>
+		public int? OperandSizeInBytes
+		{
+			get
+			{
+				switch (opcode.OperandType)
+				{
+					case OperandType.InlineNone:
+						return 0;
+
+					case OperandType.ShortInlineBrTarget:
+					case OperandType.ShortInlineI:
+					case OperandType.ShortInlineVar:
+						return 1;
+
+					case OperandType.InlineVar:
+						return 2;
+
+					case OperandType.InlineI:
+					case OperandType.ShortInlineR:
+					case OperandType.InlineTok:
+					case OperandType.InlineSig:
+					case OperandType.InlineString:
+					case OperandType.InlineType:
+					case OperandType.InlineField:
+					case OperandType.InlineMethod:
+					case OperandType.InlineBrTarget:
+						return 4;
+
+					case OperandType.InlineI8:
+					case OperandType.InlineR:
+						return 8;
+
+					case OperandType.InlineSwitch:
+						return null; // Variable-length jump table
+
+					default: throw new NotSupportedException();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Gets the size in bytes of an instruction with this opcode,
+		/// or <c>null</c> if instructions are variable-sized.
+		/// </summary>
+		public int? InstructionSizeInBytes
+		{
+			get { return (HasTwoBytes ? 2 : 1) + OperandSizeInBytes; }
 		}
 		#endregion
 

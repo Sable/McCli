@@ -7,6 +7,9 @@ using Emit = System.Reflection.Emit;
 
 namespace CliKit
 {
+	/// <summary>
+	/// Represents opcode which reference a field (load, load address, store).
+	/// </summary>
 	public sealed class FieldReferenceOpcode : Opcode
 	{
 		#region Constructors
@@ -19,9 +22,9 @@ namespace CliKit
 			get { return ReflectionEmitEnums.GetLocationReferenceKind(ref opcode); }
 		}
 
-		public bool Static
+		public bool IsStatic
 		{
-			get { return opcode.Name[2] == 's'; }
+			get { return opcode.StackBehaviourPop == Emit.StackBehaviour.Pop0; }
 		}
 		#endregion
 	}

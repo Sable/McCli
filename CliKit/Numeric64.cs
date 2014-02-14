@@ -16,5 +16,20 @@ namespace CliKit
 		public ulong UInt64;
 		[FieldOffset(0)]
 		public double Double;
+
+		public static implicit operator Numeric64(long value)
+		{
+			return new Numeric64 { Int64 = value };
+		}
+
+		public static implicit operator Numeric64(ulong value)
+		{
+			return new Numeric64 { UInt64 = value };
+		}
+
+		public static implicit operator Numeric64(double value)
+		{
+			return new Numeric64 { Double = value };
+		}
 	}
 }

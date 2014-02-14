@@ -32,18 +32,18 @@ namespace CliKit
 		#endregion
 
 		#region Properties
-		public DataTypes ConstantDataType
+		public DataType ConstantDataType
 		{
 			get
 			{
 				switch (opcode.OperandType)
 				{
-					case Emit.OperandType.ShortInlineI: return DataTypes.Int8;
-					case Emit.OperandType.InlineI: return DataTypes.Int32;
-					case Emit.OperandType.InlineI8: return DataTypes.Int64;
-					case Emit.OperandType.InlineR: return DataTypes.Float64;
-					case Emit.OperandType.ShortInlineR: return DataTypes.Float32;
-					case Emit.OperandType.InlineString: return DataTypes.ObjectReference;
+					case Emit.OperandType.ShortInlineI: return DataType.Int8;
+					case Emit.OperandType.InlineI: return DataType.Int32;
+					case Emit.OperandType.InlineI8: return DataType.Int64;
+					case Emit.OperandType.InlineR: return DataType.Float64;
+					case Emit.OperandType.ShortInlineR: return DataType.Float32;
+					case Emit.OperandType.InlineString: return DataType.ObjectReference;
 					case Emit.OperandType.InlineNone: break;
 					default: throw new NotSupportedException();
 				}
@@ -51,8 +51,8 @@ namespace CliKit
 				// No operand, can be an int or null
 				switch (opcode.StackBehaviourPush)
 				{
-					case Emit.StackBehaviour.Pushi: return DataTypes.Int32;
-					case Emit.StackBehaviour.Push1: return DataTypes.ObjectReference; // Ldnull
+					case Emit.StackBehaviour.Pushi: return DataType.Int32;
+					case Emit.StackBehaviour.Push1: return DataType.ObjectReference; // Ldnull
 					default: throw new NotSupportedException();
 				}
 			}

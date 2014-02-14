@@ -13,7 +13,7 @@ namespace CliKit
 	public sealed class ConversionOpcode : Opcode
 	{
 		#region Fields
-		private readonly DataTypes targetDataType;
+		private readonly DataType targetDataType;
 		private readonly bool isSourceUnsigned;
 		private readonly bool isOverflowChecked;
 		#endregion
@@ -28,12 +28,12 @@ namespace CliKit
 		#endregion
 
 		#region Properties
-		public DataTypes ValidSourceDataTypes
+		public DataType ValidSourceDataTypes
 		{
 			get { throw new NotImplementedException(); }
 		}
 
-		public DataTypes TargetDataType
+		public DataType TargetDataType
 		{
 			get { throw new NotImplementedException(); }
 		}
