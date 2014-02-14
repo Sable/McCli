@@ -61,16 +61,26 @@ namespace CliKit
 		private const int unsignedSizedIntegerMask = (1 << (int)DataType.UInt8) | (1 << (int)DataType.UInt16) | (1 << (int)DataType.UInt32) | (1 << (int)DataType.UInt64);
 		private const int signedIntegerMask = signedSizedIntegerMask | (1 << (int)DataType.NativeInt);
 		private const int unsignedIntegerMask = unsignedSizedIntegerMask | (1 << (int)DataType.NativeUInt);
+		private const int sizedIntegerMask = signedSizedIntegerMask | unsignedSizedIntegerMask;
+		private const int nativeIntegerMask = (1 << (int)DataType.NativeInt) | (1 << (int)DataType.NativeUInt);
 		private const int integerMask = signedIntegerMask | unsignedIntegerMask;
 		private const int shortIntegerMask = (1 << (int)DataType.Int8) | (1 << (int)DataType.UInt8) | (1 << (int)DataType.Int16) | (1 << (int)DataType.UInt16);
-		private const int becomesInt32OnStackMask = shortIntegerMask | (1 << (int)DataType.Int32) | (1 << (int)DataType.UInt32);
-		private const int floatMask = (1 << (int)DataType.Float32) | (1 << (int)DataType.Float64) | (1 << (int)DataType.NativeFloat);
-		private const int nativeNumericMask = (1 << (int)DataType.NativeInt) | (1 << (int)DataType.NativeUInt) | (1 << (int)DataType.NativeFloat);
+		private const int integer32Mask = (1 << (int)DataType.Int32) | (1 << (int)DataType.UInt32);
+		private const int integer64Mask = (1 << (int)DataType.Int64) | (1 << (int)DataType.UInt64);
+		private const int becomesInt32OnStackMask = shortIntegerMask | integer32Mask;
+		private const int nativeOr64BitIntegerMask = nativeIntegerMask | integer64Mask;
+		private const int sizedFloatMask = (1 << (int)DataType.Float32) | (1 << (int)DataType.Float64);
+		private const int floatMask = sizedFloatMask | (1 << (int)DataType.NativeFloat);
+		private const int numeric32Mask = integer32Mask | (1 << (int)DataType.Float32);
+		private const int numeric64Mask = integer64Mask | (1 << (int)DataType.Float64);
+		private const int nativeNumericMask = nativeIntegerMask | (1 << (int)DataType.NativeFloat);
 		private const int numericMask = integerMask | floatMask;
 		private const int managedPointerMask = (1 << (int)DataType.NormalMutabilityManagedPointer) | (1 << (int)DataType.ControlledMutabilityManagedPointer);
-		private const int stackTypeMask = (1 << (int)DataType.Int32) | (1 << (int)DataType.Int64)
-			| (1 << (int)DataType.NativeInt) | (1 << (int)DataType.NativeFloat)
-			| (1 << (int)DataType.ObjectReference) | managedPointerMask | (1 << (int)DataType.ValueType);
+		private const int referenceOrManagedPointerMask = (1 << (int)DataType.ObjectReference) | managedPointerMask;
+		private const int numericStackTypeMask = (1 << (int)DataType.Int32) | (1 << (int)DataType.Int64)
+			| (1 << (int)DataType.NativeInt) | (1 << (int)DataType.NativeFloat);
+		private const int stackTypeExceptValueTypeMask = numericStackTypeMask | referenceOrManagedPointerMask;
+		private const int stackTypeMask = stackTypeExceptValueTypeMask | (1 << (int)DataType.ValueType);
 
 		private static bool MatchesMask(DataType type, int mask)
 		{
@@ -101,11 +111,35 @@ namespace CliKit
 		[Pure]
 		public static bool IsUnsignedInteger(this DataType type) { return MatchesMask(type, unsignedIntegerMask); }
 		[Pure]
+		public static bool IsShortInteger(this DataType type) { return MatchesMask(type, shortIntegerMask); }
+		[Pure]
+		public static bool IsInteger32(this DataType type) { return MatchesMask(type, integer32Mask); }
+		[Pure]
+		public static bool IsInteger64(this DataType type) { return MatchesMask(type, integer64Mask); }
+		[Pure]
+		public static bool IsNativeInteger(this DataType type) { return MatchesMask(type, nativeIntegerMask); }
+		[Pure]
+		public static bool IsNativeOr64BitsInteger(this DataType type) { return MatchesMask(type, nativeOr64BitIntegerMask); }
+		[Pure]
 		public static bool IsFloat(this DataType type) { return MatchesMask(type, floatMask); }
 		[Pure]
 		public static bool IsNumeric(this DataType type) { return MatchesMask(type, numericMask); }
 		[Pure]
+		public static bool IsNumeric32(this DataType type) { return MatchesMask(type, numeric32Mask); }
+		[Pure]
+		public static bool IsNumeric64(this DataType type) { return MatchesMask(type, numeric64Mask); }
+		[Pure]
+		public static bool IsNativeNumeric(this DataType type) { return MatchesMask(type, nativeNumericMask); }
+		[Pure]
 		public static bool IsManagedPointer(this DataType type) { return MatchesMask(type, managedPointerMask); }
+		[Pure]
+		public static bool IsReferenceOrManagedPointer(this DataType type) { return MatchesMask(type, referenceOrManagedPointerMask); }
+		[Pure]
+		public static bool IsNumericStackType(this DataType type) { return MatchesMask(type, numericStackTypeMask); }
+		[Pure]
+		public static bool IsStackType(this DataType type) { return MatchesMask(type, stackTypeMask); }
+		[Pure]
+		public static bool IsStackTypeExceptValueType(this DataType type) { return MatchesMask(type, stackTypeExceptValueTypeMask); }
 
 		[Pure]
 		public static DataType ToStackType(this DataType type)

@@ -25,20 +25,6 @@ namespace CliKit
 		#endregion
 
 		#region Properties
-		public int PopCount
-		{
-			get
-			{
-				switch (opcode.StackBehaviourPop)
-				{
-					case Emit.StackBehaviour.Pop0: return 0;
-					case Emit.StackBehaviour.Pop1: return 1;
-					case Emit.StackBehaviour.Pop1_pop1: return 2;
-					default: throw new NotImplementedException();
-				}
-			}
-		}
-
 		public bool IsUnconditional
 		{
 			get { return opcode.StackBehaviourPop == Emit.StackBehaviour.Pop0; }

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Emit = System.Reflection.Emit;
 
@@ -13,6 +15,8 @@ namespace CliKit
 	public sealed class ConversionOpcode : Opcode
 	{
 		#region Fields
+		private static readonly Regex nameRegex = new Regex("conv(.ovf)?.([a-z]+)(.un)?", RegexOptions.CultureInvariant);
+
 		private readonly DataType targetDataType;
 		private readonly bool isSourceUnsigned;
 		private readonly bool isOverflowChecked;
@@ -21,21 +25,17 @@ namespace CliKit
 		#region Constructors
 		internal ConversionOpcode(Emit.OpCode opcode) : base(opcode)
 		{
-			string opcodeName = opcode.Name;
-			isSourceUnsigned = opcodeName.EndsWith(".un");
-			isOverflowChecked = opcodeName.StartsWith("conv.ovf.");
+			var match = nameRegex.Match(opcode.Name);
+			targetDataType = DataTypeEnum.TryParseNameInOpcode(match.Groups[2].Value);
+			isSourceUnsigned = match.Groups[3].Success;
+			isOverflowChecked = match.Groups[1].Success;
 		}
 		#endregion
 
 		#region Properties
-		public DataType ValidSourceDataTypes
-		{
-			get { throw new NotImplementedException(); }
-		}
-
 		public DataType TargetDataType
 		{
-			get { throw new NotImplementedException(); }
+			get { return targetDataType; }
 		}
 
 		public bool IsSourceUnsigned
@@ -46,6 +46,26 @@ namespace CliKit
 		public bool IsOverflowChecked
 		{
 			get { return isOverflowChecked; }
+		}
+		#endregion
+
+		#region Methods
+		public bool IsValidSourceDataType(DataType source, out bool verifiable)
+		{
+			if (source.IsNumericStackType())
+			{
+				verifiable = true;
+				return true;
+			}
+
+			if (source.IsReferenceOrManagedPointer() && targetDataType.IsNativeOr64BitsInteger())
+			{
+				verifiable = false; // Stops GC tracking
+				return true;
+			}
+
+			verifiable = false;
+			return false;
 		}
 		#endregion
 	}

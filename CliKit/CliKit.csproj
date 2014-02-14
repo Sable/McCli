@@ -37,6 +37,10 @@
     <Compile Include="ArithmeticOperation.cs" />
     <Compile Include="CallKind.cs" />
     <Compile Include="Comparison.cs" />
+    <Compile Include="Conversions.cs" />
+    <Compile Include="MetadataToken.cs" />
+    <Compile Include="MetadataTokenKind.cs" />
+    <Compile Include="Conversion.cs" />
     <Compile Include="Opcodes\ConversionOpcode.cs" />
     <Compile Include="ReflectionEmitEnums.cs" />
     <Compile Include="Instruction.cs" />
