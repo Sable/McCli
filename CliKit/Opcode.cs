@@ -14,6 +14,166 @@ namespace CliKit
 	/// </summary>
 	public class Opcode
 	{
+		#region Instance
+		#region Fields
+		protected OpCode opcode;
+		#endregion
+
+		#region Constructors
+		internal Opcode(OpCode opcode)
+		{
+			this.opcode = opcode;
+		}
+		#endregion
+
+		#region Properties
+		/// <summary>
+		/// Gets the name of this opcode.
+		/// </summary>
+		public string Name
+		{
+			get { return opcode.Name; }
+		}
+
+		/// <summary>
+		/// Gets the code of this opcode.
+		/// </summary>
+		public short Code
+		{
+			get { return opcode.Value; }
+		}
+
+		/// <summary>
+		/// Gets the first byte of this opcode's value.
+		/// </summary>
+		public byte FirstByte
+		{
+			get { return unchecked((byte)Code); }
+		}
+
+		/// <summary>
+		/// Gets the second byte of this opcode's value.
+		/// </summary>
+		public byte SecondByte
+		{
+			get
+			{
+				Contract.Requires(HasTwoBytes);
+				return unchecked((byte)(Code >> 8));
+			}
+		}
+
+		/// <summary>
+		/// Gets a value indicating if this opcode's value is encoded on two bytes.
+		/// </summary>
+		public bool HasTwoBytes
+		{
+			get { return IsFirstOfTwoBytes(FirstByte); }
+		}
+
+		/// <summary>
+		/// Gets the number of values popped from the evaluation stack by this opcode,
+		/// or <c>null</c> if this opcode pops a variable number of values.
+		/// </summary>
+		public int? PopCount
+		{
+			get { return -ReflectionEmitEnums.GetStackDelta(opcode.StackBehaviourPop); }
+		}
+
+		/// <summary>
+		/// Gets the number of values pushed on the evaluation stack by this opcode,
+		/// or <c>null</c> if this opcode pushes a variable number of values.
+		/// </summary>
+		public int? PushCount
+		{
+			get { return ReflectionEmitEnums.GetStackDelta(opcode.StackBehaviourPush); }
+		}
+
+		/// <summary>
+		/// Gets the change in evaluation stack depth incurred by the execution of an instruction
+		/// with this opcode, or <c>null</c> if this opcode pushes or pops a variable number of values.
+		/// </summary>
+		public int? StackDepthDelta
+		{
+			get
+			{
+				return ReflectionEmitEnums.GetStackDelta(opcode.StackBehaviourPop)
+					+ ReflectionEmitEnums.GetStackDelta(opcode.StackBehaviourPush);
+			}
+		}
+
+		/// <summary>
+		/// Gets the size in bytes of any inline operand this opcode may have.
+		/// Returns <c>null</c> if the opcode has a variable-sized inline operand.
+		/// </summary>
+		public int? OperandSizeInBytes
+		{
+			get
+			{
+				switch (opcode.OperandType)
+				{
+					case OperandType.InlineNone:
+						return 0;
+
+					case OperandType.ShortInlineBrTarget:
+					case OperandType.ShortInlineI:
+					case OperandType.ShortInlineVar:
+						return 1;
+
+					case OperandType.InlineVar:
+						return 2;
+
+					case OperandType.InlineI:
+					case OperandType.ShortInlineR:
+					case OperandType.InlineTok:
+					case OperandType.InlineSig:
+					case OperandType.InlineString:
+					case OperandType.InlineType:
+					case OperandType.InlineField:
+					case OperandType.InlineMethod:
+					case OperandType.InlineBrTarget:
+						return 4;
+
+					case OperandType.InlineI8:
+					case OperandType.InlineR:
+						return 8;
+
+					case OperandType.InlineSwitch:
+						return null; // Variable-length jump table
+
+					default: throw new NotSupportedException();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Gets the size in bytes of an instruction with this opcode,
+		/// or <c>null</c> if instructions are variable-sized.
+		/// </summary>
+		public int? InstructionSizeInBytes
+		{
+			get { return (HasTwoBytes ? 2 : 1) + OperandSizeInBytes; }
+		}
+		#endregion
+
+		#region Methods
+		/// <summary>
+		/// Gets the <see cref="System.Reflection.OpCode"/> for this opcode.
+		/// </summary>
+		/// <param name="opCode">The BCL opcode.</param>
+		public void GetReflectionEmitOpCode(out OpCode opCode)
+		{
+			opCode = this.opcode;
+		}
+
+		public override string ToString()
+		{
+			return Name;
+		}
+		#endregion
+		#endregion
+
+		#region Static
 		#region Fields
 		public static readonly ArithmeticOpcode Add = new ArithmeticOpcode(OpCodes.Add, ArithmeticOperation.Addition);
 		public static readonly ArithmeticOpcode Add_Ovf = new ArithmeticOpcode(OpCodes.Add_Ovf, ArithmeticOperation.Addition_OverflowCheck);
@@ -194,166 +354,17 @@ namespace CliKit
 		public static readonly ArithmeticOpcode Sub_Ovf = new ArithmeticOpcode(OpCodes.Sub_Ovf, ArithmeticOperation.Subtraction_OverflowCheck);
 		public static readonly ArithmeticOpcode Sub_Ovf_Un = new ArithmeticOpcode(OpCodes.Sub_Ovf_Un, ArithmeticOperation.Subtraction_UnsignedWithOverflowCheck);
 		public static readonly ArithmeticOpcode Xor = new ArithmeticOpcode(OpCodes.Xor, ArithmeticOperation.BitwiseXor);
-
-		protected OpCode opcode;
-		#endregion
-
-		#region Constructors
-		internal Opcode(OpCode opcode)
-		{
-			this.opcode = opcode;
-		}
-		#endregion
-
-		#region Properties
-		/// <summary>
-		/// Gets the name of this opcode.
-		/// </summary>
-		public string Name
-		{
-			get { return opcode.Name; }
-		}
-
-		/// <summary>
-		/// Gets the code of this opcode.
-		/// </summary>
-		public short Code
-		{
-			get { return opcode.Value; }
-		}
-
-		/// <summary>
-		/// Gets the first byte of this opcode's value.
-		/// </summary>
-		public byte FirstByte
-		{
-			get { return unchecked((byte)Code); }
-		}
-
-		/// <summary>
-		/// Gets the second byte of this opcode's value.
-		/// </summary>
-		public byte SecondByte
-		{
-			get
-			{
-				Contract.Requires(HasTwoBytes);
-				return unchecked((byte)(Code >> 8));
-			}
-		}
-
-		/// <summary>
-		/// Gets a value indicating if this opcode's value is encoded on two bytes.
-		/// </summary>
-		public bool HasTwoBytes
-		{
-			get { return IsFirstOfTwoBytes(FirstByte); }
-		}
-
-		/// <summary>
-		/// Gets the number of values popped from the evaluation stack by this opcode,
-		/// or <c>null</c> if this opcode pops a variable number of values.
-		/// </summary>
-		public int? PopCount
-		{
-			get { return -ReflectionEmitEnums.GetStackDelta(opcode.StackBehaviourPop); }
-		}
-
-		/// <summary>
-		/// Gets the number of values pushed on the evaluation stack by this opcode,
-		/// or <c>null</c> if this opcode pushes a variable number of values.
-		/// </summary>
-		public int? PushCount
-		{
-			get { return ReflectionEmitEnums.GetStackDelta(opcode.StackBehaviourPush); }
-		}
-
-		/// <summary>
-		/// Gets the change in evaluation stack depth incurred by the execution of an instruction
-		/// with this opcode, or <c>null</c> if this opcode pushes or pops a variable number of values.
-		/// </summary>
-		public int? StackDepthDelta
-		{
-			get
-			{
-				return ReflectionEmitEnums.GetStackDelta(opcode.StackBehaviourPop)
-					+ ReflectionEmitEnums.GetStackDelta(opcode.StackBehaviourPush);
-			}
-		}
-
-		/// <summary>
-		/// Gets the size in bytes of any inline operand this opcode may have.
-		/// Returns <c>null</c> if the opcode has a variable-sized inline operand.
-		/// </summary>
-		public int? OperandSizeInBytes
-		{
-			get
-			{
-				switch (opcode.OperandType)
-				{
-					case OperandType.InlineNone:
-						return 0;
-
-					case OperandType.ShortInlineBrTarget:
-					case OperandType.ShortInlineI:
-					case OperandType.ShortInlineVar:
-						return 1;
-
-					case OperandType.InlineVar:
-						return 2;
-
-					case OperandType.InlineI:
-					case OperandType.ShortInlineR:
-					case OperandType.InlineTok:
-					case OperandType.InlineSig:
-					case OperandType.InlineString:
-					case OperandType.InlineType:
-					case OperandType.InlineField:
-					case OperandType.InlineMethod:
-					case OperandType.InlineBrTarget:
-						return 4;
-
-					case OperandType.InlineI8:
-					case OperandType.InlineR:
-						return 8;
-
-					case OperandType.InlineSwitch:
-						return null; // Variable-length jump table
-
-					default: throw new NotSupportedException();
-				}
-			}
-		}
-
-		/// <summary>
-		/// Gets the size in bytes of an instruction with this opcode,
-		/// or <c>null</c> if instructions are variable-sized.
-		/// </summary>
-		public int? InstructionSizeInBytes
-		{
-			get { return (HasTwoBytes ? 2 : 1) + OperandSizeInBytes; }
-		}
 		#endregion
 
 		#region Methods
-		/// <summary>
-		/// Gets the <see cref="System.Reflection.OpCode"/> for this opcode.
-		/// </summary>
-		/// <param name="opCode">The BCL opcode.</param>
-		public void GetReflectionEmitOpCode(out OpCode opCode)
-		{
-			opCode = this.opcode;
-		}
-
-		public override string ToString()
-		{
-			return Name;
-		}
-
 		public static bool IsFirstOfTwoBytes(byte @byte)
 		{
 			return @byte == 0xFE;
 		}
+
+		#region Factory Methods
+		#endregion
+		#endregion
 		#endregion
 	}
 }

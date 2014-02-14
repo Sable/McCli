@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace CliKit
@@ -25,12 +26,6 @@ namespace CliKit
 			
 			this.kind = unchecked((ushort)kind);
 			this.index = unchecked((ushort)index);
-
-			uint foo = 0xFFFFFFFD;
-			uint bar = 4;
-			uint frob = foo * bar;
-
-			Console.WriteLine(frob);
 		}
 		#endregion
 
