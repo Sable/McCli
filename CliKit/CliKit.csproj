@@ -38,7 +38,7 @@
     <Compile Include="CallKind.cs" />
     <Compile Include="Comparison.cs" />
     <Compile Include="Opcodes\ConversionOpcode.cs" />
-    <Compile Include="RefletionEmitEnums.cs" />
+    <Compile Include="ReflectionEmitEnums.cs" />
     <Compile Include="Instruction.cs" />
     <Compile Include="IntegerOperandForm.cs" />
     <Compile Include="LocationReferenceKind.cs" />
