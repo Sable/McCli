@@ -38,6 +38,7 @@
     <Compile Include="CallKind.cs" />
     <Compile Include="Comparison.cs" />
     <Compile Include="Conversions.cs" />
+    <Compile Include="IInstructionSink.cs" />
     <Compile Include="MetadataToken.cs" />
     <Compile Include="MetadataTokenKind.cs" />
     <Compile Include="Conversion.cs" />
