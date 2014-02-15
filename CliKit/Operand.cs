@@ -13,6 +13,12 @@ namespace CliKit
 	public struct Operand
 	{
 		#region Fields
+		private sealed class NumericType
+		{
+			public static readonly NumericType Integer;
+			public static readonly NumericType Double;
+		}
+
 		public static readonly Operand None = new Operand();
 
 		private readonly Numeric64 numeric;
@@ -20,10 +26,10 @@ namespace CliKit
 		#endregion
 
 		#region Constructors
-		private Operand(Numeric64 numeric)
+		private Operand(Numeric64 numeric, NumericType numericType)
 		{
 			this.numeric = numeric;
-			this.@object = null;
+			this.@object = numericType;
 		}
 
 		private Operand(object @object)
@@ -34,9 +40,17 @@ namespace CliKit
 		#endregion
 
 		#region Properties
+		public bool IsNone
+		{
+			get { return @object == null; }
+		}
+
 		public long Int64Constant
 		{
-			get { return numeric.Int64; }
+			get
+			{
+				return numeric.Int64;
+			}
 		}
 
 		public int Int

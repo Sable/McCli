@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace CliKit
 {
+	/// <summary>
+	/// Represents a CIL instruction.
+	/// </summary>
 	public struct Instruction
 	{
 		#region Fields
@@ -17,10 +20,19 @@ namespace CliKit
 		#region Constructors
 		public Instruction(Opcode opcode)
 		{
-			Contract.Requires(opcode != null && opcode.OperandSizeInBytes != 0);
+			Contract.Requires(opcode != null && opcode.OperandSizeInBytes == 0);
 
 			this.opcode = opcode;
 			this.operand = Operand.None;
+		}
+
+		public Instruction(Opcode opcode, Operand operand)
+		{
+			Contract.Requires(opcode != null);
+
+			// TODO: Check that the operand has a type supported by the opcode.
+			this.opcode = opcode;
+			this.operand = operand;
 		}
 		#endregion
 
@@ -33,6 +45,9 @@ namespace CliKit
 			get { return opcode; }
 		}
 
+		/// <summary>
+		/// Gets the inline operand in this instruction.
+		/// </summary>
 		public Operand Operand
 		{
 			get { return operand; }

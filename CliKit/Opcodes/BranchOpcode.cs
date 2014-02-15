@@ -8,6 +8,9 @@ using Emit = System.Reflection.Emit;
 
 namespace CliKit
 {
+	/// <summary>
+	/// Represents opcodes which branch conditionally or not.
+	/// </summary>
 	public sealed class BranchOpcode : Opcode
 	{
 		#region Fields

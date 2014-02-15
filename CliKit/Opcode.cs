@@ -362,7 +362,130 @@ namespace CliKit
 			return @byte == 0xFE;
 		}
 
-		#region Factory Methods
+		#region Variable References
+		public static VariableReferenceOpcode LoadArgument(int index)
+		{
+			Contract.Requires(index >= 0 && index < 0xFFFF);
+			switch (index)
+			{
+				case 0: return Ldarg_0;
+				case 1: return Ldarg_1;
+				case 2: return Ldarg_2;
+				case 3: return Ldarg_3;
+				default: return index < 0x100 ? Ldarg_S : Ldarg;
+			}
+		}
+
+		public static VariableReferenceOpcode LoadArgumentAddress(int index)
+		{
+			Contract.Requires(index >= 0 && index < 0xFFFF);
+			return index < 0x100 ? Ldarga_S : Ldarga;
+		}
+
+		public static VariableReferenceOpcode StoreArgument(int index)
+		{
+			Contract.Requires(index >= 0 && index < 0xFFFF);
+			return index < 0x100 ? Starg_S : Starg;
+		}
+
+		public static VariableReferenceOpcode LoadLocal(int index)
+		{
+			Contract.Requires(index >= 0 && index < 0xFFFF);
+			switch (index)
+			{
+				case 0: return Ldloc_0;
+				case 1: return Ldloc_1;
+				case 2: return Ldloc_2;
+				case 3: return Ldloc_3;
+				default: return index < 0x100 ? Ldloc_S : Ldloc;
+			}
+		}
+
+		public static VariableReferenceOpcode LoadLocalAddress(int index)
+		{
+			Contract.Requires(index >= 0 && index < 0xFFFF);
+			return index < 0x100 ? Ldloca_S : Ldloca;
+		}
+
+		public static VariableReferenceOpcode StoreLocal(int index)
+		{
+			Contract.Requires(index >= 0 && index < 0xFFFF);
+			return index < 0x100 ? Stloc_S : Stloc;
+		}
+
+		public static VariableReferenceOpcode Load(VariableLocation location)
+		{
+			return location.IsLocal ? LoadLocal(location.Index) : LoadArgument(location.Index);
+		}
+
+		public static VariableReferenceOpcode LoadAddress(VariableLocation location)
+		{
+			return location.IsLocal ? LoadLocalAddress(location.Index) : LoadArgumentAddress(location.Index);
+		}
+
+		public static VariableReferenceOpcode Store(VariableLocation location)
+		{
+			return location.IsLocal ? StoreLocal(location.Index) : StoreArgument(location.Index);
+		}
+
+		public static VariableReferenceOpcode LocalReference(LocationReferenceKind referenceKind, int index)
+		{
+			switch (referenceKind)
+			{
+				case LocationReferenceKind.Load: return LoadLocal(index);
+				case LocationReferenceKind.LoadAddress: return LoadLocalAddress(index);
+				case LocationReferenceKind.Store: return StoreLocal(index);
+				default: throw new ArgumentException("referenceKind");
+			}
+		}
+
+		public static VariableReferenceOpcode ArgumentReference(LocationReferenceKind referenceKind, int index)
+		{
+			switch (referenceKind)
+			{
+				case LocationReferenceKind.Load: return LoadArgument(index);
+				case LocationReferenceKind.LoadAddress: return LoadArgumentAddress(index);
+				case LocationReferenceKind.Store: return StoreArgument(index);
+				default: throw new ArgumentException("referenceKind");
+			}
+		}
+
+		public static VariableReferenceOpcode VariableReference(LocationReferenceKind referenceKind, VariableLocation location)
+		{
+			return location.IsLocal ? LocalReference(referenceKind, location.Index) : ArgumentReference(referenceKind, location.Index);
+		}
+		#endregion
+
+		#region Branches
+		public static BranchOpcode ConditionalBranch(Comparison comparison, bool longForm)
+		{
+			switch (comparison)
+			{
+				case Comparison.Equal: return longForm ? Beq : Beq_S;
+				case Comparison.NotEqual_Unordered: return longForm ? Bne_Un : Bne_Un_S;
+				case Comparison.GreaterThanOrEqual: return longForm ? Bge : Bge_S;
+				case Comparison.GreaterThanOrEqual_Unsigned: return longForm ? Bge_Un : Bge_Un_S;
+				case Comparison.GreaterThan: return longForm ? Bgt : Bgt_S;
+				case Comparison.GreaterThan_Unsigned: return longForm ? Bgt_Un : Bgt_Un_S;
+				case Comparison.LessThanOrEqual: return longForm ? Ble : Ble_S;
+				case Comparison.LessThanOrEqual_Unsigned: return longForm ? Ble_Un : Ble_Un_S;
+				case Comparison.LessThan: return longForm ? Blt : Blt_S;
+				case Comparison.LessThan_Unsigned: return longForm ? Blt_Un : Blt_Un_S;
+				default: return null;
+			}
+		}
+
+		public static BranchOpcode ConditionalBranch(bool condition, bool longForm)
+		{
+			return condition
+				? (longForm ? Brtrue : Brtrue_S)
+				: (longForm ? Brfalse : Brfalse_S);
+		}
+
+		public static BranchOpcode UnconditionalBranch(bool longForm)
+		{
+			return longForm ? Br : Br_S;
+		}
 		#endregion
 		#endregion
 		#endregion
