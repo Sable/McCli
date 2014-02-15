@@ -27,15 +27,19 @@ namespace CliKit
 			get { return ReflectionEmitEnums.GetLocationReferenceKind(ref opcode); }
 		}
 
-		public IntegerOperandForm OperandForm
+		public bool IsLongForm
 		{
-			get
-			{
-				char lastChar = opcode.Name[opcode.Name.Length - 1];
-				if (lastChar >= '0' && lastChar <= '9') return IntegerOperandForm.Constant;
-				if (lastChar == 'S') return IntegerOperandForm.Short;
-				return IntegerOperandForm.Normal;
-			}
+			get { return OperandType == Emit.OperandType.InlineVar; }
+		}
+
+		public bool IsShortForm
+		{
+			get { return OperandType == Emit.OperandType.ShortInlineVar; }
+		}
+
+		public bool IsConstantForm
+		{
+			get { return OperandType == Emit.OperandType.InlineNone; }
 		}
 
 		public int? ConstantIndex

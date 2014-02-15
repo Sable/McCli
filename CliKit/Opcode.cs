@@ -102,6 +102,11 @@ namespace CliKit
 			}
 		}
 
+		internal OperandType OperandType
+		{
+			get { return opcode.OperandType; }
+		}
+
 		/// <summary>
 		/// Gets the size in bytes of any inline operand this opcode may have.
 		/// Returns <c>null</c> if the opcode has a variable-sized inline operand.
@@ -312,6 +317,7 @@ namespace CliKit
 		public static readonly FieldReferenceOpcode Ldsfld = new FieldReferenceOpcode(OpCodes.Ldsfld);
 		public static readonly FieldReferenceOpcode Ldsflda = new FieldReferenceOpcode(OpCodes.Ldsflda);
 		public static readonly LoadConstantOpcode Ldstr = new LoadConstantOpcode(OpCodes.Ldstr);
+		public static readonly Opcode Ldtoken = new Opcode(OpCodes.Ldtoken);
 		public static readonly ArithmeticOpcode Mul = new ArithmeticOpcode(OpCodes.Mul, ArithmeticOperation.Multiplication);
 		public static readonly ArithmeticOpcode Mul_Ovf = new ArithmeticOpcode(OpCodes.Mul_Ovf, ArithmeticOperation.Multiplication_OverflowCheck);
 		public static readonly ArithmeticOpcode Mul_Ovf_Un = new ArithmeticOpcode(OpCodes.Mul_Ovf_Un, ArithmeticOperation.Multiplication_UnsignedWithOverflowCheck);
@@ -361,6 +367,50 @@ namespace CliKit
 		{
 			return @byte == 0xFE;
 		}
+
+		#region Misc Opcode Getters
+		public static LoadConstantOpcode LoadInt32(int value)
+		{
+			switch (value)
+			{
+				case -1: return Ldc_I4_M1;
+				case 0: return Ldc_I4_0;
+				case 1: return Ldc_I4_1;
+				case 2: return Ldc_I4_2;
+				case 3: return Ldc_I4_3;
+				case 4: return Ldc_I4_4;
+				case 5: return Ldc_I4_5;
+				case 6: return Ldc_I4_6;
+				case 7: return Ldc_I4_7;
+				case 8: return Ldc_I4_8;
+				default: return (sbyte)value == value ? Ldc_I4_S : Ldc_I4;
+			}
+		}
+
+		public static FieldReferenceOpcode FieldReference(LocationReferenceKind referenceKind, bool @static)
+		{
+			switch (referenceKind)
+			{
+				case LocationReferenceKind.Load: return @static ? Opcode.Ldsfld : Opcode.Ldfld;
+				case LocationReferenceKind.LoadAddress: return @static ? Opcode.Ldsflda : Opcode.Ldflda;
+				case LocationReferenceKind.Store: return @static ? Opcode.Stsfld : Opcode.Stfld;
+				default: throw new ArgumentException("referenceKind");
+			}
+		}
+
+		public static CallOpcode GetCall(CallKind kind)
+		{
+			switch (kind)
+			{
+				case CallKind.EarlyBound: return Call;
+				case CallKind.Virtual: return Callvirt;
+				case CallKind.Indirect: return Calli;
+				case CallKind.Constructor: return Newobj;
+				case CallKind.Jump: return Jmp;
+				default: throw new ArgumentException("kind");
+			}
+		}
+		#endregion
 
 		#region Variable References
 		public static VariableReferenceOpcode LoadArgument(int index)
@@ -457,7 +507,7 @@ namespace CliKit
 		#endregion
 
 		#region Branches
-		public static BranchOpcode ConditionalBranch(Comparison comparison, bool longForm)
+		public static BranchOpcode Branch(Comparison comparison, bool longForm)
 		{
 			switch (comparison)
 			{
@@ -475,14 +525,14 @@ namespace CliKit
 			}
 		}
 
-		public static BranchOpcode ConditionalBranch(bool condition, bool longForm)
+		public static BranchOpcode Branch(bool condition, bool longForm)
 		{
 			return condition
 				? (longForm ? Brtrue : Brtrue_S)
 				: (longForm ? Brfalse : Brfalse_S);
 		}
 
-		public static BranchOpcode UnconditionalBranch(bool longForm)
+		public static BranchOpcode Branch(bool longForm)
 		{
 			return longForm ? Br : Br_S;
 		}

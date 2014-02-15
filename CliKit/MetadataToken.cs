@@ -4,6 +4,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Emit = System.Reflection.Emit;
 
 namespace CliKit
 {
@@ -86,6 +87,15 @@ namespace CliKit
 		#region Operators
 		public static bool operator ==(MetadataToken lhs, MetadataToken rhs) { return lhs.Equals(rhs); }
 		public static bool operator !=(MetadataToken lhs, MetadataToken rhs) { return !lhs.Equals(rhs); }
+
+		public static implicit operator MetadataToken(Emit.EventToken token) { return FromValue(token.Token); }
+		public static implicit operator MetadataToken(Emit.FieldToken token) { return FromValue(token.Token); }
+		public static implicit operator MetadataToken(Emit.MethodToken token) { return FromValue(token.Token); }
+		public static implicit operator MetadataToken(Emit.ParameterToken token) { return FromValue(token.Token); }
+		public static implicit operator MetadataToken(Emit.PropertyToken token) { return FromValue(token.Token); }
+		public static implicit operator MetadataToken(Emit.SignatureToken token) { return FromValue(token.Token); }
+		public static implicit operator MetadataToken(Emit.StringToken token) { return FromValue(token.Token); }
+		public static implicit operator MetadataToken(Emit.TypeToken token) { return FromValue(token.Token); }
 		#endregion
 	}
 }

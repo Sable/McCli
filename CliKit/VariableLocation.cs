@@ -22,7 +22,7 @@ namespace CliKit
 		#region Constructors
 		public VariableLocation(VariableKind kind, int index)
 		{
-			Contract.Requires(index >= 0 && index < ushort.MaxValue);
+			Contract.Requires(IsValidIndex(index));
 			
 			this.kind = unchecked((ushort)kind);
 			this.index = unchecked((ushort)index);
@@ -75,6 +75,12 @@ namespace CliKit
 		#endregion
 
 		#region Methods
+		[Pure]
+		public static bool IsValidIndex(int index)
+		{
+			return index >= 0 && index < 0xFFFF;
+		}
+
 		public static VariableLocation Parameter(int index)
 		{
 			return new VariableLocation(VariableKind.Parameter, index);
