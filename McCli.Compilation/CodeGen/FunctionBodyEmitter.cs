@@ -1,4 +1,5 @@
 ﻿using CliKit;
+using CliKit.IO;
 using McCli.Compilation.IR;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
+using Label = System.Reflection.Emit.Label;
 using VariableKind = McCli.Compilation.IR.VariableKind;
 
 namespace McCli.Compilation.CodeGen
