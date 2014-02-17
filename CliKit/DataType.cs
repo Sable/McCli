@@ -82,17 +82,36 @@ namespace CliKit
 		private const int stackTypeExceptValueTypeMask = numericStackTypeMask | referenceOrManagedPointerMask;
 		private const int stackTypeMask = stackTypeExceptValueTypeMask | (1 << (int)DataType.ValueType);
 
+		private static readonly Dictionary<string, DataType> nameInOpcode
+			= new Dictionary<string, DataType>(StringComparer.OrdinalIgnoreCase)
+			{
+				{ "i", DataType.NativeInt },
+				{ "i1", DataType.Int8 },
+				{ "i2", DataType.Int16 },
+				{ "i4", DataType.Int32 },
+				{ "i8", DataType.Int64 },
+				{ "r", DataType.NativeFloat },
+				{ "r4", DataType.Float32 },
+				{ "r8", DataType.Float64 },
+				{ "ref", DataType.NormalMutabilityManagedPointer },
+				{ "u", DataType.NativeUInt },
+				{ "u1", DataType.UInt8 },
+				{ "u2", DataType.UInt16 },
+				{ "u4", DataType.UInt32 },
+				{ "u8", DataType.UInt64 },
+			};
+
 		private static bool MatchesMask(DataType type, int mask)
 		{
 			return ((1 << (int)type) & mask) != 0;
 		}
 
 		[Pure]
-		public static DataType TryParseNameInOpcode(string name)
+		public static DataType? TryParseNameInOpcode(string name)
 		{
 			Contract.Requires(name != null);
-
-			throw new NotImplementedException();
+			DataType dataType;
+			return nameInOpcode.TryGetValue(name, out dataType) ? dataType : (DataType?)null;
 		}
 
 		[Pure]

@@ -26,7 +26,7 @@ namespace CliKit
 		internal ConversionOpcode(Emit.OpCode opcode) : base(opcode)
 		{
 			var match = nameRegex.Match(opcode.Name);
-			targetDataType = DataTypeEnum.TryParseNameInOpcode(match.Groups[2].Value);
+			targetDataType = DataTypeEnum.TryParseNameInOpcode(match.Groups[2].Value).Value;
 			isSourceUnsigned = match.Groups[3].Success;
 			isOverflowChecked = match.Groups[1].Success;
 		}

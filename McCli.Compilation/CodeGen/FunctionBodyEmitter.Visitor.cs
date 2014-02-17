@@ -1,10 +1,11 @@
-﻿using McCli.Compilation.IR;
+﻿using CliKit;
+using CliKit.IO;
+using McCli.Compilation.IR;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,8 +14,8 @@ namespace McCli.Compilation.CodeGen
 	partial class FunctionBodyEmitter : Visitor
 	{
 		#region Fields
-		private Label? continueTargetLabel;
-		private Label? breakTargetLabel;
+		private Label continueTargetLabel;
+		private Label breakTargetLabel;
 		#endregion
 
 		#region Methods
@@ -22,19 +23,16 @@ namespace McCli.Compilation.CodeGen
 		{
 			using (BeginEmitStore(literal.Target))
 			{
-				var sourceRepr = MRepr.FromCliType(literal.Value.GetType());
-				if (sourceRepr.IsPrimitive && !sourceRepr.IsComplex)
+				MRepr sourceRepr;
+				if (literal.Value is double)
 				{
-					if (sourceRepr.Type == MPrimitiveClass.Double) ilGenerator.Emit(OpCodes.Ldc_R8, (double)literal.Value);
-					else if (sourceRepr.Type == MPrimitiveClass.Single) ilGenerator.Emit(OpCodes.Ldc_R4, (float)literal.Value);
-					else if (sourceRepr.Type == MPrimitiveClass.UInt64) ilGenerator.Emit(OpCodes.Ldc_I8, unchecked((long)(ulong)literal.Value));
-					else if (sourceRepr.Type == MPrimitiveClass.Int64) ilGenerator.Emit(OpCodes.Ldc_I8, (long)literal.Value);
-					else
-					{
-						// Should be convertible to int
-						int value = unchecked((int)Convert.ToInt64(literal.Value));
-						ilGenerator.Emit(OpCodes.Ldc_I4, value); // TODO: Use short form opcodes if possible
-					}
+					cil.LoadFloat64((double)literal.Value);
+					sourceRepr = MClass.Double.ScalarRepr;
+				}
+				else if (literal.Value is char)
+				{
+					cil.LoadInt32((int)(char)literal.Value);
+					sourceRepr = MClass.Char.ScalarRepr;
 				}
 				else
 				{
@@ -74,7 +72,7 @@ namespace McCli.Compilation.CodeGen
 					EmitConversion(argument.StaticRepr, function.InputTypes[i]);
 				}
 
-				ilGenerator.Emit(OpCodes.Call, function.Method);
+				cil.Call(function.Method);
 				EmitConversion(function.OutputType, staticCall.Targets[0].StaticRepr);
 			}
 		}
@@ -113,7 +111,7 @@ namespace McCli.Compilation.CodeGen
 						EmitConversion(argument.StaticRepr, arrayType);
 					}
 
-					ilGenerator.Emit(OpCodes.Call, method);
+					cil.Call(method);
 					EmitConversion(MRepr.FromCliType(method.ReturnType), target.StaticRepr);
 				}
 			}
@@ -132,30 +130,30 @@ namespace McCli.Compilation.CodeGen
 
 			EmitLoad(@if.Condition);
 			EmitConversion(@if.Condition.StaticRepr, MRepr.Any);
-			ilGenerator.Emit(OpCodes.Call, typeof(Utilities).GetMethod("IsTrue"));
+			cil.Call(typeof(Utilities).GetMethod("IsTrue"));
 
-			var endLabel = ilGenerator.DefineLabel();
+			var endLabel = cil.CreateLabel("if_end");
 			if (@if.Then.Length == 0)
 			{
-				ilGenerator.Emit(OpCodes.Brtrue, endLabel);
+				cil.Branch(true, endLabel);
 				EmitStatements(@if.Else);
 			}
 			else if (@if.Else.Length == 0)
 			{
-				ilGenerator.Emit(OpCodes.Brfalse, endLabel);
+				cil.Branch(false, endLabel);
 				EmitStatements(@if.Then);
 			}
 			else
 			{
-				var elseLabel = ilGenerator.DefineLabel();
-				ilGenerator.Emit(OpCodes.Brfalse, elseLabel);
+				var elseLabel = cil.CreateLabel("else");
+				cil.Branch(false, elseLabel);
 				EmitStatements(@if.Then);
-				ilGenerator.Emit(OpCodes.Br, endLabel);
-				ilGenerator.MarkLabel(elseLabel);
+				cil.Branch(endLabel);
+				cil.MarkLabel(elseLabel);
 				EmitStatements(@if.Else);
 			}
 
-			ilGenerator.MarkLabel(endLabel);
+			cil.MarkLabel(endLabel);
 		}
 
 		public override void VisitWhile(While @while)
@@ -163,22 +161,22 @@ namespace McCli.Compilation.CodeGen
 			// Declare loop labels, preserving parent ones
 			var previousContinueTargetLabel = continueTargetLabel;
 			var previousBreakTargetLabel = breakTargetLabel;
-			continueTargetLabel = ilGenerator.DefineLabel();
-			breakTargetLabel = ilGenerator.DefineLabel();
+			continueTargetLabel = cil.CreateLabel("while_continue");
+			breakTargetLabel = cil.CreateLabel("while_break");
 
 			// Condition
-			ilGenerator.MarkLabel(continueTargetLabel.Value);
+			cil.MarkLabel(continueTargetLabel);
 			EmitLoad(@while.Condition);
 			EmitConversion(@while.Condition.StaticRepr, MRepr.Any);
-			ilGenerator.Emit(OpCodes.Call, typeof(Utilities).GetMethod("IsTrue"));
-			ilGenerator.Emit(OpCodes.Brfalse, breakTargetLabel.Value);
+			cil.Call(typeof(Utilities).GetMethod("IsTrue"));
+			cil.Branch(false, breakTargetLabel);
 
 			// Body
 			EmitStatements(@while.Body);
-			ilGenerator.Emit(OpCodes.Br, continueTargetLabel.Value);
+			cil.Branch(continueTargetLabel);
 
 			// End
-			ilGenerator.MarkLabel(breakTargetLabel.Value);
+			cil.MarkLabel(breakTargetLabel);
 
 			// Restore parent loop labels
 			continueTargetLabel = previousContinueTargetLabel;
@@ -190,66 +188,67 @@ namespace McCli.Compilation.CodeGen
 			var collectionRepr = @for.Collection.StaticRepr;
 			Contract.Assert(collectionRepr.StructuralClass == MStructuralClass.Array);
 			
-			// TODO: pool temporaries
-
 			// Declare loop labels, preserving parent ones
 			var previousContinueTargetLabel = continueTargetLabel;
 			var previousBreakTargetLabel = breakTargetLabel;
-			continueTargetLabel = ilGenerator.DefineLabel();
-			breakTargetLabel = ilGenerator.DefineLabel();
-			var conditionLabel = ilGenerator.DefineLabel();
+			continueTargetLabel = cil.CreateLabel("for_continue");
+			breakTargetLabel = cil.CreateLabel("for_break");
+			var conditionLabel = cil.CreateLabel("for_condition");
 
-			// arrayCopy = clone(array)
-			var arrayCopyLocal = ilGenerator.DeclareLocal(collectionRepr.CliType);
-			EmitLoad(@for.Collection);
-			EmitCloneIfNeeded(collectionRepr);
-			ilGenerator.Emit(OpCodes.Stloc, arrayCopyLocal);
-
-			// count = slicecount(arrayCopy)
-			var countLocal = ilGenerator.DeclareLocal(typeof(int));
-			ilGenerator.Emit(OpCodes.Ldloc, arrayCopyLocal);
-			ilGenerator.Emit(OpCodes.Call, typeof(Utilities).GetMethod("GetForSliceCount"));
-			ilGenerator.Emit(OpCodes.Stloc, countLocal);
-
-			// index = 0
-			var indexLocal = ilGenerator.DeclareLocal(typeof(int));
-			ilGenerator.Emit(OpCodes.Ldc_I4_0);
-			ilGenerator.Emit(OpCodes.Stloc, indexLocal);
-
-			// condition:
-			ilGenerator.MarkLabel(conditionLabel);
-
-			// if (index >= count) goto break;
-			ilGenerator.Emit(OpCodes.Ldloc, indexLocal);
-			ilGenerator.Emit(OpCodes.Ldloc, countLocal);
-			ilGenerator.Emit(OpCodes.Clt);
-			ilGenerator.Emit(OpCodes.Brfalse, breakTargetLabel.Value);
-
-			// slice = getslice(arrayCopy, index)
-			using (BeginEmitStore(@for.Iterator))
+			// Allocate the required temporaries
+			using (var arrayCopyLocalAllocation = temporaryPool.Alloc(collectionRepr.CliType))
+			using (var countLocalAllocation = temporaryPool.Alloc(typeof(int)))
+			using (var indexLocalAllocation = temporaryPool.Alloc(typeof(int)))
 			{
-				ilGenerator.Emit(OpCodes.Ldloc, arrayCopyLocal);
-				ilGenerator.Emit(OpCodes.Ldloc, indexLocal);
-				ilGenerator.Emit(OpCodes.Call, typeof(Utilities).GetMethod("GetForSlice").MakeGenericMethod(collectionRepr.Type.CliType));
+				// arrayCopy = clone(array)
+				EmitLoad(@for.Collection);
+				EmitCloneIfNeeded(collectionRepr);
+				cil.Store(arrayCopyLocalAllocation.Location);
+
+				// count = slicecount(arrayCopy)
+				cil.Load(arrayCopyLocalAllocation.Location);
+				cil.Call(typeof(Utilities).GetMethod("GetForSliceCount"));
+				cil.Store(countLocalAllocation.Location);
+
+				// index = 0
+				cil.LoadInt32(0);
+				cil.Store(indexLocalAllocation.Location);
+
+				// condition:
+				cil.MarkLabel(conditionLabel);
+
+				// if (index >= count) goto break;
+				cil.Load(indexLocalAllocation.Location);
+				cil.Load(countLocalAllocation.Location);
+				cil.Compare(Comparison.LessThan);
+				cil.Branch(false, breakTargetLabel);
+
+				// slice = getslice(arrayCopy, index)
+				using (BeginEmitStore(@for.Iterator))
+				{
+					cil.Load(arrayCopyLocalAllocation.Location);
+					cil.Load(indexLocalAllocation.Location);
+					cil.Call(typeof(Utilities).GetMethod("GetForSlice").MakeGenericMethod(collectionRepr.Type.CliType));
+				}
+
+				// body
+				EmitStatements(@for.Body);
+
+				// continue:
+				cil.MarkLabel(continueTargetLabel);
+
+				// index++
+				cil.Load(indexLocalAllocation.Location);
+				cil.LoadInt32(1);
+				cil.Instruction(Opcode.Add);
+				cil.Store(indexLocalAllocation.Location);
+
+				// goto condition
+				cil.Branch(conditionLabel);
 			}
 
-			// body
-			EmitStatements(@for.Body);
-
-			// continue:
-			ilGenerator.MarkLabel(continueTargetLabel.Value);
-
-			// index++
-			ilGenerator.Emit(OpCodes.Ldloc, indexLocal);
-			ilGenerator.Emit(OpCodes.Ldc_I4_1);
-			ilGenerator.Emit(OpCodes.Add);
-			ilGenerator.Emit(OpCodes.Stloc, indexLocal);
-			
-			// goto condition
-			ilGenerator.Emit(OpCodes.Br, conditionLabel);
-
 			// break:
-			ilGenerator.MarkLabel(breakTargetLabel.Value);
+			cil.MarkLabel(breakTargetLabel);
 
 			// Restore parent loop labels
 			continueTargetLabel = previousContinueTargetLabel;
@@ -258,28 +257,13 @@ namespace McCli.Compilation.CodeGen
 
 		public override void VisitJump(Jump jump)
 		{
-			Label targetLabel;
 			switch(jump.Kind)
 			{
-				case JumpKind.Continue:
-					Contract.Assert(continueTargetLabel.HasValue);
-					targetLabel = continueTargetLabel.Value;
-					break;
-
-				case JumpKind.Break:
-					Contract.Assert(breakTargetLabel.HasValue);
-					targetLabel = breakTargetLabel.Value;
-					break;
-
-				case JumpKind.Return:
-					targetLabel = returnTargetLabel;
-					break;
-
-				default:
-					throw new NotImplementedException();
+				case JumpKind.Continue: cil.Branch(continueTargetLabel); break;
+				case JumpKind.Break: cil.Branch(breakTargetLabel); break;
+				case JumpKind.Return: cil.Branch(returnTargetLabel); break;
+				default: throw new NotImplementedException();
 			}
-
-			ilGenerator.Emit(OpCodes.Br, targetLabel);
 		}
 
 		public override void VisitNode(IR.Node node)
@@ -293,9 +277,9 @@ namespace McCli.Compilation.CodeGen
 			if (typeof(MValue).IsAssignableFrom(sourceType))
 			{
 				var deepCloneMethod = sourceType.GetMethod("DeepClone");
-				ilGenerator.Emit(OpCodes.Callvirt, deepCloneMethod);
+				cil.Call(deepCloneMethod);
 				if (!sourceType.IsAssignableFrom(deepCloneMethod.ReturnType))
-					ilGenerator.Emit(OpCodes.Castclass, sourceType);
+					cil.Instruction(Opcode.Castclass, sourceType);
 			}
 		}
 		#endregion

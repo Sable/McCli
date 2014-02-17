@@ -29,7 +29,7 @@ namespace CliKit.IO
 		/// <summary>
 		/// Closes this instruction sink and releases all associated resources.
 		/// </summary>
-		public abstract void Dispose();
+		public virtual void Dispose() { }
 
 		public void Instruction(Opcode opcode)
 		{
@@ -111,5 +111,16 @@ namespace CliKit.IO
 		{
 			Instruction(Opcode.Ldtoken, token);
 		}
+
+		public void Compare(Comparison comparison)
+		{
+			var opcode = Opcode.Compare(comparison);
+			if (opcode == null) throw new ArgumentException("comparison");
+			Instruction(opcode);
+		}
+
+		public void Pop() { Instruction(Opcode.Pop); }
+		public void Dup() { Instruction(Opcode.Dup); }
+		public void Ret() { Instruction(Opcode.Ret); }
 	}
 }

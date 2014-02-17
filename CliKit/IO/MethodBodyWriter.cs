@@ -20,12 +20,15 @@ namespace CliKit.IO
 		/// to convert symboling operand values into metadata tokens.
 		/// Can return <c>null</c>.
 		/// </summary>
-		public abstract IMetadataTokenProvider MetadataTokenProvider { get; }
+		public virtual IMetadataTokenProvider MetadataTokenProvider
+		{
+			get { return null; }
+		}
 		#endregion
 
 		#region Methods
 		#region Overridables
-		public abstract int CreateLocal(Type type, bool pinned, string name);
+		public abstract int DeclareLocal(Type type, bool pinned, string name);
 
 		public abstract Label CreateLabel(string name);
 		public abstract void MarkLabel(Label label);
@@ -38,10 +41,11 @@ namespace CliKit.IO
 			Instruction(Opcode.Ldstr, GetMetadataTokenProviderOrThrow().GetStringToken(str));
 		}
 
-		public virtual void Call(CallKind kind, MemberInfo member)
+		public virtual void Call(CallOpcode opcode, MemberInfo member)
 		{
-			Contract.Requires(kind != CallKind.Indirect);
-			Instruction(Opcode.GetCall(kind), GetMetadataTokenProviderOrThrow().GetMemberToken(member));
+			Contract.Requires(opcode.Kind != CallKind.Indirect);
+			Contract.Requires(member != null);
+			Instruction(opcode, GetMetadataTokenProviderOrThrow().GetMemberToken(member));
 		}
 
 		public virtual void FieldReference(FieldReferenceOpcode opcode, FieldInfo field)
@@ -67,19 +71,19 @@ namespace CliKit.IO
 		#endregion
 
 		#region Helpers
-		public int CreateLocal(Type type, bool pinned)
+		public int DeclareLocal(Type type, bool pinned)
 		{
-			return CreateLocal(type, pinned, name: null);
+			return DeclareLocal(type, pinned, name: null);
 		}
 
-		public int CreateLocal(Type type, string name)
+		public int DeclareLocal(Type type, string name)
 		{
-			return CreateLocal(type, false, name: name);
+			return DeclareLocal(type, false, name: name);
 		}
 
-		public int CreateLocal(Type type)
+		public int DeclareLocal(Type type)
 		{
-			return CreateLocal(type, pinned: false, name: null);
+			return DeclareLocal(type, pinned: false, name: null);
 		}
 
 		public Label CreateLabel()
@@ -87,10 +91,16 @@ namespace CliKit.IO
 			return CreateLabel(name: null);
 		}
 
+		public void Call(CallKind kind, MethodInfo method)
+		{
+			Contract.Requires(method != null);
+			Call(Opcode.GetCall(kind), method);
+		}
+
 		public void Call(MethodInfo method)
 		{
 			Contract.Requires(method != null);
-			Call(method.IsStatic ? CallKind.EarlyBound : CallKind.Virtual, method);
+			Call(method.IsStatic ? Opcode.Call : Opcode.Callvirt, method);
 		}
 
 		public void FieldReference(LocationReferenceKind referenceKind, FieldInfo field)

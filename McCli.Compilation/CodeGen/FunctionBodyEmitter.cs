@@ -6,10 +6,9 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
-using Label = System.Reflection.Emit.Label;
+using ILGenerator = System.Reflection.Emit.ILGenerator;
 using VariableKind = McCli.Compilation.IR.VariableKind;
 
 namespace McCli.Compilation.CodeGen
@@ -42,8 +41,9 @@ namespace McCli.Compilation.CodeGen
 		private readonly IR.Function function;
 		private readonly FunctionLookup functionLookup;
 		private readonly MethodInfo method;
-		private readonly ILGenerator ilGenerator;
+		private readonly MethodBodyWriter cil;
 		private readonly Dictionary<Variable, VariableLocation> locals = new Dictionary<Variable, VariableLocation>();
+		private readonly TemporaryLocalPool temporaryPool;
 		private Label returnTargetLabel;
 		#endregion
 
@@ -70,12 +70,15 @@ namespace McCli.Compilation.CodeGen
 			}
 
 			// Create the method and get its IL generator
+			ILGenerator ilGenerator;
 			method = methodFactory(function.Name, inputDescriptorsBuilder.Complete(), function.Outputs[0].StaticRepr.CliType, out ilGenerator);
+			cil = new ILGeneratorMethodBodyWriter(ilGenerator);
+			temporaryPool = new TemporaryLocalPool(cil, "$temp");
 
 			foreach (var output in function.Outputs)
 			{
-				var local = ilGenerator.DeclareLocal(output.StaticRepr.CliType);
-				locals.Add(output, VariableLocation.Local(local.LocalIndex));
+				var localIndex = cil.DeclareLocal(output.StaticRepr.CliType, output.Name);
+				locals.Add(output, VariableLocation.Local(localIndex));
 			}
 		}
 		#endregion
@@ -94,13 +97,13 @@ namespace McCli.Compilation.CodeGen
 
 		public void Emit()
 		{
-			returnTargetLabel = ilGenerator.DefineLabel();
+			returnTargetLabel = cil.CreateLabel("return");
 
 			EmitStatements(function.Body);
 
-			ilGenerator.MarkLabel(returnTargetLabel);
+			cil.MarkLabel(returnTargetLabel);
 			EmitLoad(function.Outputs[0]);
-			ilGenerator.Emit(OpCodes.Ret);
+			cil.Ret();
 		}
 
 		private void EmitStatements(ImmutableArray<Statement> statements)
@@ -116,7 +119,7 @@ namespace McCli.Compilation.CodeGen
 				case VariableKind.Input:
 				case VariableKind.Local:
 				case VariableKind.Output:
-					ilGenerator.EmitLoad(GetLocalLocation(variable));
+					cil.Load(GetLocalLocation(variable));
 					break;
 
 				default:
@@ -149,7 +152,7 @@ namespace McCli.Compilation.CodeGen
 				case VariableKind.Input:
 				case VariableKind.Local:
 				case VariableKind.Output:
-					ilGenerator.EmitStore(GetLocalLocation(variable));
+					cil.Store(GetLocalLocation(variable));
 					break;
 
 				default:
@@ -172,7 +175,7 @@ namespace McCli.Compilation.CodeGen
 					var boxMethod = typeof(MFullArray<>)
 						.MakeGenericType(source.CliType)
 						.GetMethod("CreateScalar");
-					ilGenerator.Emit(OpCodes.Call, boxMethod);
+					cil.Call(boxMethod);
 					return;
 				}
 
@@ -189,13 +192,8 @@ namespace McCli.Compilation.CodeGen
 			VariableLocation location;
 			if (!locals.TryGetValue(variable, out location))
 			{
-				var localBuilder = ilGenerator.DeclareLocal(variable.StaticRepr.CliType);
-
-				// Dynamic methods do not support debug info
-				if (!(method is DynamicMethod))
-					localBuilder.SetLocalSymInfo(variable.Name);
-				
-				location = VariableLocation.Local(localBuilder.LocalIndex);
+				var localIndex = cil.DeclareLocal(variable.StaticRepr.CliType, variable.Name);
+				location = VariableLocation.Local(localIndex);
 				locals.Add(variable, location);
 			}
 

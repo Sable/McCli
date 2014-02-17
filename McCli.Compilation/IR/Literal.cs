@@ -12,13 +12,20 @@ namespace McCli.Compilation.IR
 		public readonly Variable Target;
 		public readonly object Value;
 
-		public Literal(Variable target, object value)
+		public Literal(Variable target, double value)
 		{
 			Contract.Requires(target != null);
-			Contract.Requires(value != null);
 
 			this.Target = target;
 			this.Value = value;
+		}
+
+		public Literal(Variable target, char character)
+		{
+			Contract.Requires(target != null);
+
+			this.Target = target;
+			this.Value = character;
 		}
 
 		public override void Accept(Visitor visitor)

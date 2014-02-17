@@ -17,7 +17,7 @@ namespace CliKit
 		#endregion
 
 		#region Properties
-		public VariableKind LocalKind
+		public VariableKind VariableKind
 		{
 			get { return opcode.Name[2] == 'a' ? VariableKind.Parameter : VariableKind.Local; }
 		}

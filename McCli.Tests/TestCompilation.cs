@@ -22,6 +22,7 @@ namespace McCli
 		private static readonly Variable doubleArrayLocal2 = new Variable("double2", VariableKind.Local, MPrimitiveClass.Double.ArrayRepr);
 		private static readonly Variable logicalArrayLocal = new Variable("logicals", VariableKind.Local, MPrimitiveClass.Logical.ArrayRepr);
 		private static readonly Variable logicalArrayOutput = new Variable("output", VariableKind.Output, MPrimitiveClass.Logical.ArrayRepr);
+		private static readonly Variable charArrayOutput = new Variable("output", VariableKind.Output, MPrimitiveClass.Char.ArrayRepr);
 		private FunctionLookup functionLookup;
 
 		[TestInitialize]
@@ -71,7 +72,7 @@ namespace McCli
 		}
 
 		[TestMethod]
-		public void TestLiteral()
+		public void TestDoubleLiteral()
 		{
 			var function = CompileFunction<Func<MArray<double>>>(
 				null, doubleArrayOutput,
@@ -82,13 +83,13 @@ namespace McCli
 		}
 
 		[TestMethod]
-		public void TestLogicalLiteral()
+		public void TestCharLiteral()
 		{
-			var function = CompileFunction<Func<MArray<bool>>>(
-				null, logicalArrayOutput,
-				new Literal(logicalArrayOutput, true));
+			var function = CompileFunction<Func<MArray<char>>>(
+				null, charArrayOutput,
+				new Literal(charArrayOutput, 'a'));
 
-			Assert.AreEqual(true, function().ToScalar());
+			Assert.AreEqual('a', function().ToScalar());
 		}
 
 		[TestMethod]

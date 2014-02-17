@@ -38,11 +38,13 @@
     <Compile Include="CallKind.cs" />
     <Compile Include="Comparison.cs" />
     <Compile Include="Conversions.cs" />
+    <Compile Include="IO\ILAsmMethodBodyWriter.cs" />
     <Compile Include="IO\ILGeneratorMethodBodyWriter.cs" />
     <Compile Include="IO\IMetadataTokenProvider.cs" />
     <Compile Include="IO\MethodBodyWriter.cs" />
     <Compile Include="IO\RawInstructionSink.cs" />
     <Compile Include="IO\Label.cs" />
+    <Compile Include="IO\TemporaryLocalPool.cs" />
     <Compile Include="MetadataToken.cs" />
     <Compile Include="MetadataTokenKind.cs" />
     <Compile Include="Conversion.cs" />

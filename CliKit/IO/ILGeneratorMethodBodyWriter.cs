@@ -61,7 +61,7 @@ namespace CliKit.IO
 		#endregion
 
 		#region Methods
-		public override int CreateLocal(Type type, bool pinned, string name)
+		public override int DeclareLocal(Type type, bool pinned, string name)
 		{
 			var localBuilder = generator.DeclareLocal(type, pinned);
 
@@ -92,15 +92,18 @@ namespace CliKit.IO
 			generator.Emit(OpCodes.Ldstr, str);
 		}
 
-		public override void Call(CallKind kind, MemberInfo member)
+		public override void Call(CallOpcode opcode, MemberInfo member)
 		{
-			switch (kind)
+			OpCode emitOpCode;
+			opcode.GetReflectionEmitOpCode(out emitOpCode);
+
+			switch (opcode.Kind)
 			{
 				case CallKind.EarlyBound: generator.Emit(OpCodes.Call, (MethodInfo)member); break;
 				case CallKind.Virtual: generator.Emit(OpCodes.Callvirt, (MethodInfo)member); break;
 				case CallKind.Jump: generator.Emit(OpCodes.Call, (MethodInfo)member); break;
 				case CallKind.Constructor: generator.Emit(OpCodes.Newobj, (ConstructorInfo)member); break;
-				default: base.Call(kind, member); break; // Let the base class handle failures
+				default: base.Call(opcode, member); break; // Let the base class handle failures
 			}
 		}
 
@@ -158,8 +161,6 @@ namespace CliKit.IO
 
 			generator.Emit(OpCodes.Switch, emitLabels);
 		}
-
-		public override void Dispose() { }
 
 		protected override void Branch(BranchOpcode opcode, Label target)
 		{

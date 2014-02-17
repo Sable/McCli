@@ -410,6 +410,19 @@ namespace CliKit
 				default: throw new ArgumentException("kind");
 			}
 		}
+
+		public static ComparisonOpcode Compare(Comparison comparison)
+		{
+			switch (comparison)
+			{
+				case Comparison.Equal: return Ceq;
+				case Comparison.GreaterThan: return Cgt;
+				case Comparison.GreaterThan_Unsigned: return Cgt_Un;
+				case Comparison.LessThan: return Clt;
+				case Comparison.LessThan_Unsigned: return Clt_Un;
+				default: return null;
+			}
+		}
 		#endregion
 
 		#region Variable References
