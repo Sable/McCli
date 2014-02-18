@@ -11,16 +11,16 @@ namespace McCli.Compilation.IR
 	/// </summary>
 	public sealed class LoadCall : Expression
 	{
+		public readonly ImmutableArray<Variable> Targets;
 		public readonly Variable Subject;
 		public readonly ImmutableArray<Variable> Arguments;
-		public readonly ImmutableArray<Variable> Targets;
 		public readonly bool Cell;
 
-		public LoadCall(Variable subject, ImmutableArray<Variable> arguments, ImmutableArray<Variable> targets, bool cell = false)
+		public LoadCall(ImmutableArray<Variable> targets, Variable subject, ImmutableArray<Variable> arguments, bool cell = false)
 		{
+			this.Targets = targets;
 			this.Subject = subject;
 			this.Arguments = arguments;
-			this.Targets = targets;
 			this.Cell = cell;
 		}
 

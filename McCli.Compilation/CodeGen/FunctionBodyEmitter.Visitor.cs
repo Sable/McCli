@@ -121,7 +121,30 @@ namespace McCli.Compilation.CodeGen
 		{
 			Contract.Assert(!storeIndexed.Cell);
 
-			throw new NotImplementedException();
+			var arrayRepr = storeIndexed.Array.StaticRepr;
+			if (arrayRepr.IsArray && storeIndexed.Indices.Length == 1)
+			{
+				// TODO: should not clone the array for each subsasgn!
+				using (BeginEmitStore(storeIndexed.Array))
+				{
+					EmitLoad(storeIndexed.Array);
+					EmitCloneIfNeeded(arrayRepr);
+				}
+
+				EmitLoad(storeIndexed.Array);
+				EmitLoad(storeIndexed.Indices[0]);
+				EmitConversion(storeIndexed.Indices[0].StaticRepr, MClass.Double.ArrayRepr);
+				EmitLoad(storeIndexed.Value);
+				EmitConversion(storeIndexed.Value.StaticRepr, arrayRepr);
+
+				var method = typeof(Utilities).GetMethod("Subsasgn")
+					.MakeGenericMethod(arrayRepr.Type.CliType);
+				cil.Call(method);
+			}
+			else
+			{
+				throw new NotImplementedException();
+			}
 		}
 
 		public override void VisitIf(If @if)

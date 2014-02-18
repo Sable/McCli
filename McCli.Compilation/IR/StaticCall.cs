@@ -12,17 +12,17 @@ namespace McCli.Compilation.IR
 	/// </summary>
 	public sealed class StaticCall : Expression
 	{
+		public readonly ImmutableArray<Variable> Targets;
 		public readonly string Name;
 		public readonly ImmutableArray<Variable> Arguments;
-		public readonly ImmutableArray<Variable> Targets;
 
-		public StaticCall(string name, ImmutableArray<Variable> arguments, ImmutableArray<Variable> targets)
+		public StaticCall(ImmutableArray<Variable> targets, string name, ImmutableArray<Variable> arguments)
 		{
 			Contract.Requires(name != null);
 
+			this.Targets = targets;
 			this.Name = name;
 			this.Arguments = arguments;
-			this.Targets = targets;
 		}
 
 		public override void Accept(Visitor visitor)

@@ -55,7 +55,7 @@ namespace McCli
 
 			var function = CompileFunction<Func<MArray<double>, MArray<double>>>(
 				new[] { doubleArrayInput }, doubleArrayOutput,
-				new Copy(doubleArrayInput, doubleArrayOutput));
+				new Copy(doubleArrayOutput, doubleArrayInput));
 
 			var argument = MFullArray<double>.CreateScalar(42);
 			var result = function(argument);
@@ -70,7 +70,7 @@ namespace McCli
 		{
 			var function = CompileFunction<Func<MArray<double>>>(
 				null, doubleArrayOutput,
-				new StaticCall("eye", ImmutableArray.Empty, doubleArrayOutput));
+				new StaticCall(doubleArrayOutput, "eye", ImmutableArray.Empty));
 
 			var result = function();
 			Assert.AreEqual(result.ToScalar(), 1.0);
@@ -102,7 +102,7 @@ namespace McCli
 		{
 			var function = CompileFunction<Func<MArray<double>, MArray<double>, MArray<double>>>(
 				new[] { doubleArrayInput, doubleArrayInput2 }, doubleArrayOutput,
-				new StaticCall("plus", new[] { doubleArrayInput, doubleArrayInput2 }, doubleArrayOutput));
+				new StaticCall(doubleArrayOutput, "plus", new[] { doubleArrayInput, doubleArrayInput2 }));
 
 			var arg1 = new MFullArray<double>(2, 1);
 			arg1[0] = 42;
@@ -118,7 +118,7 @@ namespace McCli
 		{
 			var function = CompileFunction<Func<MArray<double>, MArray<double>, MArray<double>>>(
 				new[] { doubleArrayInput, doubleArrayInput2 }, doubleArrayOutput,
-				new LoadCall(doubleArrayInput, doubleArrayInput2, doubleArrayOutput));
+				new LoadCall(doubleArrayOutput, doubleArrayInput, doubleArrayInput2));
 
 			var arg1 = new MFullArray<double>(2, 1);
 			arg1[0] = 42;
@@ -131,6 +131,11 @@ namespace McCli
 		[TestMethod]
 		public void TestArrayStore()
 		{
+			// function result = subsasgn(array, index, value)
+			//   array(index) = value;
+			//   result = array;
+			// end
+
 			var function = CompileFunction<Func<MArray<double>, MArray<double>, MArray<double>, MArray<double>>>(
 				new[] { doubleArrayInput, doubleArrayInput2, doubleArrayInput3 }, doubleArrayOutput,
 				new StoreIndexed(doubleArrayInput, doubleArrayInput2, doubleArrayInput3),
@@ -170,12 +175,12 @@ namespace McCli
 
 			var function = CompileFunction<Func<MArray<double>, MArray<double>>>(
 				new[] { doubleArrayInput }, doubleArrayOutput,
-				new Copy(doubleArrayInput, doubleArrayOutput),
+				new Copy(doubleArrayOutput, doubleArrayInput),
 				new Literal(doubleArrayLocal1, 100.0),
-				new StaticCall("lt", new[] { doubleArrayOutput, doubleArrayLocal1 }, logicalArrayLocal),
+				new StaticCall(logicalArrayLocal, "lt", new[] { doubleArrayOutput, doubleArrayLocal1 }),
 				new While(logicalArrayLocal, 
-					new StaticCall("times", new[] { doubleArrayOutput, doubleArrayInput }, doubleArrayOutput),
-					new StaticCall("lt", new[] { doubleArrayOutput, doubleArrayLocal1 }, logicalArrayLocal)
+					new StaticCall(doubleArrayOutput, "times", new[] { doubleArrayOutput, doubleArrayInput }),
+					new StaticCall(logicalArrayLocal, "lt", new[] { doubleArrayOutput, doubleArrayLocal1 })
 				));
 
 			Assert.AreEqual(125.0, function(MFullArray<double>.CreateScalar(5)).ToScalar());
@@ -240,7 +245,7 @@ namespace McCli
 				new[] { valuesInput }, totalOutput,
 				new Literal(totalOutput, 0.0),
 				new For(valueVariable, valuesInput,
-					new StaticCall("plus", new[] { totalOutput, valueVariable }, totalOutput)
+					new StaticCall(totalOutput, "plus", new[] { totalOutput, valueVariable })
 				));
 
 			Assert.AreEqual(0.0, function(MFullArray<double>.CreateEmpty()).ToScalar());
