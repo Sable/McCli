@@ -1,5 +1,6 @@
 Subscript indices must either be real positive integers or logicals
 Trailing "1" indices ignored
+Overloading on output count
 Cell arrays
 	Default cell value is empty double array
 	CellArray(...) returns smaller cell arrays

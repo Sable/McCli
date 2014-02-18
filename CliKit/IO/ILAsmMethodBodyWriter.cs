@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using OperandType = System.Reflection.Emit.OperandType;
 
 namespace CliKit.IO
 {
@@ -28,12 +30,37 @@ namespace CliKit.IO
 			}
 		}
 
+		private struct LocalInfo
+		{
+			public readonly string Name;
+			public readonly Type Type;
+			public readonly bool Pinned;
+
+			public LocalInfo(string name, Type type, bool pinned)
+			{
+				this.Name = name;
+				this.Type = type;
+				this.Pinned = pinned;
+			}
+		}
+
 		#region Fields
 		private readonly StringBuilder stringBuilder = new StringBuilder();
-		private readonly List<string> localNames = new List<string>();
+		private readonly string[] argumentNames;
+		private readonly List<LocalInfo> locals = new List<LocalInfo>();
+		private readonly string generatedLocalNamePrefix;
+		private int generatedLocalNameCount;
 		#endregion
 
 		#region Constructors
+		public ILAsmMethodBodyWriter(string[] argumentNames, string generatedLocalNamePrefix)
+		{
+			Contract.Requires(argumentNames != null);
+			Contract.Requires(generatedLocalNamePrefix != null);
+
+			this.argumentNames = (string[])argumentNames.Clone();
+			this.generatedLocalNamePrefix = generatedLocalNamePrefix;
+		}
 		#endregion
 
 		#region Properties
@@ -58,24 +85,63 @@ namespace CliKit.IO
 
 		public override int DeclareLocal(Type type, bool pinned, string name)
 		{
+			if (name == null)
+			{
+				name = generatedLocalNamePrefix + generatedLocalNameCount;
+				generatedLocalNameCount++;
+			}
+
 			stringBuilder.AppendLine(".locals " + type.FullName + ' ' + name);
-			localNames.Add(name);
-			return localNames.Count - 1;
+			locals.Add(new LocalInfo(name, type, pinned));
+			return locals.Count - 1;
 		}
 
 		public override void Instruction(Opcode opcode, NumericalOperand operand)
 		{
-			var variableReferenceOpcode = opcode as VariableReferenceOpcode;
-			if (variableReferenceOpcode != null
-				&& variableReferenceOpcode.VariableKind == VariableKind.Local)
+			stringBuilder.Append(opcode.Name);
+			if (opcode.OperandType == OperandType.InlineNone)
 			{
-				int localIndex = variableReferenceOpcode.ConstantIndex ?? operand.IntValue;
-				stringBuilder.AppendLine(opcode.Name + ' ' + localNames[localIndex]);
+				stringBuilder.AppendLine();
+				return;
 			}
-			else
+
+			stringBuilder.Append(' ');
+			switch (opcode.OperandType)
 			{
-				stringBuilder.AppendLine(opcode.Name);
+				case OperandType.InlineVar:
+				case OperandType.ShortInlineVar:
+				{
+					// TODO: Use index if variable has no name
+					int variableIndex = operand.IntValue;
+					bool isLocal = ((VariableReferenceOpcode)opcode).VariableKind == VariableKind.Local;
+					stringBuilder.Append(isLocal ? locals[variableIndex].Name : argumentNames[variableIndex]);
+					break;
+				}
+
+				case OperandType.InlineI:
+				case OperandType.ShortInlineI:
+				case OperandType.InlineBrTarget:
+				case OperandType.ShortInlineBrTarget:
+					stringBuilder.Append(operand.IntValue);
+					break;
+
+				case OperandType.InlineI8:
+					stringBuilder.Append(operand.Int64Constant);
+					break;
+
+				case OperandType.InlineR:
+					stringBuilder.Append(operand.Float64Constant);
+					break;
+
+				case OperandType.ShortInlineR:
+					stringBuilder.Append(operand.Float32Constant);
+					break;
+
+				default:
+					throw new NotSupportedException();
 			}
+
+			stringBuilder.AppendLine();
 		}
 
 		public override void LoadString(string str)
