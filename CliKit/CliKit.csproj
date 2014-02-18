@@ -40,7 +40,7 @@
     <Compile Include="Conversions.cs" />
     <Compile Include="IO\ILAsmMethodBodyWriter.cs" />
     <Compile Include="IO\ILGeneratorMethodBodyWriter.cs" />
-    <Compile Include="IO\IMetadataTokenProvider.cs" />
+    <Compile Include="IO\MethodBodyVerifier.cs" />
     <Compile Include="IO\MethodBodyWriter.cs" />
     <Compile Include="IO\RawInstructionSink.cs" />
     <Compile Include="IO\Label.cs" />

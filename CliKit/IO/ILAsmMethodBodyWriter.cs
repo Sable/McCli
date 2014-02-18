@@ -83,6 +83,11 @@ namespace CliKit.IO
 			stringBuilder.AppendLine("ldstr \"" + str + '"');
 		}
 
+		public override void LoadToken(MemberInfo member)
+		{
+			stringBuilder.AppendLine("ldtoken " + member.Name);
+		}
+
 		public override void Instruction(Opcode opcode, Type type)
 		{
 			stringBuilder.AppendLine(opcode.Name + ' ' + type.FullName);
@@ -93,9 +98,9 @@ namespace CliKit.IO
 			stringBuilder.AppendLine(opcode.Name + ' ' + field.DeclaringType.FullName + '.' + field.Name);
 		}
 
-		public override void Call(CallOpcode opcode, MemberInfo member)
+		public override void Call(CallOpcode opcode, MethodBase method)
 		{
-			stringBuilder.AppendLine(opcode.Name + ' ' + member.DeclaringType.FullName + '.' + member.Name);
+			stringBuilder.AppendLine(opcode.Name + ' ' + method.DeclaringType.FullName + '.' + method.Name);
 		}
 
 		public override void Switch(int[] jumpTable)
@@ -108,7 +113,7 @@ namespace CliKit.IO
 			stringBuilder.AppendLine("switch");
 		}
 
-		protected override void Branch(BranchOpcode opcode, Label target)
+		public override void Branch(BranchOpcode opcode, Label target)
 		{
 			stringBuilder.AppendLine(opcode.Name + ' ' + target.DebugName);
 		}

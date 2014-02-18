@@ -53,13 +53,6 @@ namespace CliKit.IO
 		}
 		#endregion
 
-		#region Properties
-		public override IMetadataTokenProvider MetadataTokenProvider
-		{
-			get { return null; } // TODO: Implement in terms of DynamicILInfo?
-		}
-		#endregion
-
 		#region Methods
 		public override int DeclareLocal(Type type, bool pinned, string name)
 		{
@@ -92,18 +85,18 @@ namespace CliKit.IO
 			generator.Emit(OpCodes.Ldstr, str);
 		}
 
-		public override void Call(CallOpcode opcode, MemberInfo member)
+		public override void Call(CallOpcode opcode, MethodBase method)
 		{
 			OpCode emitOpCode;
 			opcode.GetReflectionEmitOpCode(out emitOpCode);
 
 			switch (opcode.Kind)
 			{
-				case CallKind.EarlyBound: generator.Emit(OpCodes.Call, (MethodInfo)member); break;
-				case CallKind.Virtual: generator.Emit(OpCodes.Callvirt, (MethodInfo)member); break;
-				case CallKind.Jump: generator.Emit(OpCodes.Call, (MethodInfo)member); break;
-				case CallKind.Constructor: generator.Emit(OpCodes.Newobj, (ConstructorInfo)member); break;
-				default: base.Call(opcode, member); break; // Let the base class handle failures
+				case CallKind.EarlyBound: generator.Emit(OpCodes.Call, (MethodInfo)method); break;
+				case CallKind.Virtual: generator.Emit(OpCodes.Callvirt, (MethodInfo)method); break;
+				case CallKind.Jump: generator.Emit(OpCodes.Call, (MethodInfo)method); break;
+				case CallKind.Constructor: generator.Emit(OpCodes.Newobj, (ConstructorInfo)method); break;
+				default: throw new ArgumentException("opcode");
 			}
 		}
 
@@ -162,7 +155,7 @@ namespace CliKit.IO
 			generator.Emit(OpCodes.Switch, emitLabels);
 		}
 
-		protected override void Branch(BranchOpcode opcode, Label target)
+		public override void Branch(BranchOpcode opcode, Label target)
 		{
 			OpCode emitOpCode;
 			opcode.GetReflectionEmitOpCode(out emitOpCode);

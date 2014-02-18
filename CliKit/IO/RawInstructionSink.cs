@@ -56,6 +56,11 @@ namespace CliKit.IO
 			Instruction(Opcode.Ldc_R8, value);
 		}
 
+		public void LoadNull()
+		{
+			Instruction(Opcode.Ldnull);
+		}
+
 		public void Load(VariableLocation location)
 		{
 			Instruction(Opcode.Load(location), location.Index);

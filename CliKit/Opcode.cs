@@ -314,6 +314,7 @@ namespace CliKit
 		public static readonly VariableReferenceOpcode Ldloc_S = new VariableReferenceOpcode(OpCodes.Ldloc_S);
 		public static readonly VariableReferenceOpcode Ldloca = new VariableReferenceOpcode(OpCodes.Ldloca);
 		public static readonly VariableReferenceOpcode Ldloca_S = new VariableReferenceOpcode(OpCodes.Ldloca_S);
+		public static readonly LoadConstantOpcode Ldnull = new LoadConstantOpcode(OpCodes.Ldnull);
 		public static readonly FieldReferenceOpcode Ldsfld = new FieldReferenceOpcode(OpCodes.Ldsfld);
 		public static readonly FieldReferenceOpcode Ldsflda = new FieldReferenceOpcode(OpCodes.Ldsflda);
 		public static readonly LoadConstantOpcode Ldstr = new LoadConstantOpcode(OpCodes.Ldstr);

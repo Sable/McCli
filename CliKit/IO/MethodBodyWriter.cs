@@ -14,60 +14,20 @@ namespace CliKit.IO
 	/// </summary>
 	public abstract class MethodBodyWriter : RawInstructionSink
 	{
-		#region Properties
-		/// <summary>
-		/// Gets the <see cref="IMetadataTokenProvider"/> to be used
-		/// to convert symboling operand values into metadata tokens.
-		/// Can return <c>null</c>.
-		/// </summary>
-		public virtual IMetadataTokenProvider MetadataTokenProvider
-		{
-			get { return null; }
-		}
-		#endregion
-
 		#region Methods
 		#region Overridables
 		public abstract int DeclareLocal(Type type, bool pinned, string name);
 
 		public abstract Label CreateLabel(string name);
 		public abstract void MarkLabel(Label label);
+
+		public abstract void Branch(BranchOpcode opcode, Label target);
+		public abstract void Call(CallOpcode opcode, MethodBase method);
+		public abstract void FieldReference(FieldReferenceOpcode opcode, FieldInfo field);
+		public abstract void Instruction(Opcode opcode, Type type);
+		public abstract void LoadString(string str);
+		public abstract void LoadToken(MemberInfo member);
 		public abstract void Switch(Label[] jumpTable);
-		protected abstract void Branch(BranchOpcode opcode, Label target);
-
-		public virtual void LoadString(string str)
-		{
-			Contract.Requires(str != null);
-			Instruction(Opcode.Ldstr, GetMetadataTokenProviderOrThrow().GetStringToken(str));
-		}
-
-		public virtual void Call(CallOpcode opcode, MemberInfo member)
-		{
-			Contract.Requires(opcode.Kind != CallKind.Indirect);
-			Contract.Requires(member != null);
-			Instruction(opcode, GetMetadataTokenProviderOrThrow().GetMemberToken(member));
-		}
-
-		public virtual void FieldReference(FieldReferenceOpcode opcode, FieldInfo field)
-		{
-			Contract.Requires(opcode != null);
-			Contract.Requires(field != null);
-			Instruction(opcode, GetMetadataTokenProviderOrThrow().GetMemberToken(field));
-		}
-
-		public virtual void LoadToken(MemberInfo member)
-		{
-			Contract.Requires(member != null);
-			Instruction(Opcode.Ldtoken, GetMetadataTokenProviderOrThrow().GetMemberToken(member));
-		}
-
-		public virtual void Instruction(Opcode opcode, Type type)
-		{
-			Contract.Requires(opcode != null);
-			Contract.Assert(opcode.OperandType == Emit.OperandType.InlineType || opcode.OperandType == Emit.OperandType.InlineTok);
-			Contract.Requires(type != null);
-			Instruction(opcode, GetMetadataTokenProviderOrThrow().GetMemberToken(type));
-		}
 		#endregion
 
 		#region Helpers
@@ -143,13 +103,6 @@ namespace CliKit.IO
 		{
 			Contract.Requires(target != null);
 			Branch(Opcode.Br, target);
-		}
-
-		private IMetadataTokenProvider GetMetadataTokenProviderOrThrow()
-		{
-			var provider = MetadataTokenProvider;
-			if (provider == null) throw new NotSupportedException("No metadata token provider available.");
-			return provider;
 		}
 		#endregion
 		#endregion

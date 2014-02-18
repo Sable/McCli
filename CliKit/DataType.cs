@@ -101,6 +101,25 @@ namespace CliKit
 				{ "u8", DataType.UInt64 },
 			};
 
+		private static readonly Dictionary<Type, DataType> ctsDataTypes
+			= new Dictionary<Type, DataType>()
+		{
+			{ typeof(sbyte), DataType.Int8 },
+			{ typeof(short), DataType.Int16 },
+			{ typeof(int), DataType.Int32 },
+			{ typeof(long), DataType.Int64 },
+			{ typeof(IntPtr), DataType.NativeInt },
+			{ typeof(byte), DataType.UInt8 },
+			{ typeof(ushort), DataType.UInt16 },
+			{ typeof(uint), DataType.UInt32 },
+			{ typeof(ulong), DataType.UInt64 },
+			{ typeof(UIntPtr), DataType.NativeUInt },
+			{ typeof(float), DataType.Float32 },
+			{ typeof(double), DataType.Float64 },
+			{ typeof(char), DataType.UInt16 },
+			{ typeof(bool), DataType.UInt8 },
+		};
+
 		private static bool MatchesMask(DataType type, int mask)
 		{
 			return ((1 << (int)type) & mask) != 0;
@@ -112,6 +131,18 @@ namespace CliKit
 			Contract.Requires(name != null);
 			DataType dataType;
 			return nameInOpcode.TryGetValue(name, out dataType) ? dataType : (DataType?)null;
+		}
+
+		public static DataType FromCtsType(Type type)
+		{
+			Contract.Requires(type != null && !type.IsGenericTypeDefinition && !type.IsGenericParameter);
+
+			DataType dataType;
+			if (ctsDataTypes.TryGetValue(type, out dataType)) return dataType;
+
+			if (type.IsValueType) return DataType.ValueType;
+			if (type.IsByRef) return DataType.NormalMutabilityManagedPointer;
+			return DataType.ObjectReference;
 		}
 
 		[Pure]
