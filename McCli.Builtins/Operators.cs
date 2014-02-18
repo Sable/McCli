@@ -5,108 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace McCli
+namespace McCli.Builtins
 {
 	/// <summary>
-	/// Provides implementation of some of MatLab's built-in functions.
+	/// Implements MatLab operators builtins.
 	/// </summary>
-	public static class Builtins
+	public static class Operators
 	{
-		#region Classes
-		public static string @class(MValue value)
-		{
-			Contract.Requires(value != null);
-			return value.Class.Name;
-		}
-
-		public static bool isa(MValue value, MFullArray<char> className)
-		{
-			Contract.Requires(value != null);
-			Contract.Requires(className != null);
-
-			var @class = value.Class;
-			var classNameString = Utilities.AsString(className);
-			if (@class.Name == classNameString) return true;
-
-			// "categories"
-			var classKind = @class.Kind;
-			if (classNameString == "numeric" && (classKind & MClassKinds.NumericMask) != 0) return true;
-			if (classNameString == "float" && (classKind & MClassKinds.FloatMask) != 0) return true;
-			if (classNameString == "integer" && (classKind & MClassKinds.IntegerMask) != 0) return true;
-			return false;
-		}
-
-		public static bool iscell(MValue value)
-		{
-			Contract.Requires(value != null);
-			return value.Class == MClass.Cell;
-		}
-
-		public static bool ischar(MValue value)
-		{
-			Contract.Requires(value != null);
-			return value.Class == MClass.Char;
-		}
-
-		public static bool islogical(MValue value)
-		{
-			Contract.Requires(value != null);
-			return value.Class == MClass.Logical;
-		}
-
-		public static bool isfloat(MValue value)
-		{
-			Contract.Requires(value != null);
-			return (value.Class.Kind & MClassKinds.FloatMask) != 0;
-		}
-
-		public static bool isinteger(MValue value)
-		{
-			Contract.Requires(value != null);
-			return (value.Class.Kind & MClassKinds.IntegerMask) != 0;
-		}
-
-		public static bool isnumeric(MValue value)
-		{
-			Contract.Requires(value != null);
-			return (value.Class.Kind & MClassKinds.NumericMask) != 0;
-		}
-
-		public static bool isreal(MValue value)
-		{
-			Contract.Requires(value != null);
-			return !value.Repr.Type.IsComplex;
-		}
-
-		// TODO: When overloading is implemented,
-		// add concrete-type versions of the is*** type checking builtins above
-		#endregion
-
-		#region Execution Environment
-		public static bool ispc()
-		{
-			var platform = Environment.OSVersion.Platform;
-			return platform == PlatformID.Win32NT
-				|| platform == PlatformID.Win32Windows
-				|| platform == PlatformID.Win32S;
-		}
-
-		public static bool isunix()
-		{
-			return Environment.OSVersion.Platform == PlatformID.Unix;
-		}
-
-		public static bool ismac()
-		{
-			return Environment.OSVersion.Platform == PlatformID.MacOSX;
-		}
-
-		public static bool isstudent()
-		{
-			return false; // !
-		}
-		#endregion
-
 		#region Arithmetic
 		#region Additive
 		public static MFullArray<double> plus(MArray<double> lhs, MArray<double> rhs)
@@ -248,7 +153,7 @@ namespace McCli
 		{
 			Contract.Requires(lhs != null);
 			Contract.Requires(rhs != null);
-			
+
 			if (lhs.IsScalar) return rdivide(lhs[0], rhs);
 			if (rhs.IsScalar) return rdivide(lhs, rhs[0]);
 			if (lhs.Shape != rhs.Shape) throw new MArrayShapeException();
@@ -294,8 +199,8 @@ namespace McCli
 			Contract.Requires(@base != null);
 			Contract.Requires(exponent != null);
 
-			if (@base.IsScalar) 
-			if (exponent.IsScalar) return power(@base, exponent[0]);
+			if (@base.IsScalar)
+				if (exponent.IsScalar) return power(@base, exponent[0]);
 
 			var result = new MFullArray<double>(@base.Shape);
 			for (int i = 0; i < @base.Count; ++i)
@@ -325,7 +230,7 @@ namespace McCli
 		#endregion
 
 		// TODO: matrix multiplication, solves, transpose
-		// TODO: vector dot and cross products
+		// TODO: vector dot and cross products (not in this class)
 		#endregion
 
 		#region Comparison
@@ -404,82 +309,6 @@ namespace McCli
 		}
 		#endregion
 
-		#region Floating Point Stuff
-		#region Rounding
-		public static MArray<double> floor(MArray<double> array)
-		{
-			Contract.Requires(array != null);
-
-			var result = new MFullArray<double>(array.Shape);
-			for (int i = 0; i < result.Count; ++i)
-				result[i] = Math.Floor(array[i]);
-			return result;
-		}
-
-		public static MArray<double> ceil(MArray<double> array)
-		{
-			Contract.Requires(array != null);
-
-			var result = new MFullArray<double>(array.Shape);
-			for (int i = 0; i < result.Count; ++i)
-				result[i] = Math.Ceiling(array[i]);
-			return result;
-		}
-
-		public static MArray<double> round(MArray<double> array)
-		{
-			Contract.Requires(array != null);
-
-			var result = new MFullArray<double>(array.Shape);
-			for (int i = 0; i < result.Count; ++i)
-				result[i] = Math.Round(array[i], MidpointRounding.AwayFromZero);
-			return result;
-		}
-
-		public static MArray<double> fix(MArray<double> array)
-		{
-			Contract.Requires(array != null);
-
-			var result = new MFullArray<double>(array.Shape);
-			for (int i = 0; i < result.Count; ++i)
-				result[i] = Math.Truncate(array[i]);
-			return result;
-		}
-		#endregion
-
-		#region Finite/Infinity/NaN testing
-		public static MArray<bool> isfinite(MArray<double> array)
-		{
-			Contract.Requires(array != null);
-
-			var result = new MFullArray<bool>(array.Shape);
-			for (int i = 0; i < array.Count; ++i)
-				result[i] = !double.IsNaN(array[i]) && !double.IsInfinity(array[i]);
-			return result;
-		}
-
-		public static MArray<bool> isinf(MArray<double> array)
-		{
-			Contract.Requires(array != null);
-
-			var result = new MFullArray<bool>(array.Shape);
-			for (int i = 0; i < array.Count; ++i)
-				result[i] = double.IsInfinity(array[i]);
-			return result;
-		}
-
-		public static MArray<bool> isnan(MArray<double> array)
-		{
-			Contract.Requires(array != null);
-
-			var result = new MFullArray<bool>(array.Shape);
-			for (int i = 0; i < array.Count; ++i)
-				result[i] = double.IsNaN(array[i]);
-			return result;
-		}
-		#endregion
-		#endregion
-
 		#region Colon
 		public static MFullArray<double> colon(double low, double high)
 		{
@@ -491,203 +320,6 @@ namespace McCli
 				array[i] = low + i;
 
 			return array;
-		}
-		#endregion
-
-		#region Array Creation
-		// TODO: numerical coercion for those (can call zeros(int16(4)))
-
-		#region Zeroes
-		public static double zeros()
-		{
-			return 0;
-		}
-
-		public static MFullArray<double> zeros(int n)
-		{
-			Contract.Requires(n >= 0);
-			return zeros(n, n);
-		}
-
-		public static MFullArray<double> zeros(int sz1, int sz2)
-		{
-			Contract.Requires(sz1 >= 0);
-			Contract.Requires(sz2 >= 0);
-			return new MFullArray<double>(sz1, sz2);
-		}
-		#endregion
-
-		#region Ones
-		public static double ones()
-		{
-			return 1;
-		}
-
-		public static MFullArray<double> ones(int n)
-		{
-			Contract.Requires(n >= 0);
-			return ones(n, n);
-		}
-
-		public static MFullArray<double> ones(int sz1, int sz2)
-		{
-			Contract.Requires(sz1 >= 0);
-			Contract.Requires(sz2 >= 0);
-			return MFullArray<double>.ExpandScalar(1, new MArrayShape(sz1, sz2));
-		}
-		#endregion
-
-		#region Eye
-		public static double eye()
-		{
-			return 1;
-		}
-
-		public static MFullArray<double> eye(int n)
-		{
-			Contract.Requires(n >= 0);
-			return eye(n, n);
-		}
-
-		public static MFullArray<double> eye(int sz1, int sz2)
-		{
-			Contract.Requires(sz1 >= 0);
-			Contract.Requires(sz2 >= 0);
-
-			var result = new MFullArray<double>(sz1, sz2);
-			var array = result.BackingArray;
-			for (int i = 0; i < array.Length; ++i)
-				array[i] = (i / sz1) == (i % sz1) ? 1 : 0;
-			return result;
-		}
-		#endregion
-
-		#region True/False
-		public static bool @true() { return true; }
-
-		public static bool @false() { return false; }
-
-		// TODO: Sized true/false
-		#endregion
-
-		// TODO: diag
-		#endregion
-
-		#region Array Shape
-		#region Size & Counting
-		public static double numel(MValue value)
-		{
-			Contract.Requires(value != null);
-			return value.Count;
-		}
-
-		public static double ndims(MValue value)
-		{
-			Contract.Requires(value != null);
-			return value.Shape.DimensionCount;
-		}
-
-		public static MFullArray<double> size(MValue value)
-		{
-			Contract.Requires(value != null);
-
-			var shape = value.Shape;
-			var result = new MFullArray<double>(MArrayShape.RowVector(shape.DimensionCount));
-			for (int i = 0; i < shape.DimensionCount; ++i)
-				result[i] = shape.GetSize(i);
-			return result;
-		}
-
-		public static double length(MValue value)
-		{
-			Contract.Requires(value != null);
-
-			var shape = value.Shape;
-			int result = 0;
-			for (int i = 0; i < shape.DimensionCount; ++i)
-				result = Math.Max(result, shape.GetSize(i));
-			return result;
-		}
-		#endregion
-
-		#region Shape Testing
-		public static bool isempty(MValue value)
-		{
-			Contract.Requires(value != null);
-			return value.IsEmpty;
-		}
-
-		public static bool isscalar(MValue value)
-		{
-			Contract.Requires(value != null);
-			return value.IsScalar;
-		}
-
-		public static bool iscolumn(MValue value)
-		{
-			Contract.Requires(value != null);
-			return value.IsColumnVector;
-		}
-
-		public static bool isrow(MValue value)
-		{
-			Contract.Requires(value != null);
-			return value.IsRowVector;
-		}
-
-		public static bool isvector(MValue value)
-		{
-			Contract.Requires(value != null);
-			return value.Shape.IsVector;
-		}
-
-		public static bool ismatrix(MValue value)
-		{
-			Contract.Requires(value != null);
-			return !value.IsHigherDimensional;
-		}
-		#endregion
-		#endregion
-
-		#region Complex
-		public static MComplex<TReal> complex<[AnyRealNumeric] TReal>(TReal a) where TReal : struct
-		{
-			return new MComplex<TReal>(a);
-		}
-
-		public static MComplex<TReal> complex<[AnyRealNumeric] TReal>(TReal a, TReal b) where TReal : struct
-		{
-			return new MComplex<TReal>(a, b);
-		}
-
-		public static MComplex<double> i()
-		{
-			return new MComplex<double>(0, 1);
-		}
-
-		public static MComplex<double> j()
-		{
-			return new MComplex<double>(0, 1);
-		}
-
-		public static MArray<TReal> real<[AnyRealNumeric] TReal>(MArray<MComplex<TReal>> array) where TReal : struct
-		{
-			Contract.Requires(array != null);
-
-			var result = new MFullArray<TReal>(array.Shape);
-			for (int i = 0; i < array.Count; ++i)
-				result[i] = array[i].RealPart;
-			return result;
-		}
-
-		public static MArray<TReal> imag<[AnyRealNumeric] TReal>(MArray<MComplex<TReal>> array) where TReal : struct
-		{
-			Contract.Requires(array != null);
-
-			var result = new MFullArray<TReal>(array.Shape);
-			for (int i = 0; i < array.Count; ++i)
-				result[i] = array[i].ImaginaryPart;
-			return result;
 		}
 		#endregion
 

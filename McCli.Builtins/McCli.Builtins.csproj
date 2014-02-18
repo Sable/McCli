@@ -4,16 +4,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{A2193EBA-11D1-43A7-9ABA-D1F98C8D6A18}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{DC61C9EA-1A2B-4317-939A-4739A49B56ED}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>McCli</RootNamespace>
-    <AssemblyName>McCli</AssemblyName>
+    <RootNamespace>McCli.Builtins</RootNamespace>
+    <AssemblyName>McCli.Builtins</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -23,7 +22,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -33,40 +31,21 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EmptyArray.cs" />
-    <Compile Include="MArrayShape.cs" />
-    <Compile Include="MArrayShapeException.cs" />
-    <Compile Include="MCell.cs" />
-    <Compile Include="MCellArray.cs" />
-    <Compile Include="MCellClass.cs" />
-    <Compile Include="MClass.cs" />
-    <Compile Include="MClassKinds.cs" />
-    <Compile Include="MComplex.cs" />
-    <Compile Include="MComplexType.cs" />
-    <Compile Include="MFullArray.cs" />
-    <Compile Include="MFunctionHandleClass.cs" />
-    <Compile Include="MPrimitiveClass.cs" />
-    <Compile Include="MStructuralClass.cs" />
-    <Compile Include="MStructuralClass.Classes.cs" />
-    <Compile Include="MRepr.cs" />
-    <Compile Include="MType.cs" />
-    <Compile Include="MTypeLookup.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="Arrays.cs" />
+    <Compile Include="Classes.cs" />
+    <Compile Include="Complex.cs" />
+    <Compile Include="Environment.cs" />
+    <Compile Include="Floats.cs" />
+    <Compile Include="Operators.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="MArray.cs" />
-    <Compile Include="MValue.cs" />
-    <Compile Include="ImmutableArray.Builder.cs" />
-    <Compile Include="ImmutableArray.cs" />
-    <Compile Include="ImmutableArray.Enumerator.cs" />
-    <Compile Include="GenericMTypeAttribute.cs" />
-    <Compile Include="Utilities.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <ProjectReference Include="..\McCli\McCli.csproj">
+      <Project>{a2193eba-11d1-43a7-9aba-d1f98c8d6a18}</Project>
+      <Name>McCli</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
