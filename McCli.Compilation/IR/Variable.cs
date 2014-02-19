@@ -31,7 +31,7 @@ namespace McCli.Compilation.IR
 		/// <summary>
 		/// The constant value of this variable, if available.
 		/// </summary>
-		public readonly MValue ConstantValue;
+		public readonly object ConstantValue;
 		#endregion
 
 		#region Constructors
@@ -49,12 +49,12 @@ namespace McCli.Compilation.IR
 			this.StaticRepr = staticRepr;
 		}
 
-		public Variable(string name, VariableKind kind, MValue constantValue)
+		public Variable(string name, VariableKind kind, object constantValue)
 			: this(name, kind)
 		{
-			Contract.Requires(constantValue != null);
+			Contract.Requires(constantValue is double || constantValue is char);
 
-			this.StaticRepr = constantValue.Repr;
+			this.StaticRepr = MClass.FromCliType(constantValue.GetType());
 			this.ConstantValue = constantValue;
 		}
 		#endregion
