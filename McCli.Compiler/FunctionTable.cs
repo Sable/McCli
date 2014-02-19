@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -69,7 +70,15 @@ namespace McCli.Compiler
 			Contract.Requires(name != null);
 
 			var key = new GroupKey(name, argumentTypes.Length);
-			return functions[key];
+			FunctionInfo function;
+			if (!functions.TryGetValue(key, out function))
+			{
+				string message = string.Format(CultureInfo.InvariantCulture,
+					"No function '{0}' taking {1} arguments.", name, argumentTypes.Length);
+				throw new KeyNotFoundException(message);
+			}
+
+			return function;
 		}
 
 		/// <summary>

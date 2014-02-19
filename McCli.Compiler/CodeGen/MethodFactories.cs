@@ -18,11 +18,7 @@ namespace McCli.Compiler.CodeGen
 		{
 			Contract.Requires(name != null);
 
-			var parameterTypes = new Type[parameters.Length];
-			for (int i = 0; i < parameters.Length; ++i)
-				parameterTypes[i] = parameters[i].Type;
-
-			var method = new DynamicMethod(name, returnType, parameterTypes);
+			var method = new DynamicMethod(name, returnType, GetTypeArray(parameters));
 
 			// Define the input/output parameters
 			for (int i = 0; i < parameters.Length; ++i)
@@ -31,6 +27,33 @@ namespace McCli.Compiler.CodeGen
 			ilGenerator = method.GetILGenerator();
 
 			return method;
+		}
+
+		public static MethodFactory FromTypeBuilder(TypeBuilder typeBuilder, MethodAttributes attributes)
+		{
+			Contract.Requires(typeBuilder != null);
+			Contract.Requires((attributes & MethodAttributes.Static) == MethodAttributes.Static);
+
+			return delegate(string name, ImmutableArray<ParameterDescriptor> parameters,
+				Type returnType, out ILGenerator ilGenerator)
+			{
+				var methodBuilder = typeBuilder.DefineMethod(name, attributes, returnType, GetTypeArray(parameters));
+
+				for (int i = 0; i < parameters.Length; ++i)
+					methodBuilder.DefineParameter(i + 1, parameters[i].Attributes, parameters[i].Name ?? string.Empty);
+
+				ilGenerator = methodBuilder.GetILGenerator();
+
+				return methodBuilder;
+			};
+		}
+
+		private static Type[] GetTypeArray(ImmutableArray<ParameterDescriptor> parameters)
+		{
+			var parameterTypes = new Type[parameters.Length];
+			for (int i = 0; i < parameters.Length; ++i)
+				parameterTypes[i] = parameters[i].Type;
+			return parameterTypes;
 		}
 	}
 }

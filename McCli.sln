@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CliKit", "CliKit\CliKit.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "McCli.Builtins", "McCli.Builtins\McCli.Builtins.csproj", "{DC61C9EA-1A2B-4317-939A-4739A49B56ED}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "McCli.Compiler.CommandLine", "McCli.Compiler.CommandLine\McCli.Compiler.CommandLine.csproj", "{CCF39615-3413-452B-991D-789BE36954DC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{DC61C9EA-1A2B-4317-939A-4739A49B56ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DC61C9EA-1A2B-4317-939A-4739A49B56ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DC61C9EA-1A2B-4317-939A-4739A49B56ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CCF39615-3413-452B-991D-789BE36954DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CCF39615-3413-452B-991D-789BE36954DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CCF39615-3413-452B-991D-789BE36954DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CCF39615-3413-452B-991D-789BE36954DC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
