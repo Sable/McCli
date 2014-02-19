@@ -4,17 +4,15 @@
     <Variables>
       <Variable class="double" complex="false" name="fahrenheit" scalar="true" scope="input"/>
       <Variable class="double" complex="false" name="degree" scalar="true" scope="output"/>
-      <Variable class="double" complex="false" constant="40.0" name="mc_t3" scalar="true" scope="local"/>
+      <Variable class="double" complex="false" constant="32.0" name="mc_t3" scalar="true" scope="local"/>
       <Variable class="double" complex="false" name="mc_t2" scalar="true" scope="local"/>
       <Variable class="double" complex="false" constant="5.0" name="mc_t4" scalar="true" scope="local"/>
       <Variable class="double" complex="false" name="mc_t1" scalar="true" scope="local"/>
       <Variable class="double" complex="false" constant="9.0" name="mc_t5" scalar="true" scope="local"/>
-      <Variable class="double" complex="false" name="mc_t0" scalar="true" scope="local"/>
-      <Variable class="double" complex="false" constant="40.0" name="mc_t6" scalar="true" scope="local"/>
     </Variables>
     <TIRStatementList>
-      <TIRAssignLiteralStmt targetName="mc_t3" type="double" value="40"/>
-      <TIRCallStmt functionName="plus">
+      <TIRAssignLiteralStmt targetName="mc_t3" type="double" value="32"/>
+      <TIRCallStmt functionName="minus">
         <Targets>
           <Name nameId="mc_t2"/>
         </Targets>
@@ -24,7 +22,7 @@
         </Arguments>
       </TIRCallStmt>
       <TIRAssignLiteralStmt targetName="mc_t4" type="double" value="5"/>
-      <TIRCallStmt functionName="mtimes">
+      <TIRCallStmt functionName="times">
         <Targets>
           <Name nameId="mc_t1"/>
         </Targets>
@@ -34,23 +32,13 @@
         </Arguments>
       </TIRCallStmt>
       <TIRAssignLiteralStmt targetName="mc_t5" type="double" value="9"/>
-      <TIRCallStmt functionName="mrdivide">
-        <Targets>
-          <Name nameId="mc_t0"/>
-        </Targets>
-        <Arguments>
-          <Name nameId="mc_t1"/>
-          <Name nameId="mc_t5"/>
-        </Arguments>
-      </TIRCallStmt>
-      <TIRAssignLiteralStmt targetName="mc_t6" type="double" value="40"/>
-      <TIRCallStmt functionName="minus">
+      <TIRCallStmt functionName="rdivide">
         <Targets>
           <Name nameId="degree"/>
         </Targets>
         <Arguments>
-          <Name nameId="mc_t0"/>
-          <Name nameId="mc_t6"/>
+          <Name nameId="mc_t1"/>
+          <Name nameId="mc_t5"/>
         </Arguments>
       </TIRCallStmt>
     </TIRStatementList>

@@ -168,20 +168,22 @@ namespace McCli.Compiler.CodeGen
 
 			if (source.Type == target.Type)
 			{
+				var type = source.Type;
+
 				if (source.StructuralClass == MStructuralClass.Scalar
 					&& (target.StructuralClass == MStructuralClass.Array
 						|| target.StructuralClass == MStructuralClass.FullArray
 						|| target.IsAny))
 				{
 					// Box a scalar to an array
-					cil.Call(typeof(MFullArray<>).MakeGenericType(source.CliType).GetMethod("CreateScalar"));
+					cil.Call(typeof(MFullArray<>).MakeGenericType(type.CliType).GetMethod("CreateScalar"));
 					return;
 				}
 				else if (source.IsArray
 					&& target.StructuralClass == MStructuralClass.Scalar)
 				{
 					// Convert an array assumed to have size 1x1 to a scalar.
-					cil.Call(typeof(MArray<>).MakeGenericType(source.CliType).GetMethod("ToScalar"));
+					cil.Call(typeof(MArray<>).MakeGenericType(type.CliType).GetMethod("ToScalar"));
 					return;
 				}
 
