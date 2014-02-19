@@ -12,8 +12,7 @@ namespace McCli
 	/// An array in which the value of elements cannot change.
 	/// </summary>
 	/// <typeparam name="T">The type of the elements.</typeparam>
-	[Serializable]
-	public partial struct ImmutableArray<T> : IList<T>, IReadOnlyList<T>
+	public partial struct ImmutableArray<T> : IList<T>
 	{
 		#region Fields
 		public static readonly ImmutableArray<T> Empty = CreateNoClone(EmptyArray<T>.Rank1);
@@ -134,11 +133,6 @@ namespace McCli
 		void ICollection<T>.Clear()
 		{
 			throw new NotSupportedException();
-		}
-
-		int IReadOnlyCollection<T>.Count
-		{
-			get { return length; }
 		}
 
 		void IList<T>.Insert(int index, T item)

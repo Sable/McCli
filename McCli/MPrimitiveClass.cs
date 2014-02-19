@@ -51,7 +51,7 @@ namespace McCli
 
 		public override int FixedSizeInBytes
 		{
-			get { return cliType.StructLayoutAttribute.Size; }
+			get { throw new NotImplementedException(); }
 		}
 
 		/// <summary>

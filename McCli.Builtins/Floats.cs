@@ -33,25 +33,8 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		public static MArray<double> round(MArray<double> array)
-		{
-			Contract.Requires(array != null);
-
-			var result = new MFullArray<double>(array.Shape);
-			for (int i = 0; i < result.Count; ++i)
-				result[i] = Math.Round(array[i], MidpointRounding.AwayFromZero);
-			return result;
-		}
-
-		public static MArray<double> fix(MArray<double> array)
-		{
-			Contract.Requires(array != null);
-
-			var result = new MFullArray<double>(array.Shape);
-			for (int i = 0; i < result.Count; ++i)
-				result[i] = Math.Truncate(array[i]);
-			return result;
-		}
+		// TODO: Reimplement round and fix now that this is a portable class library
+		// (no Math.Truncate or MidpointRounding.AwayFromZero).
 		#endregion
 
 		#region Finite/Infinity/NaN testing
