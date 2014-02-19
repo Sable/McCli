@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace McCli.Compilation.CodeGen
+namespace McCli.Compiler.CodeGen
 {
 	public delegate FunctionInfo FunctionLookup(string name, ImmutableArray<MRepr> argumentTypes);
 }

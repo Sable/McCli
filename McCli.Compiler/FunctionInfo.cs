@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace McCli.Compilation
+namespace McCli.Compiler
 {
 	public sealed class FunctionInfo
 	{

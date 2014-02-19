@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace McCli.Compilation.IR
+namespace McCli.Compiler.IR
 {
 	/// <summary>
 	/// An expression in which an array's element is loaded, or a function handle is called.

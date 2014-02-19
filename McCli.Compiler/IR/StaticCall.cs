@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace McCli.Compilation.IR
+namespace McCli.Compiler.IR
 {
 	/// <summary>
 	/// A call to a "statically" resolved function (not through a function handle).

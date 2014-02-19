@@ -64,7 +64,7 @@
       <Project>{dc61c9ea-1a2b-4317-939a-4739a49b56ed}</Project>
       <Name>McCli.Builtins</Name>
     </ProjectReference>
-    <ProjectReference Include="..\McCli.Compilation\McCli.Compilation.csproj">
+    <ProjectReference Include="..\McCli.Compiler\McCli.Compiler.csproj">
       <Project>{075ef8b5-d4b5-495b-b118-1d423d10545d}</Project>
       <Name>McCli.Compilation</Name>
     </ProjectReference>

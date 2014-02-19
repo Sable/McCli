@@ -7,7 +7,7 @@ using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace McCli.Compilation.CodeGen
+namespace McCli.Compiler.CodeGen
 {
 	public delegate MethodInfo MethodFactory(string name,
 		ImmutableArray<ParameterDescriptor> parameters, Type returnType,

@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace McCli.Compilation.IR
+namespace McCli.Compiler.IR
 {
 	/// <summary>
 	/// Reads Tamer IR from its XML-serialized representation.

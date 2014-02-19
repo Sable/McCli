@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace McCli.Compilation.IR
+namespace McCli.Compiler.IR
 {
-	public abstract class Statement : Node
+	public abstract class ControlFlow : Statement
 	{
 	}
 }

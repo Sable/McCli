@@ -1,6 +1,6 @@
 ﻿using CliKit;
 using CliKit.IO;
-using McCli.Compilation.IR;
+using McCli.Compiler.IR;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
@@ -9,9 +9,9 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using ILGenerator = System.Reflection.Emit.ILGenerator;
-using VariableKind = McCli.Compilation.IR.VariableKind;
+using VariableKind = McCli.Compiler.IR.VariableKind;
 
-namespace McCli.Compilation.CodeGen
+namespace McCli.Compiler.CodeGen
 {
 	/// <summary>
 	/// Generates the IL bytecode for MatLab function bodies.

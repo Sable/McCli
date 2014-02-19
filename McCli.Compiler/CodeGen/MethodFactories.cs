@@ -8,7 +8,7 @@ using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace McCli.Compilation.CodeGen
+namespace McCli.Compiler.CodeGen
 {
 	public static class MethodFactories
 	{

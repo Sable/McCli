@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace McCli.Compilation.IR
+namespace McCli.Compiler.IR
 {
 	/// <summary>
 	/// Represents a MatLab while loop.

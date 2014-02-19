@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "McCli", "McCli\McCli.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "McCli.Tests", "McCli.Tests\McCli.Tests.csproj", "{BCA05895-5A10-4A6D-8CCC-F90093E91B88}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "McCli.Compilation", "McCli.Compilation\McCli.Compilation.csproj", "{075EF8B5-D4B5-495B-B118-1D423D10545D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "McCli.Compiler", "McCli.Compiler\McCli.Compiler.csproj", "{075EF8B5-D4B5-495B-B118-1D423D10545D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CliKit", "CliKit\CliKit.csproj", "{0362B49E-A098-461F-A0C0-C558B8A75E75}"
 EndProject

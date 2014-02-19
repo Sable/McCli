@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace McCli.Compilation.IR
+namespace McCli.Compiler.IR
 {
 	/// <summary>
 	/// Represents the MatLab for loop construct.

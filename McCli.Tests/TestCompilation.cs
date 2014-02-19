@@ -1,6 +1,6 @@
-﻿using McCli.Compilation;
-using McCli.Compilation.CodeGen;
-using McCli.Compilation.IR;
+﻿using McCli.Compiler;
+using McCli.Compiler.CodeGen;
+using McCli.Compiler.IR;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;

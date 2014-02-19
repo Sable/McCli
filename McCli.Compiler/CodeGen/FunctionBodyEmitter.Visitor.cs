@@ -1,6 +1,6 @@
 ﻿using CliKit;
 using CliKit.IO;
-using McCli.Compilation.IR;
+using McCli.Compiler.IR;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
@@ -9,7 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace McCli.Compilation.CodeGen
+namespace McCli.Compiler.CodeGen
 {
 	partial class FunctionBodyEmitter : Visitor
 	{
