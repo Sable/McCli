@@ -10,6 +10,7 @@ namespace McCli.Builtins
 	/// <summary>
 	/// Implements MatLab operators builtins.
 	/// </summary>
+	[MatlabLibrary]
 	public static class Operators
 	{
 		#region Arithmetic

@@ -10,6 +10,7 @@ namespace McCli.Builtins
 	/// <summary>
 	/// Implements MatLab builtins which relate to floating-point values.
 	/// </summary>
+	[MatlabLibrary]
 	public static class Floats
 	{
 		#region Rounding

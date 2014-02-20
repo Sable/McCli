@@ -10,6 +10,7 @@ namespace McCli.Builtins
 	/// <summary>
 	/// Implements MatLab builtins related to complex/imaginary numbers.
 	/// </summary>
+	[MatlabLibrary]
 	public static class Complex
 	{
 		public static MComplex<TReal> complex<[AnyRealNumeric] TReal>(TReal a) where TReal : struct

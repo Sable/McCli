@@ -11,6 +11,7 @@ namespace McCli.Builtins
 	/// <summary>
 	/// Implements MatLab builtins which relate to the execution environment.
 	/// </summary>
+	[MatlabLibrary]
 	public static class Environment
 	{
 		// TODO: Find a way to reimplement ispc, isunix and ismac now that this is in a portable class library

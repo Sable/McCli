@@ -10,6 +10,7 @@ namespace McCli.Builtins
 	/// <summary>
 	/// Implements MatLab builtins which deal with classes and type-testing.
 	/// </summary>
+	[MatlabLibrary]
 	public static class Classes
 	{
 		public static string @class(MValue value)

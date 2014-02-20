@@ -66,6 +66,7 @@
     <Compile Include="EmptyArray.cs" />
     <Compile Include="MArrayShape.cs" />
     <Compile Include="MArrayShapeException.cs" />
+    <Compile Include="MatlabLibraryAttribute.cs" />
     <Compile Include="MCell.cs" />
     <Compile Include="MCellArray.cs" />
     <Compile Include="MCellClass.cs" />

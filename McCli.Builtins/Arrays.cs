@@ -10,6 +10,7 @@ namespace McCli.Builtins
 	/// <summary>
 	/// Implements array-related MatLab builtins.
 	/// </summary>
+	[MatlabLibrary]
 	public static class Arrays
 	{
 		#region Array Creation
