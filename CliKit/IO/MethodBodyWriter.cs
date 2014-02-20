@@ -16,8 +16,20 @@ namespace CliKit.IO
 	{
 		#region Methods
 		#region Overridables
+		/// <summary>
+		/// Declares a new local variable.
+		/// </summary>
+		/// <param name="type">The type of the local variable.</param>
+		/// <param name="pinned">A value indicating if it is pinned.</param>
+		/// <param name="name">An optional name for debugging purposes.</param>
+		/// <returns>The index of the local that was declared.</returns>
 		public abstract int DeclareLocal(Type type, bool pinned, string name);
 
+		/// <summary>
+		/// Creates a new label to be used as a branch target.
+		/// </summary>
+		/// <param name="name">An optional name for debugging purposes.</param>
+		/// <returns>The newly created label.</returns>
 		public abstract Label CreateLabel(string name);
 		public abstract void MarkLabel(Label label);
 
@@ -28,6 +40,28 @@ namespace CliKit.IO
 		public abstract void LoadString(string str);
 		public abstract void LoadToken(MemberInfo member);
 		public abstract void Switch(Label[] jumpTable);
+
+		/// <summary>
+		/// Creates a <see cref="Label"/> with a given index value.
+		/// The first label to be created should have index zero,
+		/// and the index should be incremented by one for each subsequent label.
+		/// </summary>
+		/// <param name="index">The index of the label.</param>
+		/// <returns>The newly created label.</returns>
+		protected Label CreateLabel(int index)
+		{
+			return new Label(index);
+		}
+
+		/// <summary>
+		/// Gets the index of the given label.
+		/// </summary>
+		/// <param name="label"></param>
+		/// <returns></returns>
+		protected int GetLabelIndex(Label label)
+		{
+			return label.index;
+		}
 		#endregion
 
 		#region Helpers

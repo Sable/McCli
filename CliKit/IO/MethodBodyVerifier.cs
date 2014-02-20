@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using OperandType = System.Reflection.Emit.OperandType;
 
 namespace CliKit.IO
 {
@@ -33,10 +34,30 @@ namespace CliKit.IO
 			public string Name;
 		}
 
+		private sealed class LabelInfo
+		{
+			public string Name;
+			public StackEntry[] StackState;
+			public bool Marked;
+		}
+
 		#region Fields
+		private readonly MethodBase method;
 		private readonly MethodBodyWriter sink;
 		private readonly List<LocalInfo> locals = new List<LocalInfo>();
+		private readonly List<LabelInfo> labels = new List<LabelInfo>();
 		private readonly List<StackEntry> stack = new List<StackEntry>();
+		#endregion
+
+		#region Constructors
+		public MethodBodyVerifier(MethodBase method, MethodBodyWriter sink)
+		{
+			Contract.Requires(method != null);
+			Contract.Requires(sink != null);
+
+			this.method = method;
+			this.sink = sink;
+		}
 		#endregion
 
 		#region Properties
@@ -61,6 +82,53 @@ namespace CliKit.IO
 			return index;
 		}
 
+		public override Label CreateLabel(string name)
+		{
+			int labelIndex = labels.Count;
+			labels.Add(new LabelInfo { Name = name });
+
+			if (sink != null)
+			{
+				var sinkLabel = sink.CreateLabel(name);
+				Contract.Requires(GetLabelIndex(sinkLabel) == labelIndex);
+			}
+
+			return CreateLabel(labelIndex);
+		}
+
+		public override void MarkLabel(Label label)
+		{
+			var labelInfo = GetLabelInfo(label);
+			if (labelInfo.Marked)
+			{
+				string message = string.Format(CultureInfo.InvariantCulture,
+					"{0} label marked twice.", labelInfo.Name ?? "Unnamed");
+				throw new InvalidOperationException(message);
+			}
+
+			labelInfo.Marked = true;
+
+			SetLabelStackState(labelInfo);
+		}
+
+		public override void Branch(BranchOpcode opcode, Label target)
+		{
+			switch (opcode.BranchKind)
+			{
+				case BranchKind.Unconditional: break;
+
+				// TODO: Check operand types
+				case BranchKind.Boolean: PopStack(); break;
+				case BranchKind.Comparison: PopStack(); PopStack(); break;
+
+				default: throw new NotImplementedException();
+			}
+
+			SetLabelStackState(GetLabelInfo(target));
+
+			if (sink != null) sink.Branch(opcode, target);
+		}
+
 		public override void Call(CallOpcode opcode, MethodBase method)
 		{
 			if (method.DeclaringType.IsGenericTypeDefinition)
@@ -77,6 +145,8 @@ namespace CliKit.IO
 
 			for (int i = parameters.Length - 1; i >= 0; --i)
 				PopAssignableTo(parameters[i].ParameterType);
+
+			if (!method.IsStatic) PopAssignableTo(method.DeclaringType);
 
 			if (sink != null) sink.Call(opcode, method);
 		}
@@ -105,6 +175,14 @@ namespace CliKit.IO
 			if (sink != null) sink.FieldReference(opcode, field);
 		}
 
+		public override void Instruction(Opcode opcode, Type type)
+		{
+			if (opcode.PopCount > 0 || opcode.PushCount > 0)
+				throw new NotImplementedException();
+
+			if (sink != null) sink.Instruction(opcode, type);
+		}
+
 		public override void LoadToken(MemberInfo member)
 		{
 			switch (member.MemberType)
@@ -123,11 +201,68 @@ namespace CliKit.IO
 			if (sink != null) sink.LoadToken(member);
 		}
 
-		public override void Switch(int[] jumpTable)
+		public override void Switch(Label[] jumpTable)
 		{
-			ReportError("Unverifiable switch with integral labels.");
+			StackEntry top;
+			if (TryPopStack(out top) && !top.DataType.IsInteger())
+			{
+				ReportError("Invalid non-integral operand for switch opcode.");
+			}
+
+			foreach (var label in jumpTable)
+				SetLabelStackState(GetLabelInfo(label));
 
 			if (sink != null) sink.Switch(jumpTable);
+		}
+
+		public override void Switch(int[] jumpTable)
+		{
+			StackEntry top;
+			if (TryPopStack(out top) && !top.DataType.IsInteger())
+			{
+				ReportError("Invalid non-integral operand for switch opcode.");
+			}
+
+			// TODO: Report non-verifiable warning?
+
+			if (sink != null) sink.Switch(jumpTable);
+		}
+
+		private LabelInfo GetLabelInfo(Label label)
+		{
+			return labels[GetLabelIndex(label)];
+		}
+
+		private void SetLabelStackState(LabelInfo labelInfo)
+		{
+			if (labelInfo.StackState == null)
+			{
+				labelInfo.StackState = stack.ToArray();
+				return;
+			}
+
+			// TODO: merge stack states
+			throw new NotImplementedException();
+		}
+
+		private bool TryPopStack(out StackEntry stackEntry)
+		{
+			if (stack.Count == 0)
+			{
+				ReportError("Pop operation on empty evaluation stack.");
+				stackEntry = default(StackEntry);
+				return false;
+			}
+
+			stackEntry = stack[stack.Count - 1];
+			stack.RemoveAt(stack.Count - 1);
+			return true;
+		}
+
+		private void PopStack()
+		{
+			StackEntry entry;
+			TryPopStack(out entry);
 		}
 
 		private void PopAssignableTo(Type targetType)

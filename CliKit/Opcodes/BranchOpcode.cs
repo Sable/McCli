@@ -28,31 +28,25 @@ namespace CliKit
 		#endregion
 
 		#region Properties
-		public bool IsUnconditional
+		public BranchKind BranchKind
 		{
-			get { return opcode.StackBehaviourPop == Emit.StackBehaviour.Pop0; }
-		}
-
-		public bool IsConditional
-		{
-			get { return opcode.StackBehaviourPop != Emit.StackBehaviour.Pop0; }
-		}
-
-		public bool IsBoolean
-		{
-			get { return opcode.StackBehaviourPop == Emit.StackBehaviour.Pop1; }
-		}
-
-		public bool IsComparison
-		{
-			get { return opcode.StackBehaviourPop == Emit.StackBehaviour.Pop1_pop1; }
+			get
+			{
+				switch (opcode.StackBehaviourPop)
+				{
+					case Emit.StackBehaviour.Pop0: return CliKit.BranchKind.Unconditional;
+					case Emit.StackBehaviour.Popi: return CliKit.BranchKind.Boolean;
+					case Emit.StackBehaviour.Pop1_pop1: return CliKit.BranchKind.Comparison;
+					default: throw new NotImplementedException();
+				}
+			}
 		}
 
 		public bool Boolean
 		{
 			get
 			{
-				Contract.Requires(IsBoolean);
+				Contract.Requires(BranchKind == CliKit.BranchKind.Boolean);
 				return opcode.Name[2] == 't' ? true : false;
 			}
 		}
@@ -61,7 +55,7 @@ namespace CliKit
 		{
 			get
 			{
-				Contract.Requires(IsComparison);
+				Contract.Requires(BranchKind == CliKit.BranchKind.Comparison);
 				return comparison;
 			}
 		}

@@ -35,6 +35,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArithmeticOperation.cs" />
+    <Compile Include="BranchKind.cs" />
     <Compile Include="CallKind.cs" />
     <Compile Include="Comparison.cs" />
     <Compile Include="Conversions.cs" />

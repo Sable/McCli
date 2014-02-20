@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -14,22 +15,6 @@ namespace CliKit.IO
 	/// </summary>
 	public sealed class ILAsmMethodBodyWriter : MethodBodyWriter
 	{
-		private sealed class TextLabel : Label
-		{
-			public string Name;
-			public bool Marked;
-
-			public override string DebugName
-			{
-				get { return Name; }
-			}
-
-			public override bool IsMarked
-			{
-				get { return Marked; }
-			}
-		}
-
 		private struct LocalInfo
 		{
 			public readonly string Name;
@@ -48,7 +33,9 @@ namespace CliKit.IO
 		private readonly StringBuilder stringBuilder = new StringBuilder();
 		private readonly string[] argumentNames;
 		private readonly List<LocalInfo> locals = new List<LocalInfo>();
+		private readonly List<string> labelNames = new List<string>();
 		private readonly string generatedLocalNamePrefix;
+		private readonly string generatedLabelNamePrefix;
 		private int generatedLocalNameCount;
 		#endregion
 
@@ -67,20 +54,26 @@ namespace CliKit.IO
 		#endregion
 
 		#region Methods
+		public override Label CreateLabel(string name)
+		{
+			if (name == null) name = generatedLabelNamePrefix + labelNames.Count;
+			labelNames.Add(name);
+			return CreateLabel(labelNames.Count);
+		}
+
 		public string GetString()
 		{
 			return stringBuilder.ToString();
 		}
 
-		public override Label CreateLabel(string name)
-		{
-			return new TextLabel { Name = name };
-		}
-
 		public override void MarkLabel(Label label)
 		{
-			((TextLabel)label).Marked = true;
-			stringBuilder.AppendLine(label.DebugName + ":");
+			stringBuilder.AppendLine(GetLabelName(label) + ":");
+		}
+
+		private string GetLabelName(Label label)
+		{
+			return labelNames[GetLabelIndex(label)];
 		}
 
 		public override int DeclareLocal(Type type, bool pinned, string name)
@@ -171,17 +164,29 @@ namespace CliKit.IO
 
 		public override void Switch(int[] jumpTable)
 		{
-			stringBuilder.AppendLine("switch");
+			stringBuilder.Append("switch (");
+			for (int i = 0; i < jumpTable.Length; ++i)
+			{
+				if (i > 0) stringBuilder.Append(", ");
+				stringBuilder.Append(jumpTable[i].ToString(CultureInfo.InvariantCulture));
+			}
+			stringBuilder.AppendLine(")");
 		}
 
 		public override void Switch(Label[] jumpTable)
 		{
-			stringBuilder.AppendLine("switch");
+			stringBuilder.Append("switch (");
+			for (int i = 0; i < jumpTable.Length; ++i)
+			{
+				if (i > 0) stringBuilder.Append(", ");
+				stringBuilder.Append(GetLabelName(jumpTable[i]));
+			}
+			stringBuilder.AppendLine(")");
 		}
 
 		public override void Branch(BranchOpcode opcode, Label target)
 		{
-			stringBuilder.AppendLine(opcode.Name + ' ' + target.DebugName);
+			stringBuilder.AppendLine(opcode.Name + ' ' + GetLabelName(target));
 		}
 		#endregion
 	}

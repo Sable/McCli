@@ -15,33 +15,9 @@ namespace CliKit.IO
 	/// </summary>
 	public sealed class ILGeneratorMethodBodyWriter : MethodBodyWriter
 	{
-		#region LabelAdapter Class
-		private sealed class LabelAdapter : CliKit.IO.Label
-		{
-			public readonly EmitLabel EmitLabel;
-			public readonly string Name;
-			public bool Marked;
-
-			public LabelAdapter(EmitLabel label, string name)
-			{
-				this.EmitLabel = label;
-				this.Name = name;
-			}
-
-			public override string DebugName
-			{
-				get { return Name; }
-			}
-
-			public override bool IsMarked
-			{
-				get { return Marked; }
-			}
-		}
-		#endregion
-
 		#region Fields
 		private readonly ILGenerator generator;
+		private readonly List<EmitLabel> emitLabels = new List<EmitLabel>();
 		private bool supportsDebugInfo = true;
 		#endregion
 
@@ -70,14 +46,13 @@ namespace CliKit.IO
 
 		public override Label CreateLabel(string name)
 		{
-			return new LabelAdapter(generator.DefineLabel(), name);
+			emitLabels.Add(generator.DefineLabel());
+			return CreateLabel(emitLabels.Count - 1);
 		}
 
 		public override void MarkLabel(Label label)
 		{
-			var adapter = (LabelAdapter)label;
-			generator.MarkLabel(adapter.EmitLabel);
-			adapter.Marked = true;
+			generator.MarkLabel(GetEmitLabel(label));
 		}
 
 		public override void LoadString(string str)
@@ -150,7 +125,7 @@ namespace CliKit.IO
 		{
 			var emitLabels = new EmitLabel[jumpTable.Length];
 			for (int i = 0; i < jumpTable.Length; ++i)
-				emitLabels[i] = ((LabelAdapter)jumpTable[i]).EmitLabel;
+				emitLabels[i] = GetEmitLabel(jumpTable[i]);
 
 			generator.Emit(OpCodes.Switch, emitLabels);
 		}
@@ -160,7 +135,12 @@ namespace CliKit.IO
 			OpCode emitOpCode;
 			opcode.GetReflectionEmitOpCode(out emitOpCode);
 
-			generator.Emit(emitOpCode, ((LabelAdapter)target).EmitLabel);
+			generator.Emit(emitOpCode, GetEmitLabel(target));
+		}
+
+		private EmitLabel GetEmitLabel(Label target)
+		{
+			return emitLabels[GetLabelIndex(target)];
 		}
 		#endregion
 	}
