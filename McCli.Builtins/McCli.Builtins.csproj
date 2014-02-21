@@ -40,6 +40,7 @@
   <ItemGroup>
     <Compile Include="Arrays.cs" />
     <Compile Include="Classes.cs" />
+    <Compile Include="CommonMath.cs" />
     <Compile Include="Complex.cs" />
     <Compile Include="Environment.cs" />
     <Compile Include="Floats.cs" />
