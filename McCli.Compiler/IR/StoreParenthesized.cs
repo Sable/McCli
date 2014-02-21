@@ -7,14 +7,16 @@ using System.Threading.Tasks;
 
 namespace McCli.Compiler.IR
 {
-	public sealed class StoreIndexed : Expression
+	/// <summary>
+	/// An IR node for values stored into an array: <c>array(indices) = value</c>.
+	/// </summary>
+	public sealed class StoreParenthesized : Expression
 	{
 		public readonly Variable Array;
 		public readonly ImmutableArray<Variable> Indices;
 		public readonly Variable Value;
-		public readonly bool Cell;
 
-		public StoreIndexed(Variable array, ImmutableArray<Variable> indices, Variable value, bool cell = false)
+		public StoreParenthesized(Variable array, ImmutableArray<Variable> indices, Variable value)
 		{
 			Contract.Requires(array != null);
 			Contract.Requires(value != null);
@@ -22,12 +24,11 @@ namespace McCli.Compiler.IR
 			this.Array = array;
 			this.Indices = indices;
 			this.Value = value;
-			this.Cell = cell;
 		}
 
 		public override void Accept(Visitor visitor)
 		{
-			visitor.VisitStoreIndexed(this);
+			visitor.VisitStoreParenthesized(this);
 		}
 	}
 }

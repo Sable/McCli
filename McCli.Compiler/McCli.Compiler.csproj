@@ -43,13 +43,13 @@
     <Compile Include="CodeGen\MethodFactory.cs" />
     <Compile Include="FunctionInfo.cs" />
     <Compile Include="FunctionTable.cs" />
-    <Compile Include="IR\For.cs" />
+    <Compile Include="IR\Copy.cs" />
+    <Compile Include="IR\RangeFor.cs" />
     <Compile Include="IR\Jump.cs" />
     <Compile Include="IR\JumpKind.cs" />
-    <Compile Include="IR\StoreIndexed.cs" />
+    <Compile Include="IR\StoreParenthesized.cs" />
     <Compile Include="IR\Expression.cs" />
-    <Compile Include="IR\Copy.cs" />
-    <Compile Include="IR\LoadCall.cs" />
+    <Compile Include="IR\LoadParenthesized.cs" />
     <Compile Include="IR\ControlFlow.cs" />
     <Compile Include="IR\Function.cs" />
     <Compile Include="IR\If.cs" />

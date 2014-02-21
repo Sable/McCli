@@ -8,7 +8,8 @@ using System.Threading.Tasks;
 namespace McCli.Compiler.IR
 {
 	/// <summary>
-	/// IR node where the value of a variable is assigned to another.
+	/// IR node where the value of a variable is assigned to another: <c>target = value</c>.
+	/// This only differs from <see cref="LoadParenthesized"/> with zero arguments if the value is a function handle.
 	/// </summary>
 	public sealed class Copy : Expression
 	{

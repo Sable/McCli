@@ -51,7 +51,8 @@ namespace McCli
 		[TestMethod]
 		public void TestCopyAssignment()
 		{
-			// result = copy(x): result = clone(x)
+			// function result = copy(x)
+			//   result = x;
 
 			var function = CompileFunction<Func<MArray<double>, MArray<double>>>(
 				new[] { doubleArrayInput }, doubleArrayOutput,
@@ -118,7 +119,7 @@ namespace McCli
 		{
 			var function = CompileFunction<Func<MArray<double>, MArray<double>, MArray<double>>>(
 				new[] { doubleArrayInput, doubleArrayInput2 }, doubleArrayOutput,
-				new LoadCall(doubleArrayOutput, doubleArrayInput, doubleArrayInput2));
+				new LoadParenthesized(doubleArrayOutput, doubleArrayInput, doubleArrayInput2));
 
 			var arg1 = new MFullArray<double>(2, 1);
 			arg1[0] = 42;
@@ -138,7 +139,7 @@ namespace McCli
 
 			var function = CompileFunction<Func<MArray<double>, MArray<double>, MArray<double>, MArray<double>>>(
 				new[] { doubleArrayInput, doubleArrayInput2, doubleArrayInput3 }, doubleArrayOutput,
-				new StoreIndexed(doubleArrayInput, doubleArrayInput2, doubleArrayInput3),
+				new StoreParenthesized(doubleArrayInput, doubleArrayInput2, doubleArrayInput3),
 				new Copy(doubleArrayOutput, doubleArrayInput));
 
 			var array = MFullArray<double>.CreateScalar(42);
@@ -229,28 +230,31 @@ namespace McCli
 		[TestMethod]
 		public void TestForLoop()
 		{
-			// total = sum(values)
-			// total = 0;
-			// for value = values
-			// {
-			//   total = total + value
-			// }
-			// return total;
+			// function result = factorial(n)
+			//   result = 1;
+			//   for i = 1:n
+			//   {
+			//     result = result * i;
+			//   }
+			//   return result;
 
-			var valuesInput = doubleArrayInput;
-			var totalOutput = doubleArrayOutput;
-			var valueVariable = doubleArrayLocal1;
+			var input = doubleArrayInput;
+			var output = doubleArrayOutput;
+			var iteratorVariable = doubleArrayLocal1;
+			var oneConstant = doubleArrayLocal2;
 
 			var function = CompileFunction<Func<MArray<double>, MArray<double>>>(
-				new[] { valuesInput }, totalOutput,
-				new Literal(totalOutput, 0.0),
-				new For(valueVariable, valuesInput,
-					new StaticCall(totalOutput, "plus", new[] { totalOutput, valueVariable })
+				new[] { input }, output,
+				new Literal(output, 1.0),
+				new Literal(oneConstant, 1.0),
+				new RangeFor(iteratorVariable, oneConstant, null, input,
+					new StaticCall(output, "times", new[] { output, oneConstant })
 				));
 
-			Assert.AreEqual(0.0, function(MFullArray<double>.CreateEmpty()).ToScalar());
-			Assert.AreEqual(42.0, function(MFullArray<double>.CreateScalar(42.0)).ToScalar());
-			Assert.AreEqual(2.0, function(MFullArray<double>.CreateRowVector(1.0, 1.0)).ToScalar());
+			Assert.AreEqual(1.0, function(MFullArray<double>.CreateScalar(0)).ToScalar());
+			Assert.AreEqual(1.0, function(MFullArray<double>.CreateScalar(1)).ToScalar());
+			Assert.AreEqual(2.0, function(MFullArray<double>.CreateScalar(2)).ToScalar());
+			Assert.AreEqual(120.0, function(MFullArray<double>.CreateScalar(5)).ToScalar());
 		}
 	}
 }

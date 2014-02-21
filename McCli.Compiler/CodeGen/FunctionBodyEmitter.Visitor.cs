@@ -19,19 +19,19 @@ namespace McCli.Compiler.CodeGen
 		#endregion
 
 		#region Methods
-		public override void VisitLiteral(Literal literal)
+		public override void VisitLiteral(Literal node)
 		{
-			using (BeginEmitStore(literal.Target))
+			using (BeginEmitStore(node.Target))
 			{
 				MRepr sourceRepr;
-				if (literal.Value is double)
+				if (node.Value is double)
 				{
-					cil.LoadFloat64((double)literal.Value);
+					cil.LoadFloat64((double)node.Value);
 					sourceRepr = MClass.Double.ScalarRepr;
 				}
-				else if (literal.Value is char)
+				else if (node.Value is char)
 				{
-					cil.LoadInt32((int)(char)literal.Value);
+					cil.LoadInt32((int)(char)node.Value);
 					sourceRepr = MClass.Char.ScalarRepr;
 				}
 				else
@@ -39,73 +39,72 @@ namespace McCli.Compiler.CodeGen
 					throw new NotImplementedException();
 				}
 
-				EmitConversion(sourceRepr, literal.Target.StaticRepr);
+				EmitConversion(sourceRepr, node.Target.StaticRepr);
 			}
 		}
 
-		public override void VisitCopy(Copy copy)
+		public override void VisitCopy(Copy node)
 		{
-			Contract.Requires(copy.Value.StaticRepr == copy.Target.StaticRepr);
+			Contract.Requires(node.Value.StaticRepr == node.Target.StaticRepr);
 
-			using (BeginEmitStore(copy.Target))
+			using (BeginEmitStore(node.Target))
 			{
-				EmitLoad(copy.Value);
-				EmitCloneIfNeeded(copy.Value.StaticRepr);
+				EmitLoad(node.Value);
+				EmitCloneIfNeeded(node.Value.StaticRepr);
 
-				EmitConversion(copy.Value.StaticRepr, copy.Target.StaticRepr);
+				EmitConversion(node.Value.StaticRepr, node.Target.StaticRepr);
 			}
 		}
 
-		public override void VisitStaticCall(StaticCall staticCall)
+		public override void VisitStaticCall(StaticCall node)
 		{
-			Contract.Assert(staticCall.Targets.Length == 1);
+			Contract.Assert(node.Targets.Length == 1);
 
-			var argumentTypes = staticCall.Arguments.Select(a => a.StaticRepr);
-			var function = functionLookup(staticCall.Name, argumentTypes);
+			var argumentTypes = node.Arguments.Select(a => a.StaticRepr);
+			var function = functionLookup(node.Name, argumentTypes);
 
-			using (BeginEmitStore(staticCall.Targets[0]))
+			using (BeginEmitStore(node.Targets[0]))
 			{
-				for (int i = 0; i < staticCall.Arguments.Length; ++i)
+				for (int i = 0; i < node.Arguments.Length; ++i)
 				{
-					var argument = staticCall.Arguments[i];
+					var argument = node.Arguments[i];
 					EmitLoad(argument);
 					EmitConversion(argument.StaticRepr, function.InputTypes[i]);
 				}
 
 				cil.Call(function.Method);
-				EmitConversion(function.OutputType, staticCall.Targets[0].StaticRepr);
+				EmitConversion(function.OutputType, node.Targets[0].StaticRepr);
 			}
 		}
 
-		public override void VisitLoadCall(LoadCall loadCall)
+		public override void VisitLoadParenthesized(LoadParenthesized node)
 		{
-			Contract.Assert(!loadCall.Cell);
-			Contract.Assert(loadCall.Targets.Length == 1);
+			Contract.Assert(node.Targets.Length == 1);
 
-			var target = loadCall.Targets[0];
-			var subjectType = loadCall.Subject.StaticRepr;
+			var target = node.Targets[0];
+			var subjectType = node.Subject.StaticRepr;
 			Contract.Assert(subjectType.IsArray);
 
 			using (BeginEmitStore(target))
 			{
-				EmitLoad(loadCall.Subject);
+				EmitLoad(node.Subject);
 
-				if (loadCall.Arguments.Length == 0)
+				if (node.Arguments.Length == 0)
 				{
 					// "foo = array()", same as "foo = array"
-					EmitCloneIfNeeded(loadCall.Subject.StaticRepr);
+					EmitCloneIfNeeded(node.Subject.StaticRepr);
 				}
 				else
 				{
 					var method = typeof(Utilities).GetMethods(BindingFlags.Public | BindingFlags.Static)
-						.FirstOrDefault(m => m.Name == "Subsref" && m.GetParameters().Length == loadCall.Arguments.Length + 1);
+						.FirstOrDefault(m => m.Name == "Subsref" && m.GetParameters().Length == node.Arguments.Length + 1);
 					if (method.IsGenericMethodDefinition)
 						method = method.MakeGenericMethod(subjectType.Type.CliType);
 
 					var arrayType = subjectType.WithStructuralClass(MStructuralClass.Array);
 					EmitConversion(subjectType, arrayType);
 
-					foreach (var argument in loadCall.Arguments)
+					foreach (var argument in node.Arguments)
 					{
 						EmitLoad(argument);
 						EmitConversion(argument.StaticRepr, arrayType);
@@ -117,25 +116,23 @@ namespace McCli.Compiler.CodeGen
 			}
 		}
 
-		public override void VisitStoreIndexed(StoreIndexed storeIndexed)
+		public override void VisitStoreParenthesized(StoreParenthesized node)
 		{
-			Contract.Assert(!storeIndexed.Cell);
-
-			var arrayRepr = storeIndexed.Array.StaticRepr;
-			if (arrayRepr.IsArray && storeIndexed.Indices.Length == 1)
+			var arrayRepr = node.Array.StaticRepr;
+			if (arrayRepr.IsArray && node.Indices.Length == 1)
 			{
 				// TODO: should not clone the array for each subsasgn!
-				using (BeginEmitStore(storeIndexed.Array))
+				using (BeginEmitStore(node.Array))
 				{
-					EmitLoad(storeIndexed.Array);
+					EmitLoad(node.Array);
 					EmitCloneIfNeeded(arrayRepr);
 				}
 
-				EmitLoad(storeIndexed.Array);
-				EmitLoad(storeIndexed.Indices[0]);
-				EmitConversion(storeIndexed.Indices[0].StaticRepr, MClass.Double.ArrayRepr);
-				EmitLoad(storeIndexed.Value);
-				EmitConversion(storeIndexed.Value.StaticRepr, arrayRepr);
+				EmitLoad(node.Array);
+				EmitLoad(node.Indices[0]);
+				EmitConversion(node.Indices[0].StaticRepr, MClass.Double.ArrayRepr);
+				EmitLoad(node.Value);
+				EmitConversion(node.Value.StaticRepr, arrayRepr);
 
 				var method = typeof(Utilities).GetMethod("Subsasgn")
 					.MakeGenericMethod(arrayRepr.Type.CliType);
@@ -147,39 +144,39 @@ namespace McCli.Compiler.CodeGen
 			}
 		}
 
-		public override void VisitIf(If @if)
+		public override void VisitIf(If node)
 		{
-			if (@if.Then.Length == 0 && @if.Else.Length == 0) return;
+			if (node.Then.Length == 0 && node.Else.Length == 0) return;
 
-			EmitLoad(@if.Condition);
-			EmitConversion(@if.Condition.StaticRepr, MRepr.Any);
+			EmitLoad(node.Condition);
+			EmitConversion(node.Condition.StaticRepr, MRepr.Any);
 			cil.Call(typeof(Utilities).GetMethod("IsTrue"));
 
 			var endLabel = cil.CreateLabel("if_end");
-			if (@if.Then.Length == 0)
+			if (node.Then.Length == 0)
 			{
 				cil.Branch(true, endLabel);
-				EmitStatements(@if.Else);
+				EmitStatements(node.Else);
 			}
-			else if (@if.Else.Length == 0)
+			else if (node.Else.Length == 0)
 			{
 				cil.Branch(false, endLabel);
-				EmitStatements(@if.Then);
+				EmitStatements(node.Then);
 			}
 			else
 			{
 				var elseLabel = cil.CreateLabel("else");
 				cil.Branch(false, elseLabel);
-				EmitStatements(@if.Then);
+				EmitStatements(node.Then);
 				cil.Branch(endLabel);
 				cil.MarkLabel(elseLabel);
-				EmitStatements(@if.Else);
+				EmitStatements(node.Else);
 			}
 
 			cil.MarkLabel(endLabel);
 		}
 
-		public override void VisitWhile(While @while)
+		public override void VisitWhile(While node)
 		{
 			// Declare loop labels, preserving parent ones
 			var previousContinueTargetLabel = continueTargetLabel;
@@ -189,13 +186,13 @@ namespace McCli.Compiler.CodeGen
 
 			// Condition
 			cil.MarkLabel(continueTargetLabel);
-			EmitLoad(@while.Condition);
-			EmitConversion(@while.Condition.StaticRepr, MRepr.Any);
+			EmitLoad(node.Condition);
+			EmitConversion(node.Condition.StaticRepr, MRepr.Any);
 			cil.Call(typeof(Utilities).GetMethod("IsTrue"));
 			cil.Branch(false, breakTargetLabel);
 
 			// Body
-			EmitStatements(@while.Body);
+			EmitStatements(node.Body);
 			cil.Branch(continueTargetLabel);
 
 			// End
@@ -206,11 +203,10 @@ namespace McCli.Compiler.CodeGen
 			breakTargetLabel = previousBreakTargetLabel;
 		}
 
-		public override void VisitFor(For @for)
+		public override void VisitFor(RangeFor node)
 		{
-			var collectionRepr = @for.Collection.StaticRepr;
-			Contract.Assert(collectionRepr.StructuralClass == MStructuralClass.Array);
-			
+			var collectionRepr = node.LowerBound.StaticRepr;
+
 			// Declare loop labels, preserving parent ones
 			var previousContinueTargetLabel = continueTargetLabel;
 			var previousBreakTargetLabel = breakTargetLabel;
@@ -219,17 +215,17 @@ namespace McCli.Compiler.CodeGen
 			var conditionLabel = cil.CreateLabel("for_condition");
 
 			// Allocate the required temporaries
-			using (var arrayCopyLocalAllocation = temporaryPool.Alloc(collectionRepr.CliType))
+			using (var arrayLocalAllocation = temporaryPool.Alloc(collectionRepr.CliType))
 			using (var countLocalAllocation = temporaryPool.Alloc(typeof(int)))
 			using (var indexLocalAllocation = temporaryPool.Alloc(typeof(int)))
 			{
-				// arrayCopy = clone(array)
-				EmitLoad(@for.Collection);
+				// array = colon(lowerBound, increment, upperBound)
+				EmitLoad(node.LowerBound);
 				EmitCloneIfNeeded(collectionRepr);
-				cil.Store(arrayCopyLocalAllocation.Location);
+				cil.Store(arrayLocalAllocation.Location);
 
 				// count = slicecount(arrayCopy)
-				cil.Load(arrayCopyLocalAllocation.Location);
+				cil.Load(arrayLocalAllocation.Location);
 				cil.Call(typeof(Utilities).GetMethod("GetForSliceCount"));
 				cil.Store(countLocalAllocation.Location);
 
@@ -247,15 +243,15 @@ namespace McCli.Compiler.CodeGen
 				cil.Branch(false, breakTargetLabel);
 
 				// slice = getslice(arrayCopy, index)
-				using (BeginEmitStore(@for.Iterator))
+				using (BeginEmitStore(node.Iterator))
 				{
-					cil.Load(arrayCopyLocalAllocation.Location);
+					cil.Load(arrayLocalAllocation.Location);
 					cil.Load(indexLocalAllocation.Location);
 					cil.Call(typeof(Utilities).GetMethod("GetForSlice").MakeGenericMethod(collectionRepr.Type.CliType));
 				}
 
 				// body
-				EmitStatements(@for.Body);
+				EmitStatements(node.Body);
 
 				// continue:
 				cil.MarkLabel(continueTargetLabel);
@@ -276,11 +272,13 @@ namespace McCli.Compiler.CodeGen
 			// Restore parent loop labels
 			continueTargetLabel = previousContinueTargetLabel;
 			breakTargetLabel = previousBreakTargetLabel;
+
+			throw new NotImplementedException("Repair for loops to make them range-based.");
 		}
 
-		public override void VisitJump(Jump jump)
+		public override void VisitJump(Jump node)
 		{
-			switch(jump.Kind)
+			switch(node.Kind)
 			{
 				case JumpKind.Continue: cil.Branch(continueTargetLabel); break;
 				case JumpKind.Break: cil.Branch(breakTargetLabel); break;

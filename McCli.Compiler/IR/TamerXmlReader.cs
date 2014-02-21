@@ -23,13 +23,13 @@ namespace McCli.Compiler.IR
 			var root = document.Root;
 			Contract.Assert(root != null && root.Name == "CompilationUnit");
 
-			foreach (var functionElement in root.Elements("TIRFunction"))
+			foreach (var functionElement in root.Elements("Function"))
 				yield return ReadFunction(functionElement);
 		}
 
 		private static Function ReadFunction(XElement functionElement)
 		{
-			Contract.Requires(functionElement != null && functionElement.Name == "TIRFunction");
+			Contract.Requires(functionElement != null && functionElement.Name == "Function");
 
 			string name = (string)functionElement.Attribute("name");
 
@@ -51,7 +51,7 @@ namespace McCli.Compiler.IR
 			}
 
 			// Read the function body
-			var body = ReadStatements(functionElement.Element("TIRStatementList"), variables).ToImmutableArray();
+			var body = ReadStatements(functionElement.Element("Statements"), variables).ToImmutableArray();
 
 			return new Function(name, inputs.ToImmutableArray(), outputs.ToImmutableArray(), body);
 		}
@@ -87,23 +87,69 @@ namespace McCli.Compiler.IR
 				: new Variable(name, kind, constantValue);
 		}
 
-		private static IEnumerable<Statement> ReadStatements(XElement statementListElement, IReadOnlyDictionary<string, Variable> variables)
+		private static IEnumerable<Statement> ReadStatements(XElement parentElement, IReadOnlyDictionary<string, Variable> variables)
 		{
-			if (statementListElement == null) yield break;
-			foreach (var statementElement in statementListElement.Elements())
+			if (parentElement == null) yield break;
+			foreach (var statementElement in parentElement.Elements())
 			{
 				switch (statementElement.Name.LocalName)
 				{
-					case "TIRAssignLiteralStmt": yield return ReadLiteral(statementElement, variables); break;
-					case "TIRCallStmt": yield return ReadCall(statementElement, variables); break;
-					default: throw new NotImplementedException();
+					case "ArrayGet": yield return ReadArrayGet(statementElement, variables); break;
+					case "ArraySet": yield return ReadArraySet(statementElement, variables); break;
+					case "Call": yield return ReadCall(statementElement, variables); break;
+					case "Copy": yield return ReadCopy(statementElement, variables); break;
+					case "For": yield return ReadFor(statementElement, variables); break;
+					case "Literal": yield return ReadLiteral(statementElement, variables); break;
+					default: throw new NotImplementedException("Statements of type: " + statementElement.Name.LocalName);
 				}
 			}
 		}
 
+		private static LoadParenthesized ReadArrayGet(XElement statementElement, IReadOnlyDictionary<string, Variable> variables)
+		{
+			var targets = ReadVariables(statementElement.Attribute("targets"), variables).ToImmutableArray();
+			var subject = ReadVariable(statementElement.Attribute("subject"), variables);
+			var arguments = ReadVariables(statementElement.Attribute("indices"), variables).ToImmutableArray();
+			return new LoadParenthesized(targets, subject, arguments);
+		}
+
+		private static StoreParenthesized ReadArraySet(XElement statementElement, IReadOnlyDictionary<string, Variable> variables)
+		{
+			var array = ReadVariable(statementElement.Attribute("array"), variables);
+			var indices = ReadVariables(statementElement.Attribute("indices"), variables).ToImmutableArray();
+			var value = ReadVariable(statementElement.Attribute("value"), variables);
+			return new StoreParenthesized(array, indices, value);
+		}
+
+		private static StaticCall ReadCall(XElement statementElement, IReadOnlyDictionary<string, Variable> variables)
+		{
+			var functionName = (string)statementElement.Attribute("functionName");
+			var targets = ReadVariables(statementElement.Attribute("targets"), variables).ToImmutableArray();
+			var arguments = ReadVariables(statementElement.Attribute("arguments"), variables).ToImmutableArray();
+
+			return new StaticCall(targets, functionName, arguments);
+		}
+
+		private static Copy ReadCopy(XElement statementElement, IReadOnlyDictionary<string, Variable> variables)
+		{
+			var target = ReadVariable(statementElement.Attribute("target"), variables);
+			var value = ReadVariable(statementElement.Attribute("source"), variables);
+			return new Copy(target, value);
+		}
+
+		private static RangeFor ReadFor(XElement statementElement, IReadOnlyDictionary<string, Variable> variables)
+		{
+			var iterator = ReadVariable(statementElement.Attribute("iterator"), variables);
+			var lowerBound = ReadVariable(statementElement.Attribute("lowerBound"), variables);
+			var upperBound = ReadVariable(statementElement.Attribute("upperBound"), variables);
+			var increment = ReadVariable(statementElement.Attribute("increment"), variables);
+			var body = ReadStatements(statementElement, variables).ToImmutableArray();
+			return new RangeFor(iterator, lowerBound, increment, upperBound, body);
+		}
+
 		private static Literal ReadLiteral(XElement statementElement, IReadOnlyDictionary<string, Variable> variables)
 		{
-			var target = variables[(string)statementElement.Attribute("targetName")];
+			var target = ReadVariable(statementElement.Attribute("target"), variables);
 			string valueString = (string)statementElement.Attribute("value");
 			switch ((string)statementElement.Attribute("type"))
 			{
@@ -113,24 +159,24 @@ namespace McCli.Compiler.IR
 			}
 		}
 
-		private static StaticCall ReadCall(XElement statementElement, IReadOnlyDictionary<string, Variable> variables)
+		private static Variable ReadVariable(XAttribute attribute, IReadOnlyDictionary<string, Variable> variables)
 		{
-			string functionName = (string)statementElement.Attribute("functionName");
+			if (attribute == null) return null;
 
-			var targets = ReadVariableNames(statementElement.Element("Targets"), variables).ToImmutableArray();
-			var arguments = ReadVariableNames(statementElement.Element("Arguments"), variables).ToImmutableArray();
-
-			return new StaticCall(targets, functionName, arguments);
+			Variable variable;
+			variables.TryGetValue(attribute.Value, out variable);
+			return variable;
 		}
 
-		private static IEnumerable<Variable> ReadVariableNames(XElement parentElement, IReadOnlyDictionary<string, Variable> variables)
+		private static IEnumerable<Variable> ReadVariables(XAttribute attribute, IReadOnlyDictionary<string, Variable> variables)
 		{
-			if (parentElement == null) yield break;
-			foreach (var nameElement in parentElement.Elements("Name"))
-			{
-				var name = (string)nameElement.Attribute("nameId");
+			if (attribute == null) yield break;
+
+			string commaSeparatedList = attribute.Value;
+			if (commaSeparatedList.Length == 0) yield break;
+
+			foreach (var name in commaSeparatedList.Split(new[] { ',' }))
 				yield return variables[name];
-			}
 		}
 	}
 }
