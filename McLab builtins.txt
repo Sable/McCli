@@ -1,6 +1,5 @@
 Not implemented
 ------
-abs
 acos
 acosd
 acosh
@@ -50,7 +49,6 @@ clock
 computer
 cond
 conj
-cos
 cosd
 cosh
 cot
@@ -78,7 +76,6 @@ echo
 eig
 end
 eps
-eq
 erf
 erfc
 erfcinv
@@ -88,7 +85,6 @@ eval
 evalin
 exist
 exit
-exp
 expm
 fclose
 ferror
@@ -131,9 +127,6 @@ lasterror
 lastwarn
 linsolve
 load
-log
-log2
-log10
 logical
 logm
 lower
@@ -146,14 +139,12 @@ median
 message
 methods
 min
-minus
 mldivide
 mod
 mode
 mpower
 mrdivide
 mtimes
-nan
 nargchk
 nargin
 nargout
@@ -167,13 +158,10 @@ or
 ordschur
 pause
 permute
-pi
 prod
 qr
 quit
-rand
 randi
-randn
 randperm
 rank
 rcond
@@ -191,14 +179,12 @@ sec
 secd
 sech
 sign
-sin
 sind
 single
 sinh
 sort
 sparse
 sprintf
-sqrt
 sqrtm
 squeeze
 sscanf
@@ -220,13 +206,11 @@ superiorfloat
 superiorto
 svd
 system
-tan
 tand
 tanh
 textscan
 tic
 toc
-transpose
 tril
 triu
 uint8
@@ -246,9 +230,13 @@ xor
 
 Partial
 ----------
+abs
 class
 colon
 complex
+cos
+eq
+exp
 eye
 false
 fix
@@ -261,14 +249,23 @@ isequal
 ldivide
 le
 length
+log
+log2
+log10
 lt
+minus
 ne
 ones
 plus
 power
+rand
+randn
 rdivide
 round
+sin
 size
+sqrt
+tan
 times
 true
 uminus
@@ -290,6 +287,9 @@ isreal
 isscalar
 isvector
 j
+nan
 ndims
+pi
 real
+transpose
 uplus

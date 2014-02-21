@@ -30,6 +30,17 @@ namespace McCli
 			if (!value.IsScalar) throw new MArrayShapeException();
 			return ToInt(value[0]);
 		}
+		
+		public static MArrayShape ToShape(double rowCount, double columnCount)
+		{
+			int rowCountInt = ToInt(rowCount);
+			int columnCountInt = ToInt(columnCount);
+
+			// Ensure neither are negative
+			if ((rowCountInt | columnCountInt) < 0) throw new MArrayShapeException();
+			
+			return new MArrayShape(rowCountInt, columnCountInt);
+		}
 
 		public static bool IsTrue(MValue value)
 		{

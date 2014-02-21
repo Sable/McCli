@@ -58,11 +58,6 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="Microsoft.CSharp" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="EmptyArray.cs" />
     <Compile Include="MArrayShape.cs" />
     <Compile Include="MArrayShapeException.cs" />

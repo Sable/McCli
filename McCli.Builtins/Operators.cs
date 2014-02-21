@@ -230,6 +230,26 @@ namespace McCli.Builtins
 		}
 		#endregion
 
+		#region Transpose
+		public static MArray<TScalar> transpose<[AnyPrimitive] TScalar>(MArray<TScalar> array)
+		{
+			Contract.Requires(array != null);
+			if (array.IsHigherDimensional) throw new MArrayShapeException();
+
+			var shape = array.Shape;
+			var result = new MFullArray<TScalar>(shape.ColumnCount, shape.RowCount);
+			for (int row = 0; row < shape.RowCount; ++row)
+				for (int column = 0; column < shape.ColumnCount; ++column)
+					result[row * shape.ColumnCount + column] = array[column * shape.RowCount + row];
+			return result;
+		}
+
+		private static TScalar transpose<[AnyPrimitive] TScalar>(TScalar value)
+		{
+			return value;
+		}
+		#endregion
+
 		// TODO: matrix multiplication, solves, transpose
 		// TODO: vector dot and cross products (not in this class)
 		#endregion
