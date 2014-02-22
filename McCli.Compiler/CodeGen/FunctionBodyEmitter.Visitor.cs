@@ -205,8 +205,6 @@ namespace McCli.Compiler.CodeGen
 
 		public override void VisitFor(RangeFor node)
 		{
-			var collectionRepr = node.LowerBound.StaticRepr;
-
 			// Declare loop labels, preserving parent ones
 			var previousContinueTargetLabel = continueTargetLabel;
 			var previousBreakTargetLabel = breakTargetLabel;
@@ -214,55 +212,59 @@ namespace McCli.Compiler.CodeGen
 			breakTargetLabel = cil.CreateLabel("for_break");
 			var conditionLabel = cil.CreateLabel("for_condition");
 
+			var repr = new MRepr(node.Iterator.StaticRepr.Type, MStructuralClass.Scalar);
+			Contract.Requires(repr.Class.IsNumeric && !repr.IsComplex);
+
 			// Allocate the required temporaries
-			using (var arrayLocalAllocation = temporaryPool.Alloc(collectionRepr.CliType))
-			using (var countLocalAllocation = temporaryPool.Alloc(typeof(int)))
-			using (var indexLocalAllocation = temporaryPool.Alloc(typeof(int)))
+			using (var currentLocal = temporaryPool.Alloc(repr.CliType))
+			using (var incrementLocal = temporaryPool.Alloc(repr.CliType))
+			using (var upperBoundLocal = temporaryPool.Alloc(repr.CliType))
 			{
-				// array = colon(lowerBound, increment, upperBound)
+				// Save the lower bound to a "current" variable
 				EmitLoad(node.LowerBound);
-				EmitCloneIfNeeded(collectionRepr);
-				cil.Store(arrayLocalAllocation.Location);
+				EmitConversion(node.LowerBound.StaticRepr, repr);
+				cil.Store(currentLocal.Location);
 
-				// count = slicecount(arrayCopy)
-				cil.Load(arrayLocalAllocation.Location);
-				cil.Call(typeof(Utilities).GetMethod("GetForSliceCount"));
-				cil.Store(countLocalAllocation.Location);
-
-				// index = 0
-				cil.LoadInt32(0);
-				cil.Store(indexLocalAllocation.Location);
-
-				// condition:
-				cil.MarkLabel(conditionLabel);
-
-				// if (index >= count) goto break;
-				cil.Load(indexLocalAllocation.Location);
-				cil.Load(countLocalAllocation.Location);
-				cil.Compare(Comparison.LessThan);
-				cil.Branch(false, breakTargetLabel);
-
-				// slice = getslice(arrayCopy, index)
-				using (BeginEmitStore(node.Iterator))
+				// Save the increment to a local variable
+				if (node.Increment == null)
 				{
-					cil.Load(arrayLocalAllocation.Location);
-					cil.Load(indexLocalAllocation.Location);
-					cil.Call(typeof(Utilities).GetMethod("GetForSlice").MakeGenericMethod(collectionRepr.Type.CliType));
+					Contract.Assert(repr.Type == MClass.Double);
+					cil.LoadFloat64(1);
 				}
+				else
+				{
+					EmitLoad(node.Increment);
+					EmitConversion(node.Increment.StaticRepr, repr);
+				}
+				cil.Store(incrementLocal.Location);
+
+				// Save the upper bound to a local variable
+				EmitLoad(node.UpperBound);
+				EmitConversion(node.UpperBound.StaticRepr, repr);
+				cil.Store(upperBoundLocal.Location);
+
+				// Test the loop condition
+				// condition: if (current > upper) goto break;
+				cil.MarkLabel(conditionLabel);
+				cil.Load(currentLocal.Location);
+				cil.Load(upperBoundLocal.Location);
+				cil.Branch(Comparison.GreaterThan, breakTargetLabel);
+
+				// Setup the iterator variable (which can be modified inside the loop)
+				cil.Load(currentLocal.Location);
+				EmitConversion(repr, node.Iterator.StaticRepr);
+				cil.Store(GetLocalLocation(node.Iterator));
 
 				// body
 				EmitStatements(node.Body);
 
-				// continue:
+				// Loop increment
+				// continue: current += increment; goto condition;
 				cil.MarkLabel(continueTargetLabel);
-
-				// index++
-				cil.Load(indexLocalAllocation.Location);
-				cil.LoadInt32(1);
+				cil.Load(currentLocal.Location);
+				cil.Load(incrementLocal.Location);
 				cil.Instruction(Opcode.Add);
-				cil.Store(indexLocalAllocation.Location);
-
-				// goto condition
+				cil.Store(currentLocal.Location);
 				cil.Branch(conditionLabel);
 			}
 
@@ -272,8 +274,6 @@ namespace McCli.Compiler.CodeGen
 			// Restore parent loop labels
 			continueTargetLabel = previousContinueTargetLabel;
 			breakTargetLabel = previousBreakTargetLabel;
-
-			throw new NotImplementedException("Repair for loops to make them range-based.");
 		}
 
 		public override void VisitJump(Jump node)

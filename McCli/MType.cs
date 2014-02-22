@@ -44,6 +44,42 @@ namespace McCli
 		}
 
 		/// <summary>
+		/// Gets a value indicating if this type is of a numeric class.
+		/// </summary>
+		public bool IsNumeric
+		{
+			get { return (Class.Kind & MClassKinds.NumericMask) != 0; }
+		}
+
+		/// <summary>
+		/// Gets a value indicating if this type is of a floating-point class.
+		/// </summary>
+		public bool IsFloat
+		{
+			get { return (Class.Kind & MClassKinds.FloatMask) != 0; }
+		}
+
+		public bool IsInteger
+		{
+			get { return (Class.Kind & MClassKinds.IntegerMask) != 0; }
+		}
+
+		public bool IsSignedInteger
+		{
+			get { return (Class.Kind & MClassKinds.SignedIntegerMask) != 0; }
+		}
+
+		public bool IsUnsignedInteger
+		{
+			get { return (Class.Kind & MClassKinds.UnsignedIntegerMask) != 0; }
+		}
+
+		public bool IsReal
+		{
+			get { return IsNumeric && !IsComplex; }
+		}
+
+		/// <summary>
 		/// Gets a value indicating if this is a complex numeric type.
 		/// </summary>
 		public bool IsComplex

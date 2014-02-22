@@ -57,8 +57,9 @@ namespace CliKit.IO
 		public override Label CreateLabel(string name)
 		{
 			if (name == null) name = generatedLabelNamePrefix + labelNames.Count;
+			int labelIndex = labelNames.Count;
 			labelNames.Add(name);
-			return CreateLabel(labelNames.Count);
+			return CreateLabel(labelIndex);
 		}
 
 		public string GetString()

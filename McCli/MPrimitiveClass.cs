@@ -62,31 +62,6 @@ namespace McCli
 			get { return complexType; }
 		}
 
-		public bool IsNumeric
-		{
-			get { return (kind & MClassKinds.NumericMask) != 0; }
-		}
-
-		public bool IsFloat
-		{
-			get { return (kind & MClassKinds.FloatMask) != 0; }
-		}
-
-		public bool IsInteger
-		{
-			get { return (kind & MClassKinds.IntegerMask) != 0; }
-		}
-
-		public bool IsSignedInteger
-		{
-			get { return (kind & MClassKinds.SignedIntegerMask) != 0; }
-		}
-
-		public bool IsUnsignedInteger
-		{
-			get { return (kind & MClassKinds.UnsignedIntegerMask) != 0; }
-		}
-
 		public MRepr ScalarRepr
 		{
 			get { return new MRepr(this, MStructuralClass.Scalar); }

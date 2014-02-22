@@ -248,7 +248,7 @@ namespace McCli
 				new Literal(output, 1.0),
 				new Literal(oneConstant, 1.0),
 				new RangeFor(iteratorVariable, oneConstant, null, input,
-					new StaticCall(output, "times", new[] { output, oneConstant })
+					new StaticCall(output, "times", new[] { output, iteratorVariable })
 				));
 
 			Assert.AreEqual(1.0, function(MFullArray<double>.CreateScalar(0)).ToScalar());
