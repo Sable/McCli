@@ -43,16 +43,25 @@ namespace McCli.Compiler
 		#endregion
 
 		#region Methods
-		public void AddStatic(Type type)
+		public void AddMethodsFromAssembly(Assembly assembly)
+		{
+			Contract.Requires(assembly != null);
+
+			foreach (var type in assembly.ExportedTypes)
+				if (type.GetCustomAttribute<MatlabLibraryAttribute>() != null)
+					AddMethodsFromType(type);
+		}
+
+		public void AddMethodsFromType(Type type)
 		{
 			Contract.Requires(type != null);
 
 			foreach (var method in type.GetTypeInfo().DeclaredMethods)
 				if (method.IsPublic && method.IsStatic && !method.IsGenericMethodDefinition)
-					Add(method);
+					AddMethod(method);
 		}
 
-		public void Add(MethodInfo method)
+		public void AddMethod(MethodInfo method)
 		{
 			Contract.Requires(method != null);
 

@@ -15,9 +15,9 @@ namespace McCli.Compiler.CommandLine
 	{
 		static void Main(string[] args)
 		{
-			if (args.Length != 2)
+			if (args.Length == 0)
 			{
-				Console.WriteLine("Usage: {0} {source} {output}",
+				Console.WriteLine("Usage: {0} source [output]",
 					Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().Location));
 				return;
 			}
@@ -32,15 +32,10 @@ namespace McCli.Compiler.CommandLine
 
 				// Gather the referenced builtins
 				var functionTable = new FunctionTable();
-				functionTable.AddStatic(typeof(Builtins.Operators));
-				functionTable.AddStatic(typeof(Builtins.Classes));
-				functionTable.AddStatic(typeof(Builtins.Complex));
-				functionTable.AddStatic(typeof(Builtins.Environment));
-				functionTable.AddStatic(typeof(Builtins.Floats));
-				functionTable.AddStatic(typeof(Builtins.Arrays));
+				functionTable.AddMethodsFromAssembly(typeof(Builtins.Operators).Assembly);
 
 				// Output the dll.
-				string outputFilePath = Path.GetFullPath(args[1]);
+				string outputFilePath = args.Length >= 2 ? Path.GetFullPath(args[1]) : (sourceFilePath + ".dll");
 				string assemblyName = Path.GetFileNameWithoutExtension(outputFilePath);
 				var assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(
 					new AssemblyName(assemblyName),

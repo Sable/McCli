@@ -1,5 +1,62 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <CompilationUnit>
+  <Function name="bubble">
+    <Variables>
+      <Variable class="double" complex="false" name="A" scope="input"/>
+      <Variable class="double" complex="false" name="x" scope="output"/>
+      <Variable class="double" complex="false" name="n" scalar="true" scope="local"/>
+      <Variable class="double" complex="false" constant="1.0" name="mc_t10" scalar="true" scope="local"/>
+      <Variable class="double" complex="false" name="mc_t9" scalar="true" scope="local"/>
+      <Variable class="double" complex="false" constant="1.0" name="mc_t17" scalar="true" scope="local"/>
+      <Variable class="double" complex="false" constant="1.0" name="mc_t11" scalar="true" scope="local"/>
+      <Variable class="double" complex="false" name="mc_t8" scalar="true" scope="local"/>
+      <Variable class="double" complex="false" constant="1.0" name="mc_t16" scalar="true" scope="local"/>
+      <Variable class="double" complex="false" name="mc_t2" scalar="true" scope="local"/>
+      <Variable class="double" complex="false" constant="1.0" name="mc_t12" scalar="true" scope="local"/>
+      <Variable class="double" complex="false" name="mc_t6" scalar="true" scope="local"/>
+      <Variable class="double" complex="false" name="mc_t3" scalar="true" scope="local"/>
+      <Variable class="logical" complex="false" name="mc_t15" scalar="true" scope="local"/>
+      <Variable class="double" complex="false" name="temp" scalar="true" scope="local"/>
+      <Variable class="double" complex="false" constant="1.0" name="mc_t13" scalar="true" scope="local"/>
+      <Variable class="double" complex="false" name="mc_t7" scalar="true" scope="local"/>
+      <Variable class="double" complex="false" name="mc_t4" scalar="true" scope="local"/>
+      <Variable class="double" complex="false" constant="1.0" name="mc_t14" scalar="true" scope="local"/>
+      <Variable class="double" complex="false" name="mc_t5" scalar="true" scope="local"/>
+      <Variable class="double" complex="false" name="i" scalar="true" scope="local"/>
+      <Variable class="double" complex="false" name="j" scalar="true" scope="local"/>
+    </Variables>
+    <Statements>
+      <Call arguments="A" function="length" targets="n"/>
+      <Literal target="mc_t10" type="double" value="1"/>
+      <Call arguments="n,mc_t10" function="minus" targets="mc_t9"/>
+      <Literal target="mc_t17" type="double" value="1"/>
+      <For iterator="j" lowerBound="mc_t17" upperBound="mc_t9">
+        <Literal target="mc_t11" type="double" value="1"/>
+        <Call arguments="n,mc_t11" function="minus" targets="mc_t8"/>
+        <Literal target="mc_t16" type="double" value="1"/>
+        <For iterator="i" lowerBound="mc_t16" upperBound="mc_t8">
+          <ArrayGet array="A" indices="i" targets="mc_t2"/>
+          <Literal target="mc_t12" type="double" value="1"/>
+          <Call arguments="i,mc_t12" function="plus" targets="mc_t6"/>
+          <ArrayGet array="A" indices="mc_t6" targets="mc_t3"/>
+          <Call arguments="mc_t2,mc_t3" function="gt" targets="mc_t15"/>
+          <If condition="mc_t15">
+            <Then>
+              <ArrayGet array="A" indices="i" targets="temp"/>
+              <Literal target="mc_t13" type="double" value="1"/>
+              <Call arguments="i,mc_t13" function="plus" targets="mc_t7"/>
+              <ArrayGet array="A" indices="mc_t7" targets="mc_t4"/>
+              <ArraySet array="A" indices="i" value="mc_t4"/>
+              <Literal target="mc_t14" type="double" value="1"/>
+              <Call arguments="i,mc_t14" function="plus" targets="mc_t5"/>
+              <ArraySet array="A" indices="mc_t5" value="temp"/>
+            </Then>
+          </If>
+        </For>
+      </For>
+      <Copy source="A" target="x"/>
+    </Statements>
+  </Function>
   <Function name="drv_bubble">
     <Variables>
       <Variable class="double" complex="false" name="size" scalar="true" scope="input"/>
@@ -14,61 +71,6 @@
       <Literal target="mc_t1" type="double" value="100"/>
       <Call arguments="mc_t1,A" function="mtimes" targets="A"/>
       <Call arguments="A" function="bubble" targets="y"/>
-    </Statements>
-  </Function>
-  <Function name="bubble">
-    <Variables>
-      <Variable class="double" complex="false" name="A" scope="input"/>
-      <Variable class="double" complex="false" name="x" scope="output"/>
-      <Variable class="double" complex="false" name="n" scalar="true" scope="local"/>
-      <Variable class="double" complex="false" constant="1.0" name="mc_t10" scalar="true" scope="local"/>
-      <Variable class="double" complex="false" name="mc_t9" scalar="true" scope="local"/>
-      <Variable class="double" complex="false" constant="1.0" name="mc_t17" scalar="true" scope="local"/>
-      <Variable class="double" complex="false" constant="1.0" name="mc_t11" scalar="true" scope="local"/>
-      <Variable class="double" complex="false" name="mc_t8" scalar="true" scope="local"/>
-      <Variable class="double" complex="false" constant="1.0" name="mc_t16" scalar="true" scope="local"/>
-      <Variable class="double" complex="false" name="mc_t3" scalar="true" scope="local"/>
-      <Variable class="double" complex="false" constant="1.0" name="mc_t12" scalar="true" scope="local"/>
-      <Variable class="double" complex="false" name="mc_t6" scalar="true" scope="local"/>
-      <Variable class="double" complex="false" name="mc_t4" scalar="true" scope="local"/>
-      <Variable class="logical" complex="false" name="mc_t15" scalar="true" scope="local"/>
-      <Variable class="double" complex="false" name="temp" scalar="true" scope="local"/>
-      <Variable class="double" complex="false" constant="1.0" name="mc_t13" scalar="true" scope="local"/>
-      <Variable class="double" complex="false" name="mc_t7" scalar="true" scope="local"/>
-      <Variable class="double" complex="false" name="mc_t2" scalar="true" scope="local"/>
-      <Variable class="double" complex="false" constant="1.0" name="mc_t14" scalar="true" scope="local"/>
-      <Variable class="double" complex="false" name="mc_t5" scalar="true" scope="local"/>
-    </Variables>
-    <Statements>
-      <Call arguments="A" function="length" targets="n"/>
-      <Literal target="mc_t10" type="double" value="1"/>
-      <Call arguments="n,mc_t10" function="minus" targets="mc_t9"/>
-      <Literal target="mc_t17" type="double" value="1"/>
-      <For iterator="j" lowerBound="mc_t17" upperBound="mc_t9">
-        <Literal target="mc_t11" type="double" value="1"/>
-        <Call arguments="n,mc_t11" function="minus" targets="mc_t8"/>
-        <Literal target="mc_t16" type="double" value="1"/>
-        <For iterator="i" lowerBound="mc_t16" upperBound="mc_t8">
-          <ArrayGet array="A" indices="i" targets="mc_t3"/>
-          <Literal target="mc_t12" type="double" value="1"/>
-          <Call arguments="i,mc_t12" function="plus" targets="mc_t6"/>
-          <ArrayGet array="A" indices="mc_t6" targets="mc_t4"/>
-          <Call arguments="mc_t3,mc_t4" function="gt" targets="mc_t15"/>
-          <If condition="mc_t15">
-            <Then>
-              <ArrayGet array="A" indices="i" targets="temp"/>
-              <Literal target="mc_t13" type="double" value="1"/>
-              <Call arguments="i,mc_t13" function="plus" targets="mc_t7"/>
-              <ArrayGet array="A" indices="mc_t7" targets="mc_t2"/>
-              <ArraySet array="A" indices="i" value="mc_t2"/>
-              <Literal target="mc_t14" type="double" value="1"/>
-              <Call arguments="i,mc_t14" function="plus" targets="mc_t5"/>
-              <ArraySet array="A" indices="mc_t5" value="temp"/>
-            </Then>
-          </If>
-        </For>
-      </For>
-      <Copy source="A" target="x"/>
     </Statements>
   </Function>
 </CompilationUnit>

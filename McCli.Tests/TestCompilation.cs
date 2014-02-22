@@ -29,12 +29,12 @@ namespace McCli
 		public void Initialize()
 		{
 			var functionTable = new FunctionTable();
-			functionTable.AddStatic(typeof(McCli.Builtins.Operators));
-			functionTable.AddStatic(typeof(McCli.Builtins.Classes));
-			functionTable.AddStatic(typeof(McCli.Builtins.Arrays));
-			functionTable.AddStatic(typeof(McCli.Builtins.Environment));
-			functionTable.AddStatic(typeof(McCli.Builtins.Floats));
-			functionTable.AddStatic(typeof(McCli.Builtins.Complex));
+			functionTable.AddMethodsFromType(typeof(McCli.Builtins.Operators));
+			functionTable.AddMethodsFromType(typeof(McCli.Builtins.Classes));
+			functionTable.AddMethodsFromType(typeof(McCli.Builtins.Arrays));
+			functionTable.AddMethodsFromType(typeof(McCli.Builtins.Environment));
+			functionTable.AddMethodsFromType(typeof(McCli.Builtins.Floats));
+			functionTable.AddMethodsFromType(typeof(McCli.Builtins.Complex));
 			functionLookup = functionTable.Lookup;
 		}
 
