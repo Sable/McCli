@@ -23,7 +23,7 @@ namespace McCli
 		#region Constructors
 		internal MPrimitiveClass(MClassKinds kind, Type cliType)
 		{
-			Contract.Requires(name != null);
+			Contract.Requires(cliType != null);
 
 			this.kind = kind;
 			this.cliType = cliType;

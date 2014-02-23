@@ -35,12 +35,13 @@ namespace McCli.Compiler.CommandLine
 				functionTable.AddMethodsFromAssembly(typeof(Builtins.Operators).Assembly);
 
 				// Output the dll.
-				string outputFilePath = args.Length >= 2 ? Path.GetFullPath(args[1]) : (sourceFilePath + ".dll");
-				string assemblyName = Path.GetFileNameWithoutExtension(outputFilePath);
+				string outputFilePath = args.Length >= 2 ? Path.GetFullPath(args[1]) : MakeDefaultOutputFilePath(sourceFilePath);
+				var assemblyName = MakeAssemblyName(outputFilePath);
 				var assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(
 					new AssemblyName(assemblyName),
 					AssemblyBuilderAccess.Save,
 					Path.GetDirectoryName(outputFilePath));
+				PortableClassLibrary.AddPortableFrameworkAttribute(assemblyBuilder);
 				var moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName, Path.GetFileName(outputFilePath), emitSymbolInfo: true);
 				var typeBuilder = moduleBuilder.DefineType(assemblyName, TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.Class);
 				var methodFactory = MethodFactories.FromTypeBuilder(typeBuilder, MethodAttributes.Public | MethodAttributes.Static);
@@ -52,6 +53,20 @@ namespace McCli.Compiler.CommandLine
 			{
 				Console.WriteLine("Compiler error: {0}", exception);
 			}
+		}
+
+		private static string MakeDefaultOutputFilePath(string sourceFilePath)
+		{
+			var directoryPath = Path.GetDirectoryName(sourceFilePath);
+			var fileName = Path.GetFileName(sourceFilePath);
+			fileName = fileName.Substring(0, fileName.IndexOf('.'));
+			return directoryPath + Path.DirectorySeparatorChar + fileName + ".dll";
+		}
+
+		private static string MakeAssemblyName(string path)
+		{
+			path = Path.GetFileName(path);
+			return path.Substring(0, path.IndexOf('.'));
 		}
 	}
 }

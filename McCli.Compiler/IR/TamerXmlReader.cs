@@ -124,7 +124,7 @@ namespace McCli.Compiler.IR
 
 		private static StaticCall ReadCall(XElement element, IReadOnlyDictionary<string, Variable> variables)
 		{
-			var functionName = (string)element.Attribute("functionName");
+			var functionName = (string)element.Attribute("function");
 			var targets = ReadVariables(element.Attribute("targets"), variables);
 			var arguments = ReadVariables(element.Attribute("arguments"), variables);
 

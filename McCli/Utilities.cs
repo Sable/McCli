@@ -157,7 +157,7 @@ namespace McCli
 			if (indices.IsEmpty && values.IsEmpty) return;
 
 			var indicesShape = indices.Shape;
-			Contract.Requires(indicesShape.ColumnCount == 1);
+			Contract.Assert(indicesShape.ColumnCount == 1);
 			Contract.Assert(indicesShape == values.Shape);
 			
 			for (int i = 0; i < indicesShape.RowCount; ++i)

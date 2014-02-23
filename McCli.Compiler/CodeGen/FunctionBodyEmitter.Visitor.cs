@@ -45,7 +45,7 @@ namespace McCli.Compiler.CodeGen
 
 		public override void VisitCopy(Copy node)
 		{
-			Contract.Requires(node.Value.StaticRepr == node.Target.StaticRepr);
+			Contract.Assert(node.Value.StaticRepr == node.Target.StaticRepr);
 
 			using (BeginEmitStore(node.Target))
 			{
@@ -213,7 +213,7 @@ namespace McCli.Compiler.CodeGen
 			var conditionLabel = cil.CreateLabel("for_condition");
 
 			var repr = new MRepr(node.Iterator.StaticRepr.Type, MStructuralClass.Scalar);
-			Contract.Requires(repr.Class.IsNumeric && !repr.IsComplex);
+			Contract.Assert(repr.Class.IsNumeric && !repr.IsComplex);
 
 			// Allocate the required temporaries
 			using (var currentLocal = temporaryPool.Alloc(repr.CliType))

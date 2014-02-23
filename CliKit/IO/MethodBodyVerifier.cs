@@ -90,7 +90,7 @@ namespace CliKit.IO
 			if (sink != null)
 			{
 				var sinkLabel = sink.CreateLabel(name);
-				Contract.Requires(GetLabelIndex(sinkLabel) == labelIndex);
+				Contract.Assert(GetLabelIndex(sinkLabel) == labelIndex);
 			}
 
 			return CreateLabel(labelIndex);
