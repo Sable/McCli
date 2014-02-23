@@ -31,6 +31,7 @@ namespace CliKit.IO.PE
 		public ushort e_oeminfo; // OEM information; e_oemid specific
 		public ulong e_res2_0; // Reserved words
 		public ulong e_res2_1; // Reserved words
+		public uint e_res2_2; // Reserved words
 		public uint e_lfanew; // File address of new exe header
 	}
 }

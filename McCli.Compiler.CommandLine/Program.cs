@@ -25,6 +25,7 @@ namespace McCli.Compiler.CommandLine
 			try
 			{
 				// Read the source file
+				Console.WriteLine("Reading source file...");
 				string sourceFilePath = args[0];
 				Function entryPointFunction;
 				using (var sourceFileStream = new FileStream(args[0], FileMode.Open, FileAccess.Read, FileShare.Read))
@@ -35,8 +36,11 @@ namespace McCli.Compiler.CommandLine
 				functionTable.AddMethodsFromAssembly(typeof(Builtins.Operators).Assembly);
 
 				// Output the dll.
+				Console.WriteLine("Creating assembly builder...");
 				string outputFilePath = args.Length >= 2 ? Path.GetFullPath(args[1]) : MakeDefaultOutputFilePath(sourceFilePath);
 				var assemblyName = MakeAssemblyName(outputFilePath);
+
+				// Create the assembly builder and friends
 				var assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(
 					new AssemblyName(assemblyName),
 					AssemblyBuilderAccess.Save,
@@ -44,10 +48,21 @@ namespace McCli.Compiler.CommandLine
 				PortableClassLibrary.AddPortableFrameworkAttribute(assemblyBuilder);
 				var moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName, Path.GetFileName(outputFilePath), emitSymbolInfo: true);
 				var typeBuilder = moduleBuilder.DefineType(assemblyName, TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.Class);
+
+				// Emit the functions
+				Console.WriteLine("Emitting function {0}...", entryPointFunction.Name);
 				var methodFactory = MethodFactories.FromTypeBuilder(typeBuilder, MethodAttributes.Public | MethodAttributes.Static);
 				FunctionBodyEmitter.Emit(entryPointFunction, methodFactory, functionTable.Lookup);
+
+				// Save the assembly
+				Console.WriteLine("Saving the assembly...");
 				typeBuilder.CreateType();
 				assemblyBuilder.Save(Path.GetFileName(outputFilePath));
+
+				// Patch the assembly to make it a portable class library
+				Console.WriteLine("Patching the generated assembly to make it a portable class library...");
+				using (var assemblyStream = new FileStream(outputFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+					PortableClassLibrary.PatchReflectionEmitAssembly(assemblyStream);
 			}
 			catch (Exception exception)
 			{

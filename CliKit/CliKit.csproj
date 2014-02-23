@@ -85,9 +85,12 @@
     <Compile Include="IO\PE\IMAGE_NT_HEADERS .cs" />
     <Compile Include="IO\PE\IMAGE_OPTIONAL_HEADER.cs" />
     <Compile Include="IO\PE\IMAGE_SECTION_HEADER.cs" />
+    <Compile Include="IO\PE\MetadataRoot.cs" />
+    <Compile Include="IO\PE\StreamHeader.cs" />
     <Compile Include="IO\RawInstructionSink.cs" />
     <Compile Include="IO\Label.cs" />
     <Compile Include="IO\TemporaryLocalPool.cs" />
+    <Compile Include="IO\PE\MetadataTablesStreamHeader.cs" />
     <Compile Include="MetadataToken.cs" />
     <Compile Include="MetadataTokenKind.cs" />
     <Compile Include="Conversion.cs" />

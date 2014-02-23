@@ -83,15 +83,44 @@ namespace McCli.Compiler.CodeGen
 
 			// Read the metadata header
 			var metadataHeaderVirtualAddress = cor20Header.MetaData.VirtualAddress;
-			stream.Position = VirtualAddressToFilePosition(metadataHeaderVirtualAddress, sectionHeaders);
+			var metadataHeaderPosition = VirtualAddressToFilePosition(metadataHeaderVirtualAddress, sectionHeaders);
+			stream.Position = metadataHeaderPosition;
+			var metadataRootPart1 = stream.ReadStruct<MetadataRoot_BeforeVersion>();
+			if (metadataRootPart1.Signature != MetadataRoot_BeforeVersion.StandardSignature)
+				throw new InvalidDataException("Invalid metadata root signature.");
+
+			string metadataVersionString = stream.ReadNullPaddedString((metadataRootPart1.Length + 3U) & ~3U);
+			var metadataRootPart2 = stream.ReadStruct<MetadataRoot_AfterVersion>();
+
+			// Read the stream headers
+			var metadataStreamHeaders = new Dictionary<string, StreamHeader>(StringComparer.Ordinal);
+			for (int i = 0; i < metadataRootPart2.Streams; ++i)
+			{
+				var metadataStreamHeader = stream.ReadStruct<StreamHeader>();
+				var metadataStreamName = stream.ReadPaddedNullTerminatedString(4);
+				metadataStreamHeaders.Add(metadataStreamName, metadataStreamHeader);
+			}
+
+			// Read the metadata table stream header
+			stream.Position = metadataHeaderPosition + metadataStreamHeaders["#~"].Offset;
+			var metadataTablesStream = stream.ReadStruct<MetadataTablesStreamHeader>();
+			if (metadataTablesStream.MajorVersion != 2 || metadataTablesStream.MinorVersion != 0)
+				throw new InvalidDataException("Unsupported metadata tables stream version.");
+
+			uint[] metadataTableRowCounts = new uint[64];
+			for (int i = 0; i < metadataTableRowCounts.Length; ++i)
+			{
+				if ((metadataTablesStream.Valid & (1UL << i)) != 0)
+					metadataTableRowCounts[i] = stream.ReadStruct<uint>();
+			}
 
 			// More to be done!
-			throw new NotImplementedException();
+			throw new NotImplementedException("Patching assemblies to make them portable not yet fully implemented.");
 		}
 
 		private static TStruct ReadStruct<TStruct>(this Stream stream) where TStruct : struct
 		{
-			var bytes = new byte[Marshal.SizeOf(stream)];
+			var bytes = new byte[Marshal.SizeOf(typeof(TStruct))];
 			stream.ReadAll(bytes, 0, bytes.Length);
 
 			var pin = GCHandle.Alloc(bytes, GCHandleType.Pinned);
@@ -121,6 +150,42 @@ namespace McCli.Compiler.CodeGen
 			}
 
 			throw new NotImplementedException();
+		}
+
+		private static string ReadNullPaddedString(this Stream stream, uint length)
+		{
+			byte[] bytes = new byte[length];
+			stream.ReadAll(bytes, 0, bytes.Length);
+
+			int stringLength = Array.IndexOf<byte>(bytes, (byte)0);
+			if (stringLength == -1) stringLength = bytes.Length;
+
+			return Encoding.UTF8.GetString(bytes, 0, stringLength);
+		}
+
+		private static string ReadPaddedNullTerminatedString(this Stream stream, int alignment)
+		{
+			var bytes = new List<byte>();
+			while (true)
+			{
+				var @byte = stream.ReadByte();
+				if (unchecked((byte)@byte) != @byte) throw new EndOfStreamException();
+				if (@byte == 0) break;
+
+				bytes.Add(unchecked((byte)@byte));
+			}
+
+			int paddingLength = alignment - (bytes.Count + 1) % alignment;
+			if (paddingLength < alignment)
+			{
+				while (paddingLength > 0)
+				{
+					stream.ReadByte();
+					paddingLength--;
+				}
+			}
+
+			return Encoding.UTF8.GetString(bytes.ToArray());
 		}
 	}
 }
