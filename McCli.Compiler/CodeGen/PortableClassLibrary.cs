@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -24,6 +25,13 @@ namespace McCli.Compiler.CodeGen
 			public uint RowCount;
 			public uint BytesPerRow;
 		}
+
+		private static readonly byte[] nonportableMscorlibPublicKeyBlob = new byte[] { 0x08, 0xB7, 0x7A, 0x5C, 0x56, 0x19, 0x34, 0xE0, 0x89 };
+		private static readonly Version nonportableMscorlibVersion = new Version(4, 0, 0, 0);
+		private static readonly uint nonportableMscorlibFlags = (uint)AssemblyNameFlags.None;
+		private static readonly byte[] portableMscorlibPublicKeyBlob = new byte[] { 0x08, 0x7C, 0xEC, 0x85, 0xD7, 0xBE, 0xA7, 0x79, 0x8E };
+		private static readonly Version portableMscorlibVersion = new Version(2, 0, 5, 0);
+		private static readonly uint portableMscorlibFlags = (uint)AssemblyNameFlags.Retargetable;
 
 		/// <summary>
 		/// Adds the assembly attributes required to mark a generated assembly as
@@ -140,21 +148,50 @@ namespace McCli.Compiler.CodeGen
 				ushort minorVersion = stream.ReadStruct<ushort>();
 				ushort buildNumber = stream.ReadStruct<ushort>();
 				ushort revisionNumber = stream.ReadStruct<ushort>();
+				var version = new Version(majorVersion, minorVersion, buildNumber, revisionNumber);
 				uint flags = stream.ReadStruct<uint>();
 				uint publicKeyOrTokenIndex = blobIndexSize == 2 ? stream.ReadStruct<ushort>() : stream.ReadStruct<uint>();
 				uint nameIndex = stringIndexSize == 2 ? stream.ReadStruct<ushort>() : stream.ReadStruct<uint>();
 				uint cultureIndex = stringIndexSize == 2 ? stream.ReadStruct<ushort>() : stream.ReadStruct<uint>();
 				uint hashValueIndex = stringIndexSize == 2 ? stream.ReadStruct<ushort>() : stream.ReadStruct<uint>();
 
-				if (majorVersion == 4 && minorVersion == 0 && buildNumber == 0 && revisionNumber == 0)
+				var nextRowPosition = stream.Position;
+				if (version == nonportableMscorlibVersion && flags == nonportableMscorlibFlags)
 				{
-					// TODO: Check that it's actually mscorlib and patch the reference
-					stream.Position = rowPosition;
-					throw new NotImplementedException("Patching assemblies to make them portable not yet fully implemented.");
+					// Looks like mscorlib, let's make sure
+					long nameStringPosition = metadataHeaderPosition + metadataStreamHeaders["#Strings"].Offset + nameIndex;
+					long publicKeyBlobPosition = metadataHeaderPosition + metadataStreamHeaders["#Blob"].Offset + publicKeyOrTokenIndex;
+
+					stream.Position = nameStringPosition;
+					var name = stream.ReadPaddedNullTerminatedString(1);
+					stream.Position = publicKeyBlobPosition;
+					var publicKeyBlob = stream.ReadBytes(nonportableMscorlibPublicKeyBlob.Length);
+					if (name == "mscorlib" && Equals(publicKeyBlob, nonportableMscorlibPublicKeyBlob))
+					{
+						// It is indeed the mscorlib we want to patch!
+						// Patch the version number and assembly flags
+						stream.Position = rowPosition;
+						stream.WriteStruct((ushort)portableMscorlibVersion.Major);
+						stream.WriteStruct((ushort)portableMscorlibVersion.Minor);
+						stream.WriteStruct((ushort)portableMscorlibVersion.Build);
+						stream.WriteStruct((ushort)portableMscorlibVersion.Revision);
+						stream.WriteStruct<uint>(portableMscorlibFlags);
+
+						// Update the public key token
+						stream.Position = publicKeyBlobPosition;
+						stream.Write(portableMscorlibPublicKeyBlob, 0, portableMscorlibPublicKeyBlob.Length);
+
+						// Done!
+						return;
+					}
+					else
+					{
+						stream.Position = nextRowPosition;
+					}
 				}
 			}
 
-			throw new InvalidDataException("Mscorlib reference not found.");
+			throw new InvalidDataException("mscorlib assembly reference not found.");
 		}
 
 		private static void FillMetadataTableInfos(
@@ -220,12 +257,36 @@ namespace McCli.Compiler.CodeGen
 
 		private static uint GetIndexSize(CodedIndex codedIndex, MetadataTableInfo[] tables)
 		{
-			throw new NotImplementedException();
+			uint maxRowCount = 0;
+			for (int i = 0; i < codedIndex.TableCount; ++i)
+			{
+				var table = codedIndex.GetTable(i);
+				if (table.HasValue)
+				{
+					var rowCount = tables[(int)table.Value].RowCount;
+					if (rowCount > maxRowCount) maxRowCount = rowCount;
+				}
+			}
+
+			int valueBitCount = 16 - codedIndex.TagBitCount;
+			return maxRowCount < (1U << valueBitCount) ? 2U : 4U;
 		}
 
 		private static uint GetIndexSize(Table table, MetadataTableInfo[] tables)
 		{
-			throw new NotImplementedException();
+			return tables[(int)table].RowCount <= ushort.MaxValue ? 2U : 4U;
+		}
+
+		private static long VirtualAddressToFilePosition(uint virtualAddress, IMAGE_SECTION_HEADER[] sectionHeaders)
+		{
+			for (int i = 0; i < sectionHeaders.Length; ++i)
+			{
+				long relativeVirtualAddress = (long)virtualAddress - sectionHeaders[i].VirtualAddress;
+				if (relativeVirtualAddress >= 0 && relativeVirtualAddress < sectionHeaders[i].SizeOfRawData)
+					return sectionHeaders[i].PointerToRawData + relativeVirtualAddress;
+			}
+
+			throw new InvalidDataException("Could not resolve virtual address.");
 		}
 
 		private static TStruct ReadStruct<TStruct>(this Stream stream) where TStruct : struct
@@ -238,6 +299,22 @@ namespace McCli.Compiler.CodeGen
 			finally { pin.Free(); }
 		}
 
+		private static void WriteStruct<TStruct>(this Stream stream, TStruct value) where TStruct : struct
+		{
+			var bytes = new byte[Marshal.SizeOf(typeof(TStruct))];
+			var pin = GCHandle.Alloc(bytes, GCHandleType.Pinned);
+			try { Marshal.StructureToPtr(value, pin.AddrOfPinnedObject(), fDeleteOld: false); }
+			finally { pin.Free(); }
+			stream.Write(bytes, 0, bytes.Length);
+		}
+
+		private static byte[] ReadBytes(this Stream stream, int size)
+		{
+			var bytes = new byte[size];
+			ReadAll(stream, bytes, 0, size);
+			return bytes;
+		}
+
 		private static void ReadAll(this Stream stream, byte[] buffer, int offset, int size)
 		{
 			while (size > 0)
@@ -248,18 +325,6 @@ namespace McCli.Compiler.CodeGen
 				offset += read;
 				size -= read;
 			}
-		}
-
-		private static long VirtualAddressToFilePosition(uint virtualAddress, IMAGE_SECTION_HEADER[] sectionHeaders)
-		{
-			for (int i = 0; i < sectionHeaders.Length; ++i)
-			{
-				long relativeVirtualAddress = (long)virtualAddress - sectionHeaders[i].VirtualAddress;
-				if (relativeVirtualAddress >= 0 && relativeVirtualAddress < sectionHeaders[i].SizeOfRawData)
-					return sectionHeaders[i].PointerToRawData + relativeVirtualAddress;
-			}
-
-			throw new NotImplementedException();
 		}
 
 		private static string ReadNullPaddedString(this Stream stream, uint length)
@@ -296,6 +361,15 @@ namespace McCli.Compiler.CodeGen
 			}
 
 			return Encoding.UTF8.GetString(bytes.ToArray());
+		}
+
+		private static bool Equals(byte[] first, byte[] second)
+		{
+			if (first.Length != second.Length) return false;
+			for (int i = 0; i < first.Length; ++i)
+				if (first[i] != second[i])
+					return false;
+			return true;
 		}
 	}
 }

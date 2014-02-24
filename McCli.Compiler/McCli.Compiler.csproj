@@ -78,6 +78,7 @@
     <Compile Include="CodeGen\MethodFactory.cs" />
     <Compile Include="FunctionInfo.cs" />
     <Compile Include="FunctionTable.cs" />
+    <Compile Include="IR\CompilationUnit.cs" />
     <Compile Include="IR\Copy.cs" />
     <Compile Include="IR\RangeFor.cs" />
     <Compile Include="IR\Jump.cs" />

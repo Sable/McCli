@@ -27,9 +27,9 @@ namespace McCli.Compiler.CommandLine
 				// Read the source file
 				Console.WriteLine("Reading source file...");
 				string sourceFilePath = args[0];
-				Function entryPointFunction;
+				CompilationUnit compilationUnit;
 				using (var sourceFileStream = new FileStream(args[0], FileMode.Open, FileAccess.Read, FileShare.Read))
-					entryPointFunction = TamerXmlReader.Read(sourceFileStream).Single();
+					compilationUnit = TamerXmlReader.Read(sourceFileStream);
 
 				// Gather the referenced builtins
 				var functionTable = new FunctionTable();
@@ -38,7 +38,7 @@ namespace McCli.Compiler.CommandLine
 				// Output the dll.
 				Console.WriteLine("Creating assembly builder...");
 				string outputFilePath = args.Length >= 2 ? Path.GetFullPath(args[1]) : MakeDefaultOutputFilePath(sourceFilePath);
-				var assemblyName = MakeAssemblyName(outputFilePath);
+				var assemblyName = Path.GetFileNameWithoutExtension(outputFilePath);
 
 				// Create the assembly builder and friends
 				var assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(
@@ -50,9 +50,9 @@ namespace McCli.Compiler.CommandLine
 				var typeBuilder = moduleBuilder.DefineType(assemblyName, TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.Class);
 
 				// Emit the functions
-				Console.WriteLine("Emitting function {0}...", entryPointFunction.Name);
+				Console.WriteLine("Emitting function {0}...", compilationUnit.EntryPoint.Name);
 				var methodFactory = MethodFactories.FromTypeBuilder(typeBuilder, MethodAttributes.Public | MethodAttributes.Static);
-				FunctionBodyEmitter.Emit(entryPointFunction, methodFactory, functionTable.Lookup);
+				FunctionBodyEmitter.Emit(compilationUnit.EntryPoint, methodFactory, functionTable.Lookup);
 
 				// Save the assembly
 				Console.WriteLine("Saving the assembly...");
@@ -76,12 +76,6 @@ namespace McCli.Compiler.CommandLine
 			var fileName = Path.GetFileName(sourceFilePath);
 			fileName = fileName.Substring(0, fileName.IndexOf('.'));
 			return directoryPath + Path.DirectorySeparatorChar + fileName + ".dll";
-		}
-
-		private static string MakeAssemblyName(string path)
-		{
-			path = Path.GetFileName(path);
-			return path.Substring(0, path.IndexOf('.'));
 		}
 	}
 }

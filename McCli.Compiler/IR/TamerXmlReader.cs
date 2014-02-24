@@ -15,7 +15,7 @@ namespace McCli.Compiler.IR
 	/// </summary>
 	public sealed class TamerXmlReader
 	{
-		public static IEnumerable<Function> Read(Stream stream)
+		public static CompilationUnit Read(Stream stream)
 		{
 			Contract.Requires(stream != null && stream.CanRead);
 
@@ -23,15 +23,32 @@ namespace McCli.Compiler.IR
 			var root = document.Root;
 			Contract.Assert(root != null && root.Name == "CompilationUnit");
 
-			foreach (var functionElement in root.Elements("Function"))
-				yield return ReadFunction(functionElement);
+			var functions = new List<Function>();
+			Function entryPoint = null;
+			foreach (var element in root.Elements("Function"))
+			{
+				bool isEntryPoint;
+				var function = ReadFunction(element, out isEntryPoint);
+
+				if (isEntryPoint)
+				{
+					if (entryPoint != null) throw new InvalidDataException("Compilation unit has multiple entry point.");
+					entryPoint = function;
+				}
+
+				functions.Add(function);
+			}
+
+			if (entryPoint == null) throw new InvalidDataException("Compilation unit has no entry point.");
+			return new CompilationUnit(functions, entryPoint);
 		}
 
-		private static Function ReadFunction(XElement functionElement)
+		private static Function ReadFunction(XElement functionElement, out bool entryPoint)
 		{
 			Contract.Requires(functionElement != null && functionElement.Name == "Function");
 
 			string name = (string)functionElement.Attribute("name");
+			entryPoint = ((bool?)functionElement.Attribute("entryPoint")).GetValueOrDefault();
 
 			// "Declare" variables
 			var variables = new Dictionary<string, Variable>(StringComparer.Ordinal);

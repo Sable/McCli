@@ -54,7 +54,7 @@ namespace McCli.Compiler.CodeGen
 			Contract.Requires(methodFactory != null);
 			Contract.Requires(functionLookup != null);
 
-			Contract.Assert(function.Outputs.Length == 1);
+			Contract.Assert(function.Outputs.Length <= 1);
 
 			this.function = function;
 			this.functionLookup = functionLookup;
@@ -69,9 +69,11 @@ namespace McCli.Compiler.CodeGen
 				inputDescriptorsBuilder[i] = new ParameterDescriptor(input.StaticRepr.CliType, ParameterAttributes.In, input.Name);
 			}
 
+			var outputType = function.Outputs.Length == 0 ? typeof(void) : function.Outputs[0].StaticRepr.CliType;
+
 			// Create the method and get its IL generator
 			ILGenerator ilGenerator;
-			method = methodFactory(function.Name, inputDescriptorsBuilder.Complete(), function.Outputs[0].StaticRepr.CliType, out ilGenerator);
+			method = methodFactory(function.Name, inputDescriptorsBuilder.Complete(), outputType, out ilGenerator);
 			cil = new ILGeneratorMethodBodyWriter(ilGenerator);
 			temporaryPool = new TemporaryLocalPool(cil, "$temp");
 
@@ -102,7 +104,7 @@ namespace McCli.Compiler.CodeGen
 			EmitStatements(function.Body);
 
 			cil.MarkLabel(returnTargetLabel);
-			EmitLoad(function.Outputs[0]);
+			if (function.Outputs.Length == 1) EmitLoad(function.Outputs[0]);
 			cil.Ret();
 		}
 

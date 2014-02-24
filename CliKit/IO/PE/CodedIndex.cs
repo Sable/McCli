@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -72,9 +73,12 @@ namespace CliKit.IO.PE
 		#endregion
 
 		#region Methods
-		public Table GetTable(int tag)
+		public Table? GetTable(int tag)
 		{
-			return (Table)tables[tag];
+			Contract.Requires(tag >= 0 && tag < (1 << TagBitCount));
+			if (tag >= TableCount) return null;
+			var table = tables[tag];
+			return table == unused ? null : (Table?)table;
 		}
 		#endregion
 	}
