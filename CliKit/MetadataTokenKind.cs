@@ -36,7 +36,7 @@ namespace CliKit
 		ModuleReference = 0x1A,
 		TypeSpecification = 0x1B,
 		ImplementationMap = 0x1C,
-		FieldRelativeVirtualAddress = 0x1D,
+		FieldRva = 0x1D,
 		Assembly = 0x20,
 		AssemblyProcessor = 0x21,
 		AssemblyOS = 0x22,

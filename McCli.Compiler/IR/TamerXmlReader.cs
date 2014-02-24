@@ -90,18 +90,22 @@ namespace McCli.Compiler.IR
 		private static IEnumerable<Statement> ReadStatements(XElement parentElement, IReadOnlyDictionary<string, Variable> variables)
 		{
 			if (parentElement == null) yield break;
-			foreach (var statementElement in parentElement.Elements())
+			foreach (var element in parentElement.Elements())
 			{
-				switch (statementElement.Name.LocalName)
+				switch (element.Name.LocalName)
 				{
-					case "ArrayGet": yield return ReadArrayGet(statementElement, variables); break;
-					case "ArraySet": yield return ReadArraySet(statementElement, variables); break;
-					case "Call": yield return ReadCall(statementElement, variables); break;
-					case "Copy": yield return ReadCopy(statementElement, variables); break;
-					case "For": yield return ReadFor(statementElement, variables); break;
-					case "If": yield return ReadIf(statementElement, variables); break;
-					case "Literal": yield return ReadLiteral(statementElement, variables); break;
-					default: throw new NotImplementedException("Statements of type: " + statementElement.Name.LocalName);
+					case "ArrayGet": yield return ReadArrayGet(element, variables); break;
+					case "ArraySet": yield return ReadArraySet(element, variables); break;
+					case "Break": yield return new Jump(JumpKind.Break); break;
+					case "Call": yield return ReadCall(element, variables); break;
+					case "Continue": yield return new Jump(JumpKind.Continue); break;
+					case "Copy": yield return ReadCopy(element, variables); break;
+					case "For": yield return ReadFor(element, variables); break;
+					case "If": yield return ReadIf(element, variables); break;
+					case "Literal": yield return ReadLiteral(element, variables); break;
+					case "Return": yield return new Jump(JumpKind.Return); break;
+					case "While": yield return ReadWhile(element, variables); break;
+					default: throw new NotImplementedException("Statements of type: " + element.Name.LocalName);
 				}
 			}
 		}
@@ -166,6 +170,13 @@ namespace McCli.Compiler.IR
 				case "char": return new Literal(target, valueString[0]);
 				default: throw new InvalidDataException("Unexpected literal type.");
 			}
+		}
+
+		private static While ReadWhile(XElement element, IReadOnlyDictionary<string, Variable> variables)
+		{
+			var condition = ReadVariable(element.Attribute("condition"), variables);
+			var body = ReadStatements(element, variables).ToImmutableArray();
+			return new While(condition, body);
 		}
 
 		private static Variable ReadVariable(XAttribute attribute, IReadOnlyDictionary<string, Variable> variables)

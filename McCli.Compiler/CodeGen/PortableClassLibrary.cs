@@ -1,4 +1,5 @@
-﻿using CliKit.IO.PE;
+﻿using CliKit;
+using CliKit.IO.PE;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
@@ -8,6 +9,7 @@ using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using Table = CliKit.MetadataTokenKind;
 
 namespace McCli.Compiler.CodeGen
 {
@@ -16,6 +18,13 @@ namespace McCli.Compiler.CodeGen
 	/// </summary>
 	public static class PortableClassLibrary
 	{
+		private struct MetadataTableInfo
+		{
+			public uint Offset;
+			public uint RowCount;
+			public uint BytesPerRow;
+		}
+
 		/// <summary>
 		/// Adds the assembly attributes required to mark a generated assembly as
 		/// being a portable class library.
@@ -103,19 +112,120 @@ namespace McCli.Compiler.CodeGen
 
 			// Read the metadata table stream header
 			stream.Position = metadataHeaderPosition + metadataStreamHeaders["#~"].Offset;
-			var metadataTablesStream = stream.ReadStruct<MetadataTablesStreamHeader>();
-			if (metadataTablesStream.MajorVersion != 2 || metadataTablesStream.MinorVersion != 0)
+			var metadataTablesStreamHeader = stream.ReadStruct<MetadataTablesStreamHeader>();
+			if (metadataTablesStreamHeader.MajorVersion != 2 || metadataTablesStreamHeader.MinorVersion != 0)
 				throw new InvalidDataException("Unsupported metadata tables stream version.");
 
-			uint[] metadataTableRowCounts = new uint[64];
-			for (int i = 0; i < metadataTableRowCounts.Length; ++i)
+			var metadataTableInfos = new MetadataTableInfo[64];
+			for (int i = 0; i < metadataTableInfos.Length; ++i)
 			{
-				if ((metadataTablesStream.Valid & (1UL << i)) != 0)
-					metadataTableRowCounts[i] = stream.ReadStruct<uint>();
+				if ((metadataTablesStreamHeader.Valid & (1UL << i)) != 0)
+					metadataTableInfos[i].RowCount = stream.ReadStruct<uint>();
 			}
 
-			// More to be done!
-			throw new NotImplementedException("Patching assemblies to make them portable not yet fully implemented.");
+			var metadataTablesStartPosition = stream.Position;
+
+			// Compute the size of the metadata rows and their offset
+			uint stringIndexSize = (metadataTablesStreamHeader.HeapSizes & 0x01) == 0 ? 2U : 4U;
+			uint blobIndexSize = (metadataTablesStreamHeader.HeapSizes & 0x04) == 0 ? 2U : 4U;
+			FillMetadataTableInfos(ref metadataTablesStreamHeader, metadataTableInfos);
+
+			// Read the assembly reference tables
+			var assemblyReferenceTableInfo = metadataTableInfos[(int)Table.AssemblyReference];
+			stream.Position = metadataTablesStartPosition + assemblyReferenceTableInfo.Offset;
+			for (uint i = 0; i < assemblyReferenceTableInfo.RowCount; ++i)
+			{
+				var rowPosition = stream.Position;
+				ushort majorVersion = stream.ReadStruct<ushort>();
+				ushort minorVersion = stream.ReadStruct<ushort>();
+				ushort buildNumber = stream.ReadStruct<ushort>();
+				ushort revisionNumber = stream.ReadStruct<ushort>();
+				uint flags = stream.ReadStruct<uint>();
+				uint publicKeyOrTokenIndex = blobIndexSize == 2 ? stream.ReadStruct<ushort>() : stream.ReadStruct<uint>();
+				uint nameIndex = stringIndexSize == 2 ? stream.ReadStruct<ushort>() : stream.ReadStruct<uint>();
+				uint cultureIndex = stringIndexSize == 2 ? stream.ReadStruct<ushort>() : stream.ReadStruct<uint>();
+				uint hashValueIndex = stringIndexSize == 2 ? stream.ReadStruct<ushort>() : stream.ReadStruct<uint>();
+
+				if (majorVersion == 4 && minorVersion == 0 && buildNumber == 0 && revisionNumber == 0)
+				{
+					// TODO: Check that it's actually mscorlib and patch the reference
+					stream.Position = rowPosition;
+					throw new NotImplementedException("Patching assemblies to make them portable not yet fully implemented.");
+				}
+			}
+
+			throw new InvalidDataException("Mscorlib reference not found.");
+		}
+
+		private static void FillMetadataTableInfos(
+			ref MetadataTablesStreamHeader header, MetadataTableInfo[] tables)
+		{
+			// Compute the size of the metadata tables
+			uint stringIndexSize = (header.HeapSizes & 0x01) == 0 ? 2U : 4U;
+			uint guidIndexSize = (header.HeapSizes & 0x02) == 0 ? 2U : 4U;
+			uint blobIndexSize = (header.HeapSizes & 0x04) == 0 ? 2U : 4U;
+
+			tables[(int)Table.Module].BytesPerRow = 2 + stringIndexSize + guidIndexSize * 3;
+			tables[(int)Table.TypeReference].BytesPerRow = GetIndexSize(CodedIndex.ResolutionScope, tables) + stringIndexSize * 2;
+			tables[(int)Table.Type].BytesPerRow = 4 + stringIndexSize * 2 + GetIndexSize(CodedIndex.TypeDefOrRef, tables)
+				+ GetIndexSize(Table.Field, tables) + GetIndexSize(Table.Method, tables);
+			tables[(int)Table.Field].BytesPerRow = 2 + stringIndexSize + blobIndexSize;
+			tables[(int)Table.Method].BytesPerRow = 8 + stringIndexSize + blobIndexSize + GetIndexSize(Table.Parameter, tables);
+			tables[(int)Table.Parameter].BytesPerRow = 4 + stringIndexSize;
+			tables[(int)Table.InterfaceImplementation].BytesPerRow = GetIndexSize(Table.Type, tables) + GetIndexSize(CodedIndex.TypeDefOrRef, tables);
+			tables[(int)Table.MemberReference].BytesPerRow = GetIndexSize(CodedIndex.MemberRefParent, tables) + stringIndexSize + blobIndexSize;
+			tables[(int)Table.Constant].BytesPerRow = 2 + GetIndexSize(CodedIndex.HasConstant, tables) + blobIndexSize;
+			tables[(int)Table.CustomAttribute].BytesPerRow = GetIndexSize(CodedIndex.HasCustomAttribute, tables)
+				+ GetIndexSize(CodedIndex.CustomAttributeType, tables) + blobIndexSize;
+			tables[(int)Table.FieldMarshal].BytesPerRow = GetIndexSize(CodedIndex.HasFieldMarshal, tables) + blobIndexSize;
+			tables[(int)Table.DeclarativeSecurity].BytesPerRow = 2 + GetIndexSize(CodedIndex.HasDeclSecurity, tables) + blobIndexSize;
+			tables[(int)Table.ClassLayout].BytesPerRow = 6 + GetIndexSize(Table.Type, tables);
+			tables[(int)Table.FieldLayout].BytesPerRow = 4 + GetIndexSize(Table.Field, tables);
+			tables[(int)Table.Signature].BytesPerRow = blobIndexSize;
+			tables[(int)Table.EventMap].BytesPerRow = GetIndexSize(Table.Type, tables) + GetIndexSize(Table.Event, tables);
+			tables[(int)Table.Event].BytesPerRow = 2 + stringIndexSize + GetIndexSize(CodedIndex.TypeDefOrRef, tables);
+			tables[(int)Table.PropertyMap].BytesPerRow = GetIndexSize(Table.Type, tables) + GetIndexSize(Table.Property, tables);
+			tables[(int)Table.Property].BytesPerRow = 2 + stringIndexSize + blobIndexSize;
+			tables[(int)Table.MethodSemantics].BytesPerRow = 2 + GetIndexSize(Table.Method, tables) + GetIndexSize(CodedIndex.HasSemantics, tables);
+			tables[(int)Table.MethodImplementation].BytesPerRow = GetIndexSize(Table.Type, tables) + GetIndexSize(CodedIndex.MethodDefOrRef, tables) * 2;
+			tables[(int)Table.ModuleReference].BytesPerRow = stringIndexSize;
+			tables[(int)Table.TypeSpecification].BytesPerRow = blobIndexSize;
+			tables[(int)Table.ImplementationMap].BytesPerRow = 2 + GetIndexSize(CodedIndex.MemberForwarded, tables)
+				+ stringIndexSize + GetIndexSize(Table.ModuleReference, tables);
+			tables[(int)Table.FieldRva].BytesPerRow = 4 + GetIndexSize(Table.Field, tables);
+			tables[(int)Table.Assembly].BytesPerRow = 16 + blobIndexSize + stringIndexSize * 2;
+			tables[(int)Table.AssemblyProcessor].BytesPerRow = 4;
+			tables[(int)Table.AssemblyOS].BytesPerRow = 12;
+			tables[(int)Table.AssemblyReference].BytesPerRow = 12 + blobIndexSize * 2 + stringIndexSize * 2;
+			tables[(int)Table.AssemblyReferenceProcessor].BytesPerRow = 4 + GetIndexSize(Table.AssemblyReference, tables);
+			tables[(int)Table.AssemblyReferenceOS].BytesPerRow = 12 + GetIndexSize(Table.AssemblyReference, tables);
+			tables[(int)Table.File].BytesPerRow = 4 + stringIndexSize + blobIndexSize;
+			tables[(int)Table.ExportedType].BytesPerRow = 8 + stringIndexSize * 2 + GetIndexSize(CodedIndex.Implementation, tables);
+			tables[(int)Table.ManifestResource].BytesPerRow = 8 + stringIndexSize + GetIndexSize(CodedIndex.Implementation, tables);
+			tables[(int)Table.NestedClass].BytesPerRow = GetIndexSize(Table.NestedClass, tables) * 2;
+			tables[(int)Table.GenericParameter].BytesPerRow = 4 + GetIndexSize(CodedIndex.TypeOrMethodDef, tables) + stringIndexSize;
+			tables[(int)Table.MethodSpecification].BytesPerRow = GetIndexSize(CodedIndex.MethodDefOrRef, tables) + blobIndexSize;
+			tables[(int)Table.GenericParameterConstraint].BytesPerRow = GetIndexSize(Table.GenericParameter, tables) + GetIndexSize(CodedIndex.TypeDefOrRef, tables);
+
+			uint offset = 0;
+			for (int i = 0; i < tables.Length; ++i)
+			{
+				if (tables[i].RowCount > 0 && tables[i].BytesPerRow == 0)
+					throw new NotImplementedException();
+
+				tables[i].Offset = offset;
+				offset += tables[i].BytesPerRow * tables[i].RowCount;
+			}
+		}
+
+		private static uint GetIndexSize(CodedIndex codedIndex, MetadataTableInfo[] tables)
+		{
+			throw new NotImplementedException();
+		}
+
+		private static uint GetIndexSize(Table table, MetadataTableInfo[] tables)
+		{
+			throw new NotImplementedException();
 		}
 
 		private static TStruct ReadStruct<TStruct>(this Stream stream) where TStruct : struct
