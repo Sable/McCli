@@ -71,12 +71,14 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CodeGen\FunctionBodyEmitter.cs" />
-    <Compile Include="CodeGen\FunctionBodyEmitter.Visitor.cs" />
+    <Compile Include="CodeGen\AssemblyEmitter.cs" />
+    <Compile Include="CodeGen\FunctionEmitter.cs" />
+    <Compile Include="CodeGen\FunctionEmitter.Visitor.cs" />
     <Compile Include="CodeGen\FunctionLookup.cs" />
     <Compile Include="CodeGen\MethodFactories.cs" />
     <Compile Include="CodeGen\MethodFactory.cs" />
     <Compile Include="FunctionInfo.cs" />
+    <Compile Include="FunctionSignature.cs" />
     <Compile Include="FunctionTable.cs" />
     <Compile Include="IR\CompilationUnit.cs" />
     <Compile Include="IR\Copy.cs" />

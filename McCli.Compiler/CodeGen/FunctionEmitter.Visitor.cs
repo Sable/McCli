@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace McCli.Compiler.CodeGen
 {
-	partial class FunctionBodyEmitter : Visitor
+	partial class FunctionEmitter : Visitor
 	{
 		#region Fields
 		private Label continueTargetLabel;

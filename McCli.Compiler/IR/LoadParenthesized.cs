@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,6 +18,8 @@ namespace McCli.Compiler.IR
 
 		public LoadParenthesized(ImmutableArray<Variable> targets, Variable subject, ImmutableArray<Variable> arguments)
 		{
+			Contract.Requires(subject != null);
+
 			this.Targets = targets;
 			this.Subject = subject;
 			this.Arguments = arguments;

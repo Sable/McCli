@@ -16,15 +16,15 @@ namespace McCli.Compiler.CodeGen
 	/// <summary>
 	/// Generates the IL bytecode for MatLab function bodies.
 	/// </summary>
-	public sealed partial class FunctionBodyEmitter
+	public sealed partial class FunctionEmitter
 	{
 		#region EmitStoreScope type
 		private struct EmitStoreScope : IDisposable
 		{
-			private readonly FunctionBodyEmitter instance;
+			private readonly FunctionEmitter instance;
 			private readonly Variable variable;
 
-			public EmitStoreScope(FunctionBodyEmitter instance, Variable variable)
+			public EmitStoreScope(FunctionEmitter instance, Variable variable)
 			{
 				this.instance = instance;
 				this.variable = variable;
@@ -48,7 +48,7 @@ namespace McCli.Compiler.CodeGen
 		#endregion
 
 		#region Constructors
-		private FunctionBodyEmitter(IR.Function function, MethodFactory methodFactory, FunctionLookup functionLookup)
+		internal FunctionEmitter(IR.Function function, MethodFactory methodFactory, FunctionLookup functionLookup)
 		{
 			Contract.Requires(function != null);
 			Contract.Requires(methodFactory != null);
@@ -85,6 +85,13 @@ namespace McCli.Compiler.CodeGen
 		}
 		#endregion
 
+		#region Properties
+		public MethodInfo Method
+		{
+			get { return method; }
+		}
+		#endregion
+
 		#region Methods
 		public static MethodInfo Emit(IR.Function function, MethodFactory methodFactory, FunctionLookup functionLookup)
 		{
@@ -92,12 +99,12 @@ namespace McCli.Compiler.CodeGen
 			Contract.Requires(methodFactory != null);
 			Contract.Requires(functionLookup != null);
 
-			var emitter = new FunctionBodyEmitter(function, methodFactory, functionLookup);
-			emitter.Emit();
-			return emitter.method;
+			var emitter = new FunctionEmitter(function, methodFactory, functionLookup);
+			emitter.EmitBody();
+			return emitter.Method;
 		}
 
-		public void Emit()
+		public void EmitBody()
 		{
 			returnTargetLabel = cil.CreateLabel("return");
 

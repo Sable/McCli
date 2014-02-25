@@ -130,7 +130,7 @@ namespace McCli.Compiler.IR
 		private static LoadParenthesized ReadArrayGet(XElement element, IReadOnlyDictionary<string, Variable> variables)
 		{
 			var targets = ReadVariables(element.Attribute("targets"), variables);
-			var subject = ReadVariable(element.Attribute("subject"), variables);
+			var subject = ReadVariable(element.Attribute("array"), variables);
 			var arguments = ReadVariables(element.Attribute("indices"), variables);
 			return new LoadParenthesized(targets, subject, arguments);
 		}

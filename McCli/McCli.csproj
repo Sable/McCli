@@ -112,7 +112,6 @@
     <Compile Include="MRepr.cs" />
     <Compile Include="MType.cs" />
     <Compile Include="MTypeLookup.cs" />
-    <Compile Include="NArgoutAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MArray.cs" />
     <Compile Include="MValue.cs" />

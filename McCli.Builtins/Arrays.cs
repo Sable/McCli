@@ -22,17 +22,17 @@ namespace McCli.Builtins
 			return 0;
 		}
 
-		public static MFullArray<double> zeros(int n)
+		public static MFullArray<double> zeros(double n)
 		{
 			Contract.Requires(n >= 0);
 			return zeros(n, n);
 		}
 
-		public static MFullArray<double> zeros(int sz1, int sz2)
+		public static MFullArray<double> zeros(double sz1, double sz2)
 		{
 			Contract.Requires(sz1 >= 0);
 			Contract.Requires(sz2 >= 0);
-			return new MFullArray<double>(sz1, sz2);
+			return new MFullArray<double>(Utilities.ToInt(sz1), Utilities.ToInt(sz2));
 		}
 		#endregion
 

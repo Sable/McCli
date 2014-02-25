@@ -129,6 +129,11 @@ namespace McCli
 			return result;
 		}
 
+		private static TScalar Subsref<TScalar>(MArray<TScalar> array, double index)
+		{
+			return Subsref(array, Utilities.ToInt(index));
+		}
+
 		private static TScalar Subsref<TScalar>(MArray<TScalar> array, int index)
 		{
 			return array[index - 1];

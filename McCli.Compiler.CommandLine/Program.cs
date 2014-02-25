@@ -2,6 +2,7 @@
 using McCli.Compiler.IR;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -37,36 +38,23 @@ namespace McCli.Compiler.CommandLine
 
 				// Output the dll.
 				Console.WriteLine("Creating assembly builder...");
-				string outputFilePath = args.Length >= 2 ? Path.GetFullPath(args[1]) : MakeDefaultOutputFilePath(sourceFilePath);
-				var assemblyName = Path.GetFileNameWithoutExtension(outputFilePath);
+				string outputFilePath;
+				if (args.Length >= 2)
+				{
+					outputFilePath = Path.GetFullPath(args[1]);
+				}
+				else
+				{
+					outputFilePath = Path.GetDirectoryName(sourceFilePath) + Path.DirectorySeparatorChar
+						+ Path.GetFileNameWithoutExtension(sourceFilePath) + ".dll";
+				}
 
-				// Create the assembly builder and friends
-				var assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(
-					new AssemblyName(assemblyName),
-					AssemblyBuilderAccess.Save,
-					Path.GetDirectoryName(outputFilePath));
-				PortableClassLibrary.AddPortableFrameworkAttribute(assemblyBuilder);
-				var moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName, Path.GetFileName(outputFilePath), emitSymbolInfo: true);
-				var typeBuilder = moduleBuilder.DefineType(assemblyName, TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.Class);
-
-				// Emit the functions
-				Console.WriteLine("Emitting function {0}...", compilationUnit.EntryPoint.Name);
-				var methodFactory = MethodFactories.FromTypeBuilder(typeBuilder, MethodAttributes.Public | MethodAttributes.Static);
-				FunctionBodyEmitter.Emit(compilationUnit.EntryPoint, methodFactory, functionTable.Lookup);
-
-				// Save the assembly
-				Console.WriteLine("Saving the assembly...");
-				typeBuilder.CreateType();
-				assemblyBuilder.Save(Path.GetFileName(outputFilePath));
-
-				// Patch the assembly to make it a portable class library
-				Console.WriteLine("Patching the generated assembly to make it a portable class library...");
-				using (var assemblyStream = new FileStream(outputFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
-					PortableClassLibrary.PatchReflectionEmitAssembly(assemblyStream);
+				AssemblyEmitter.Emit(compilationUnit, outputFilePath, functionTable.Lookup);
 			}
 			catch (Exception exception)
 			{
 				Console.WriteLine("Compiler error: {0}", exception);
+				if (Debugger.IsAttached) Debugger.Break();
 			}
 		}
 

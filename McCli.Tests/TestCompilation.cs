@@ -44,7 +44,7 @@ namespace McCli
 			var immutableInputs = inputs == null ? ImmutableArray<Variable>.Empty : ImmutableArray.Create(inputs);
 			var immutableOutput = output == null ? ImmutableArray<Variable>.Empty : ImmutableArray.Create(output);
 			var function = new Function("generated", immutableInputs, immutableOutput, ImmutableArray.Create(statements));
-			var method = FunctionBodyEmitter.Emit(function, MethodFactories.Dynamic, functionLookup);
+			var method = FunctionEmitter.Emit(function, MethodFactories.Dynamic, functionLookup);
 			return (TDelegate)(object)method.CreateDelegate(typeof(TDelegate));
 		}
 
