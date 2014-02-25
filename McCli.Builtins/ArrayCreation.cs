@@ -16,7 +16,7 @@ namespace McCli.Builtins
 	{
 		// TODO: numerical coercion for those (can call zeros(int16(4)))
 
-		#region Zeros
+		#region zeros
 		public static double zeros()
 		{
 			return 0;
@@ -33,7 +33,7 @@ namespace McCli.Builtins
 		}
 		#endregion
 
-		#region Ones
+		#region ones
 		public static double ones()
 		{
 			return 1;
@@ -50,7 +50,7 @@ namespace McCli.Builtins
 		}
 		#endregion
 
-		#region Eye
+		#region eye
 		public static double eye()
 		{
 			return 1;
@@ -72,7 +72,7 @@ namespace McCli.Builtins
 		}
 		#endregion
 
-		#region True
+		#region true
 		public static bool @true() { return true; }
 
 		public static MFullArray<bool> @true(double n)
@@ -86,7 +86,7 @@ namespace McCli.Builtins
 		}
 		#endregion
 
-		#region False
+		#region false
 		public static bool @false() { return false; }
 
 		public static MFullArray<bool> @false(double n)
@@ -97,6 +97,34 @@ namespace McCli.Builtins
 		public static MFullArray<bool> @false(double sz1, double sz2)
 		{
 			return new MFullArray<bool>(Utilities.ToShape(sz1, sz2));
+		}
+		#endregion
+
+		#region horzcat
+		public static MArray<TScalar> horzcat<[AnyPrimitive]TScalar>(MArray<TScalar> left, MArray<TScalar> right)
+		{
+			Contract.Requires(left != null);
+			Contract.Requires(right != null);
+
+			if (left.IsHigherDimensional || right.IsHigherDimensional)
+				throw new NotImplementedException("horzcat on higher-dimensional arrays.");
+
+			if (left.RowCount != right.RowCount)
+				throw new MArrayShapeException();
+
+			int rowCount = left.RowCount;
+			var resultShape = new MArrayShape(rowCount, left.ColumnCount + right.ColumnCount);
+			var result = new MFullArray<TScalar>(resultShape);
+
+			for (int rowIndex = 0; rowIndex < rowCount; ++rowIndex)
+			{
+				for (int leftColumnIndex = 0; leftColumnIndex < left.ColumnCount; ++leftColumnIndex)
+					result[leftColumnIndex * rowCount + rowIndex] = left[leftColumnIndex * rowCount + rowIndex];
+				for (int rightColumnIndex = 0; rightColumnIndex < right.ColumnCount; ++rightColumnIndex)
+					result[(left.ColumnCount + rightColumnIndex) * rowCount + rowIndex] = right[rightColumnIndex * rowCount + rowIndex];
+			}
+
+			return result;
 		}
 		#endregion
 

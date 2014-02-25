@@ -45,7 +45,7 @@ namespace McCli.Compiler.CodeGen
 
 		public override void VisitCopy(Copy node)
 		{
-			Contract.Assert(node.Value.StaticRepr == node.Target.StaticRepr);
+			Contract.Assert(node.Value.StaticRepr.Type == node.Target.StaticRepr.Type);
 
 			using (BeginEmitStore(node.Target))
 			{

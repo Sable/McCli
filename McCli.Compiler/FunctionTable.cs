@@ -57,13 +57,20 @@ namespace McCli.Compiler
 			Contract.Requires(type != null);
 
 			foreach (var method in type.GetTypeInfo().DeclaredMethods)
-				if (method.IsPublic && method.IsStatic && !method.IsGenericMethodDefinition)
+				if (method.IsPublic && method.IsStatic)
 					AddMethod(method);
 		}
 
 		public void AddMethod(MethodInfo method)
 		{
 			Contract.Requires(method != null);
+
+			if (method.IsGenericMethodDefinition)
+			{
+				// TODO: Change this once overloading is implemented
+				AddMethod(method.MakeGenericMethod(typeof(double)));
+				return;
+			}
 
 			// TODO: Support variadic arguments
 			// TODO: Support multiple return parameters

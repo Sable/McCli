@@ -11,6 +11,7 @@ namespace McCli.Compiler.IR
 		Local,
 		Input,
 		Output,
+		InputAndOutput,
 		Global,
 		Persistent
 	}
