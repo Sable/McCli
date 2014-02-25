@@ -129,6 +129,24 @@ namespace McCli
 			return result;
 		}
 
+		public static TScalar Subsref<TScalar>(MArray<TScalar> array, double rowIndex, double columnIndex)
+		{
+			return Subsref(array, ToInt(rowIndex), ToInt(columnIndex));
+		}
+
+		private static TScalar Subsref<TScalar>(MArray<TScalar> array, int rowIndex, int columnIndex)
+		{
+			Contract.Requires(array != null);
+			Contract.Requires(!array.IsHigherDimensional);
+
+			if (rowIndex < 1 || rowIndex > array.RowCount
+				|| columnIndex < 1 || columnIndex > array.ColumnCount)
+				throw new ArgumentOutOfRangeException();
+
+			int index = rowIndex + (columnIndex - 1) * array.RowCount;
+			return Subsref(array, index);
+		}
+
 		private static TScalar Subsref<TScalar>(MArray<TScalar> array, double index)
 		{
 			return Subsref(array, Utilities.ToInt(index));

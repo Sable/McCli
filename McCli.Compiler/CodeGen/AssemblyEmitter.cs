@@ -35,7 +35,9 @@ namespace McCli.Compiler.CodeGen
 			FunctionLookup functionLookup = (name, inputReprs) =>
 			{
 				// TODO: Return a function emitter's method if needed
-				return builtinLookup(name, inputReprs);
+				Function function;
+				return compilationUnit.Functions.TryGetValue(name, out function)
+					? functionEmitters[function].Method : builtinLookup(name, inputReprs);
 			};
 
 			var methodFactory = MethodFactories.FromTypeBuilder(typeBuilder, MethodAttributes.Public | MethodAttributes.Static);

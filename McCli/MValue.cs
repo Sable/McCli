@@ -53,6 +53,22 @@ namespace McCli
 		}
 
 		/// <summary>
+		/// Gets the number of column this value has.
+		/// </summary>
+		public int ColumnCount
+		{
+			get { return shape.ColumnCount; }
+		}
+
+		/// <summary>
+		/// Gets the number of rows this value has.
+		/// </summary>
+		public int RowCount
+		{
+			get { return shape.RowCount; }
+		}
+
+		/// <summary>
 		/// Gets a value indicating if this value contains a single element.
 		/// </summary>
 		public bool IsScalar

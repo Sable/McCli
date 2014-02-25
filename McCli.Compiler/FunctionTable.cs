@@ -39,7 +39,7 @@ namespace McCli.Compiler
 		}
 
 		#region Fields
-		private readonly Dictionary<GroupKey, FunctionInfo> functions = new Dictionary<GroupKey, FunctionInfo>();
+		private readonly Dictionary<GroupKey, FunctionMethod> functions = new Dictionary<GroupKey, FunctionMethod>();
 		#endregion
 
 		#region Methods
@@ -70,16 +70,16 @@ namespace McCli.Compiler
 			// TODO: Support variadic return parameters
 			// TODO: Support overloading
 			var key = new GroupKey(method.Name, method.GetParameters().Length);
-			var functionInfo = new FunctionInfo(method);
+			var functionInfo = new FunctionMethod(method);
 			functions.Add(key, functionInfo);
 		}
 
-		public FunctionInfo Lookup(string name, ImmutableArray<MRepr> argumentTypes)
+		public FunctionMethod Lookup(string name, ImmutableArray<MRepr> argumentTypes)
 		{
 			Contract.Requires(name != null);
 
 			var key = new GroupKey(name, argumentTypes.Length);
-			FunctionInfo function;
+			FunctionMethod function;
 			if (!functions.TryGetValue(key, out function))
 			{
 				string message = string.Format(CultureInfo.InvariantCulture,

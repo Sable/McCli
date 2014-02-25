@@ -69,11 +69,11 @@ namespace McCli.Compiler.CodeGen
 				{
 					var argument = node.Arguments[i];
 					EmitLoad(argument);
-					EmitConversion(argument.StaticRepr, function.InputTypes[i]);
+					EmitConversion(argument.StaticRepr, function.InputReprs[i]);
 				}
 
 				cil.Call(function.Method);
-				EmitConversion(function.OutputType, node.Targets[0].StaticRepr);
+				EmitConversion(function.OutputRepr, node.Targets[0].StaticRepr);
 			}
 		}
 

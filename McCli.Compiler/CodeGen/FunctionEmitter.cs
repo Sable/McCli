@@ -40,7 +40,7 @@ namespace McCli.Compiler.CodeGen
 		#region Fields
 		private readonly IR.Function function;
 		private readonly FunctionLookup functionLookup;
-		private readonly MethodInfo method;
+		private readonly FunctionMethod method;
 		private readonly MethodBodyWriter cil;
 		private readonly Dictionary<Variable, VariableLocation> locals = new Dictionary<Variable, VariableLocation>();
 		private readonly TemporaryLocalPool temporaryPool;
@@ -68,12 +68,16 @@ namespace McCli.Compiler.CodeGen
 				locals.Add(input, VariableLocation.Parameter(i));
 				inputDescriptorsBuilder[i] = new ParameterDescriptor(input.StaticRepr.CliType, ParameterAttributes.In, input.Name);
 			}
-
+			
+			var inputDescriptors = inputDescriptorsBuilder.Complete();
 			var outputType = function.Outputs.Length == 0 ? typeof(void) : function.Outputs[0].StaticRepr.CliType;
 
 			// Create the method and get its IL generator
 			ILGenerator ilGenerator;
-			method = methodFactory(function.Name, inputDescriptorsBuilder.Complete(), outputType, out ilGenerator);
+			var methodInfo = methodFactory(function.Name, inputDescriptors, outputType, out ilGenerator);
+
+			this.method = new FunctionMethod(methodInfo, inputDescriptors.Select(i => i.Type).ToArray(), outputType);
+
 			cil = new ILGeneratorMethodBodyWriter(ilGenerator);
 			temporaryPool = new TemporaryLocalPool(cil, "$temp");
 
@@ -86,14 +90,14 @@ namespace McCli.Compiler.CodeGen
 		#endregion
 
 		#region Properties
-		public MethodInfo Method
+		public FunctionMethod Method
 		{
 			get { return method; }
 		}
 		#endregion
 
 		#region Methods
-		public static MethodInfo Emit(IR.Function function, MethodFactory methodFactory, FunctionLookup functionLookup)
+		public static FunctionMethod Emit(IR.Function function, MethodFactory methodFactory, FunctionLookup functionLookup)
 		{
 			Contract.Requires(function != null);
 			Contract.Requires(methodFactory != null);
@@ -173,7 +177,16 @@ namespace McCli.Compiler.CodeGen
 		{
 			if (source == target) return;
 
-			if (target.IsAny && source.IsMValue) return;
+			if (target.IsAny)
+			{
+				if (source.IsMValue) return;
+
+				if (source.IsPrimitive && source.StructuralClass == MStructuralClass.Scalar)
+				{
+					EmitBoxScalar(source.Type);
+					return;
+				}
+			}
 
 			if (source.Type == target.Type)
 			{
@@ -185,7 +198,7 @@ namespace McCli.Compiler.CodeGen
 						|| target.IsAny))
 				{
 					// Box a scalar to an array
-					cil.Call(typeof(MFullArray<>).MakeGenericType(type.CliType).GetMethod("CreateScalar"));
+					EmitBoxScalar(type);
 					return;
 				}
 				else if (source.IsArray
@@ -202,6 +215,11 @@ namespace McCli.Compiler.CodeGen
 
 			throw new NotImplementedException(
 				string.Format("Conversion from {0} to {1}.", source, target));
+		}
+
+		private void EmitBoxScalar(MType type)
+		{
+			cil.Call(typeof(MFullArray<>).MakeGenericType(type.CliType).GetMethod("CreateScalar"));
 		}
 
 		private VariableLocation GetLocalLocation(Variable variable)

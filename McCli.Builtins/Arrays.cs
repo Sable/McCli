@@ -24,15 +24,12 @@ namespace McCli.Builtins
 
 		public static MFullArray<double> zeros(double n)
 		{
-			Contract.Requires(n >= 0);
 			return zeros(n, n);
 		}
 
 		public static MFullArray<double> zeros(double sz1, double sz2)
 		{
-			Contract.Requires(sz1 >= 0);
-			Contract.Requires(sz2 >= 0);
-			return new MFullArray<double>(Utilities.ToInt(sz1), Utilities.ToInt(sz2));
+			return new MFullArray<double>(Utilities.ToShape(sz1, sz2));
 		}
 		#endregion
 
@@ -42,17 +39,14 @@ namespace McCli.Builtins
 			return 1;
 		}
 
-		public static MFullArray<double> ones(int n)
+		public static MFullArray<double> ones(double n)
 		{
-			Contract.Requires(n >= 0);
 			return ones(n, n);
 		}
 
-		public static MFullArray<double> ones(int sz1, int sz2)
+		public static MFullArray<double> ones(double sz1, double sz2)
 		{
-			Contract.Requires(sz1 >= 0);
-			Contract.Requires(sz2 >= 0);
-			return MFullArray<double>.ExpandScalar(1, new MArrayShape(sz1, sz2));
+			return MFullArray<double>.ExpandScalar(1, Utilities.ToShape(sz1, sz2));
 		}
 		#endregion
 
@@ -62,21 +56,18 @@ namespace McCli.Builtins
 			return 1;
 		}
 
-		public static MFullArray<double> eye(int n)
+		public static MFullArray<double> eye(double n)
 		{
-			Contract.Requires(n >= 0);
 			return eye(n, n);
 		}
 
-		public static MFullArray<double> eye(int sz1, int sz2)
+		public static MFullArray<double> eye(double sz1, double sz2)
 		{
-			Contract.Requires(sz1 >= 0);
-			Contract.Requires(sz2 >= 0);
-
-			var result = new MFullArray<double>(sz1, sz2);
+			var shape = Utilities.ToShape(sz1, sz2);
+			var result = new MFullArray<double>(shape);
 			var array = result.BackingArray;
 			for (int i = 0; i < array.Length; ++i)
-				array[i] = (i / sz1) == (i % sz1) ? 1 : 0;
+				array[i] = (i / shape.RowCount) == (i % shape.RowCount) ? 1 : 0;
 			return result;
 		}
 		#endregion
@@ -84,9 +75,27 @@ namespace McCli.Builtins
 		#region True/False
 		public static bool @true() { return true; }
 
+		public static MFullArray<bool> @true(double n)
+		{
+			return @true(n, n);
+		}
+
+		public static MFullArray<bool> @true(double sz1, double sz2)
+		{
+			return MFullArray<bool>.ExpandScalar(true, Utilities.ToShape(sz1, sz2));
+		}
+
 		public static bool @false() { return false; }
 
-		// TODO: Sized true/false
+		public static MFullArray<bool> @false(double n)
+		{
+			return @false(n, n);
+		}
+
+		public static MFullArray<bool> @false(double sz1, double sz2)
+		{
+			return new MFullArray<bool>(Utilities.ToShape(sz1, sz2));
+		}
 		#endregion
 
 		public static MArray<TScalar> arrayfun<TScalar>(Func<TScalar, TScalar> map, MArray<TScalar> array)

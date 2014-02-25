@@ -8,37 +8,53 @@ using System.Threading.Tasks;
 
 namespace McCli.Compiler
 {
-	public sealed class FunctionInfo
+	public sealed class FunctionMethod
 	{
 		#region Fields
 		private readonly MethodInfo method;
-		private readonly ImmutableArray<MRepr> inputTypes;
+		private readonly ImmutableArray<MRepr> inputReprs;
 		private readonly MRepr outputType;
 		#endregion
 
 		#region Constructors
-		public FunctionInfo(MethodInfo method)
+		public FunctionMethod(MethodInfo method)
 		{
 			Contract.Requires(method != null);
 
 			this.method = method;
-			inputTypes = method.GetParameters().Select(p => MRepr.FromCliType(p.ParameterType)).ToImmutableArray();
+			inputReprs = method.GetParameters().Select(p => MRepr.FromCliType(p.ParameterType)).ToImmutableArray();
 			outputType = MRepr.FromCliType(method.ReturnType);
+		}
+
+		public FunctionMethod(MethodInfo method, Type[] inputTypes, Type returnType)
+		{
+			Contract.Requires(method != null);
+			Contract.Requires(inputTypes != null);
+			Contract.Requires(returnType != null);
+
+			this.method = method;
+			inputReprs = inputTypes.Select(t => MRepr.FromCliType(t)).ToImmutableArray();
+			outputType = MRepr.FromCliType(returnType);
 		}
 		#endregion
 
 		#region Properties
+		public string Name
+		{
+			get { return method.Name; }
+		}
+
 		public MethodInfo Method
 		{
 			get { return method; }
 		}
 
-		public ImmutableArray<MRepr> InputTypes
+		public ImmutableArray<MRepr> InputReprs
 		{
-			get { return inputTypes; }
+			get { return inputReprs; }
 		}
 
-		public MRepr OutputType
+		public MRepr OutputRepr
 		{
 			get { return outputType; }
 		}
@@ -50,10 +66,10 @@ namespace McCli.Compiler
 			var stringBuilder = new StringBuilder();
 
 			stringBuilder.Append(method.Name).Append(" : (");
-			for (int i = 0; i < inputTypes.Length; ++i)
+			for (int i = 0; i < inputReprs.Length; ++i)
 			{
 				if (i > 0) stringBuilder.Append(", ");
-				stringBuilder.Append(inputTypes[i]);
+				stringBuilder.Append(inputReprs[i]);
 			}
 
 			stringBuilder.Append(") -> ").Append(outputType);
