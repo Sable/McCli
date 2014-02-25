@@ -3,15 +3,14 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace McCli.Builtins
 {
 	/// <summary>
-	/// Implements MatLab builtins which deal with classes and type-testing.
+	/// Implements MatLab builtins for data type identification.
+	/// http://www.mathworks.com/help/matlab/data-type-identification.html
 	/// </summary>
-	[MatlabLibrary]
-	public static class Classes
+	public static class DataTypeIdentification
 	{
 		public static string @class(MValue value)
 		{
@@ -53,32 +52,5 @@ namespace McCli.Builtins
 			Contract.Requires(value != null);
 			return value.Class == MClass.Logical;
 		}
-
-		public static bool isfloat(MValue value)
-		{
-			Contract.Requires(value != null);
-			return (value.Class.Kind & MClassKinds.FloatMask) != 0;
-		}
-
-		public static bool isinteger(MValue value)
-		{
-			Contract.Requires(value != null);
-			return (value.Class.Kind & MClassKinds.IntegerMask) != 0;
-		}
-
-		public static bool isnumeric(MValue value)
-		{
-			Contract.Requires(value != null);
-			return (value.Class.Kind & MClassKinds.NumericMask) != 0;
-		}
-
-		public static bool isreal(MValue value)
-		{
-			Contract.Requires(value != null);
-			return !value.Repr.Type.IsComplex;
-		}
-
-		// TODO: When overloading is implemented,
-		// add concrete-type versions of the is*** type checking builtins above
 	}
 }

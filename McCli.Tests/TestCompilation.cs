@@ -29,12 +29,7 @@ namespace McCli
 		public void Initialize()
 		{
 			var functionTable = new FunctionTable();
-			functionTable.AddMethodsFromType(typeof(McCli.Builtins.Operators));
-			functionTable.AddMethodsFromType(typeof(McCli.Builtins.Classes));
-			functionTable.AddMethodsFromType(typeof(McCli.Builtins.Arrays));
-			functionTable.AddMethodsFromType(typeof(McCli.Builtins.Environment));
-			functionTable.AddMethodsFromType(typeof(McCli.Builtins.Floats));
-			functionTable.AddMethodsFromType(typeof(McCli.Builtins.Complex));
+			functionTable.AddMethodsFromAssembly(typeof(Builtins.ArrayCreation).Assembly);
 			functionLookup = functionTable.Lookup;
 		}
 
@@ -44,8 +39,8 @@ namespace McCli
 			var immutableInputs = inputs == null ? ImmutableArray<Variable>.Empty : ImmutableArray.Create(inputs);
 			var immutableOutput = output == null ? ImmutableArray<Variable>.Empty : ImmutableArray.Create(output);
 			var function = new Function("generated", immutableInputs, immutableOutput, ImmutableArray.Create(statements));
-			var method = FunctionEmitter.Emit(function, MethodFactories.Dynamic, functionLookup);
-			return (TDelegate)(object)method.CreateDelegate(typeof(TDelegate));
+			var functionMethod = FunctionEmitter.Emit(function, MethodFactories.Dynamic, functionLookup);
+			return (TDelegate)(object)functionMethod.Method.CreateDelegate(typeof(TDelegate));
 		}
 
 		[TestMethod]

@@ -128,5 +128,12 @@ namespace McCli
 			get { return elements; }
 		}
 		#endregion
+
+		#region Operators
+		public static implicit operator MFullArray<TScalar>(TScalar scalar)
+		{
+			return MFullArray<TScalar>.CreateScalar(scalar);
+		}
+		#endregion
 	}
 }

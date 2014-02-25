@@ -9,18 +9,12 @@ using System.Threading.Tasks;
 namespace McCli.Builtins
 {
 	/// <summary>
-	/// Implements MatLab builtins which relate to the execution environment.
+	/// Implements MatLab builtins for dates and time.
+	/// http://www.mathworks.com/help/matlab/date-and-time-operations.html
 	/// </summary>
 	[MatlabLibrary]
-	public static class Environment
+	public static class DatesAndTime
 	{
-		// TODO: Find a way to reimplement ispc, isunix and ismac now that this is in a portable class library
-
-		public static bool isstudent()
-		{
-			return false; // Muahaha !
-		}
-
 		#region Time
 		public static double now()
 		{
@@ -53,7 +47,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		private static DateTime RowToDateTime(MArray<double> array, int rowIndex)
+		internal static DateTime RowToDateTime(MArray<double> array, int rowIndex)
 		{
 			int rowCount = array.Shape.RowCount;
 			double seconds = array[rowCount * 5 + rowIndex];

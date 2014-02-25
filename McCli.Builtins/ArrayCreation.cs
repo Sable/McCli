@@ -8,15 +8,15 @@ using System.Threading.Tasks;
 namespace McCli.Builtins
 {
 	/// <summary>
-	/// Implements array-related MatLab builtins.
+	/// Implements MatLab builtins for array creation and concatenation.
+	/// http://www.mathworks.com/help/matlab/elementary-matrices-and-arrays.html
 	/// </summary>
 	[MatlabLibrary]
-	public static class Arrays
+	public static class ArrayCreation
 	{
-		#region Array Creation
 		// TODO: numerical coercion for those (can call zeros(int16(4)))
 
-		#region Zeroes
+		#region Zeros
 		public static double zeros()
 		{
 			return 0;
@@ -72,7 +72,7 @@ namespace McCli.Builtins
 		}
 		#endregion
 
-		#region True/False
+		#region True
 		public static bool @true() { return true; }
 
 		public static MFullArray<bool> @true(double n)
@@ -84,7 +84,9 @@ namespace McCli.Builtins
 		{
 			return MFullArray<bool>.ExpandScalar(true, Utilities.ToShape(sz1, sz2));
 		}
+		#endregion
 
+		#region False
 		public static bool @false() { return false; }
 
 		public static MFullArray<bool> @false(double n)
@@ -125,82 +127,5 @@ namespace McCli.Builtins
 		}
 
 		// TODO: diag, pascal, magic
-		#endregion
-
-		#region Array Shape
-		#region Size & Counting
-		public static double numel(MValue value)
-		{
-			Contract.Requires(value != null);
-			return value.Count;
-		}
-
-		public static double ndims(MValue value)
-		{
-			Contract.Requires(value != null);
-			return value.Shape.DimensionCount;
-		}
-
-		public static MFullArray<double> size(MValue value)
-		{
-			Contract.Requires(value != null);
-
-			var shape = value.Shape;
-			var result = new MFullArray<double>(MArrayShape.RowVector(shape.DimensionCount));
-			for (int i = 0; i < shape.DimensionCount; ++i)
-				result[i] = shape.GetSize(i);
-			return result;
-		}
-
-		public static double length(MValue value)
-		{
-			Contract.Requires(value != null);
-
-			var shape = value.Shape;
-			int result = 0;
-			for (int i = 0; i < shape.DimensionCount; ++i)
-				result = Math.Max(result, shape.GetSize(i));
-			return result;
-		}
-		#endregion
-
-		#region Shape Testing
-		public static bool isempty(MValue value)
-		{
-			Contract.Requires(value != null);
-			return value.IsEmpty;
-		}
-
-		public static bool isscalar(MValue value)
-		{
-			Contract.Requires(value != null);
-			return value.IsScalar;
-		}
-
-		public static bool iscolumn(MValue value)
-		{
-			Contract.Requires(value != null);
-			return value.IsColumnVector;
-		}
-
-		public static bool isrow(MValue value)
-		{
-			Contract.Requires(value != null);
-			return value.IsRowVector;
-		}
-
-		public static bool isvector(MValue value)
-		{
-			Contract.Requires(value != null);
-			return value.Shape.IsVector;
-		}
-
-		public static bool ismatrix(MValue value)
-		{
-			Contract.Requires(value != null);
-			return !value.IsHigherDimensional;
-		}
-		#endregion
-		#endregion
 	}
 }

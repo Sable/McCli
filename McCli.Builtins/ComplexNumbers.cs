@@ -9,10 +9,21 @@ namespace McCli.Builtins
 {
 	/// <summary>
 	/// Implements MatLab builtins related to complex/imaginary numbers.
+	/// http://www.mathworks.com/help/matlab/complex-numbers.html
 	/// </summary>
 	[MatlabLibrary]
-	public static class Complex
+	public static class ComplexNumbers
 	{
+		public static MArray<double> abs(MArray<double> array)
+		{
+			return ArrayCreation.arrayfun(abs, array);
+		}
+
+		internal static double abs(double value)
+		{
+			return Math.Abs(value);
+		}
+
 		public static MComplex<TReal> complex<[AnyRealNumeric] TReal>(TReal a) where TReal : struct
 		{
 			return new MComplex<TReal>(a);

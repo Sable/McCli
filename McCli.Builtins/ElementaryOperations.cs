@@ -3,17 +3,15 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace McCli.Builtins
 {
 	/// <summary>
-	/// Implements MatLab operators builtins.
+	/// Implements MatLab builtins for elementary operations.
+	/// http://www.mathworks.com/help/matlab/operators-and-elementary-operations.html
 	/// </summary>
-	[MatlabLibrary]
-	public static class Operators
+	public static class ElementaryOperations
 	{
-		#region Arithmetic
 		#region Additive
 		public static MFullArray<double> plus(MArray<double> lhs, MArray<double> rhs)
 		{
@@ -30,7 +28,7 @@ namespace McCli.Builtins
 			return c;
 		}
 
-		private static MFullArray<double> plus(MArray<double> lhs, double rhs)
+		internal static MFullArray<double> plus(MArray<double> lhs, double rhs)
 		{
 			Contract.Requires(lhs != null);
 
@@ -55,7 +53,7 @@ namespace McCli.Builtins
 			return c;
 		}
 
-		private static MFullArray<double> minus(MArray<double> lhs, double rhs)
+		internal static MFullArray<double> minus(MArray<double> lhs, double rhs)
 		{
 			Contract.Requires(lhs != null);
 
@@ -65,7 +63,7 @@ namespace McCli.Builtins
 			return c;
 		}
 
-		private static MFullArray<double> minus(double lhs, MArray<double> rhs)
+		internal static MFullArray<double> minus(double lhs, MArray<double> rhs)
 		{
 			Contract.Requires(rhs != null);
 
@@ -92,7 +90,7 @@ namespace McCli.Builtins
 		}
 		#endregion
 
-		#region Multiplicative
+		#region Elementwise Multiplicative
 		public static MFullArray<double> times(MArray<double> lhs, MArray<double> rhs)
 		{
 			Contract.Requires(lhs != null);
@@ -108,7 +106,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		private static MFullArray<double> times(MArray<double> lhs, double rhs)
+		internal static MFullArray<double> times(MArray<double> lhs, double rhs)
 		{
 			Contract.Requires(lhs != null);
 
@@ -118,6 +116,51 @@ namespace McCli.Builtins
 			return result;
 		}
 
+		public static MFullArray<double> rdivide(MArray<double> lhs, MArray<double> rhs)
+		{
+			Contract.Requires(lhs != null);
+			Contract.Requires(rhs != null);
+
+			if (lhs.IsScalar) return rdivide(lhs[0], rhs);
+			if (rhs.IsScalar) return rdivide(lhs, rhs[0]);
+			if (lhs.Shape != rhs.Shape) throw new MArrayShapeException();
+
+			var result = new MFullArray<double>(lhs.Shape);
+			for (int i = 0; i < lhs.Count; ++i)
+				result[i] = lhs[i] / rhs[i];
+			return result;
+		}
+
+		internal static MFullArray<double> rdivide(MArray<double> lhs, double rhs)
+		{
+			Contract.Requires(lhs != null);
+
+			var result = new MFullArray<double>(lhs.Shape);
+			for (int i = 0; i < lhs.Count; ++i)
+				result[i] = lhs[i] / rhs;
+			return result;
+		}
+
+		internal static MFullArray<double> rdivide(double lhs, MArray<double> rhs)
+		{
+			Contract.Requires(rhs != null);
+
+			var result = new MFullArray<double>(rhs.Shape);
+			for (int i = 0; i < rhs.Count; ++i)
+				result[i] = lhs / rhs[i];
+			return result;
+		}
+
+		public static MFullArray<double> ldivide(MArray<double> lhs, MArray<double> rhs)
+		{
+			Contract.Requires(lhs != null);
+			Contract.Requires(rhs != null);
+
+			return rdivide(rhs, lhs);
+		}
+		#endregion
+
+		#region Matrix Operations
 		public static MFullArray<double> mtimes(MArray<double> lhs, MArray<double> rhs)
 		{
 			Contract.Requires(lhs != null);
@@ -150,47 +193,40 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		public static MFullArray<double> rdivide(MArray<double> lhs, MArray<double> rhs)
+		public static MFullArray<double> mrdivide(MArray<double> b, MArray<double> a)
 		{
-			Contract.Requires(lhs != null);
-			Contract.Requires(rhs != null);
+			Contract.Requires(b != null);
+			Contract.Requires(a != null);
 
-			if (lhs.IsScalar) return rdivide(lhs[0], rhs);
-			if (rhs.IsScalar) return rdivide(lhs, rhs[0]);
-			if (lhs.Shape != rhs.Shape) throw new MArrayShapeException();
+			if (a.IsHigherDimensional || b.IsHigherDimensional || a.ColumnCount != b.ColumnCount)
+				throw new MArrayShapeException();
 
-			var result = new MFullArray<double>(lhs.Shape);
-			for (int i = 0; i < lhs.Count; ++i)
-				result[i] = lhs[i] / rhs[i];
-			return result;
+			if (a.IsScalar && b.IsScalar) return mrdivide(b[0], a[0]);
+
+			throw new NotImplementedException("Non-scalar mrdivide.");
+		}
+		
+		internal static double mrdivide(double b, double a)
+		{
+			return b / a;
 		}
 
-		private static MFullArray<double> rdivide(MArray<double> lhs, double rhs)
+		public static MFullArray<double> mldivide(MArray<double> a, MArray<double> b)
 		{
-			Contract.Requires(lhs != null);
+			Contract.Requires(b != null);
+			Contract.Requires(a != null);
 
-			var result = new MFullArray<double>(lhs.Shape);
-			for (int i = 0; i < lhs.Count; ++i)
-				result[i] = lhs[i] / rhs;
-			return result;
+			if (a.IsHigherDimensional || b.IsHigherDimensional || a.RowCount != b.RowCount)
+				throw new MArrayShapeException();
+
+			if (a.IsScalar && b.IsScalar) return mldivide(a[0], b[0]);
+
+			throw new NotImplementedException("Non-scalar mldivide.");
 		}
 
-		private static MFullArray<double> rdivide(double lhs, MArray<double> rhs)
+		internal static double mldivide(double a, double b)
 		{
-			Contract.Requires(rhs != null);
-
-			var result = new MFullArray<double>(rhs.Shape);
-			for (int i = 0; i < rhs.Count; ++i)
-				result[i] = lhs / rhs[i];
-			return result;
-		}
-
-		public static MFullArray<double> ldivide(MArray<double> lhs, MArray<double> rhs)
-		{
-			Contract.Requires(lhs != null);
-			Contract.Requires(rhs != null);
-
-			return rdivide(rhs, lhs);
+			return b / a;
 		}
 		#endregion
 
@@ -209,7 +245,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		private static MFullArray<double> power(MArray<double> @base, double exponent)
+		internal static MFullArray<double> power(MArray<double> @base, double exponent)
 		{
 			Contract.Requires(@base != null);
 
@@ -219,7 +255,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		private static MFullArray<double> power(double @base, MArray<double> exponent)
+		internal static MFullArray<double> power(double @base, MArray<double> exponent)
 		{
 			Contract.Requires(exponent != null);
 
@@ -230,122 +266,83 @@ namespace McCli.Builtins
 		}
 		#endregion
 
-		#region Transpose
-		public static MArray<TScalar> transpose<[AnyPrimitive] TScalar>(MArray<TScalar> array)
+		#region Rounding
+		public static MArray<double> floor(MArray<double> array)
 		{
 			Contract.Requires(array != null);
-			if (array.IsHigherDimensional) throw new MArrayShapeException();
 
-			var shape = array.Shape;
-			var result = new MFullArray<TScalar>(shape.ColumnCount, shape.RowCount);
-			for (int row = 0; row < shape.RowCount; ++row)
-				for (int column = 0; column < shape.ColumnCount; ++column)
-					result[row * shape.ColumnCount + column] = array[column * shape.RowCount + row];
+			var result = new MFullArray<double>(array.Shape);
+			for (int i = 0; i < result.Count; ++i)
+				result[i] = floor(array[i]);
 			return result;
 		}
 
-		private static TScalar transpose<[AnyPrimitive] TScalar>(TScalar value)
+		internal static double floor(double value)
 		{
-			return value;
+			return Math.Floor(value);
+		}
+
+		public static MArray<double> ceil(MArray<double> array)
+		{
+			Contract.Requires(array != null);
+
+			var result = new MFullArray<double>(array.Shape);
+			for (int i = 0; i < result.Count; ++i)
+				result[i] = ceil(array[i]);
+			return result;
+		}
+
+		internal static double ceil(double value)
+		{
+			return Math.Ceiling(value);
+		}
+
+		public static MArray<double> round(MArray<double> array)
+		{
+			Contract.Requires(array != null);
+
+			var result = new MFullArray<double>(array.Shape);
+			for (int i = 0; i < result.Count; ++i)
+				result[i] = round(array[i]);
+			return result;
+		}
+
+		internal static double round(double value)
+		{
+			// Unfortunately, portable class libraries do not have
+			// Math.Round(..., MidpointRounding, AwayFromZero).
+
+			if (value > 0)
+				return (value % 1) == 0.5 ? ceil(value) : floor(value);
+			else
+				return (value % 1) == -0.5 ? floor(value) : ceil(value);
+		}
+
+		public static MArray<double> fix(MArray<double> array)
+		{
+			Contract.Requires(array != null);
+
+			var result = new MFullArray<double>(array.Shape);
+			for (int i = 0; i < result.Count; ++i)
+				result[i] = fix(array[i]);
+			return result;
+		}
+
+		internal static double fix(double value)
+		{
+			// Unfortunately, portable class libraries do not have Math.Truncate
+			return double.IsInfinity(value) ? value : (value - (value % 1));
 		}
 		#endregion
 
-		// TODO: matrix multiplication, solves, transpose
-		// TODO: vector dot and cross products (not in this class)
-		#endregion
-
-		#region Comparison
-		public static MArray<bool> eq(MArray<double> a, MArray<double> b)
-		{
-			CheckMatchingShapes_ScalarExpand(ref a, ref b);
-
-			var result = new MFullArray<bool>(a.Shape);
-			for (int i = 0; i < result.Count; ++i)
-				result[i] = a[i] == b[i];
-			return result;
-		}
-
-		public static MArray<bool> ne(MArray<double> a, MArray<double> b)
-		{
-			CheckMatchingShapes_ScalarExpand(ref a, ref b);
-
-			var result = new MFullArray<bool>(a.Shape);
-			for (int i = 0; i < result.Count; ++i)
-				result[i] = a[i] != b[i];
-			return result;
-		}
-
-		public static MArray<bool> gt(MArray<double> a, MArray<double> b)
-		{
-			CheckMatchingShapes_ScalarExpand(ref a, ref b);
-
-			var result = new MFullArray<bool>(a.Shape);
-			for (int i = 0; i < result.Count; ++i)
-				result[i] = a[i] > b[i];
-			return result;
-		}
-
-		public static MArray<bool> lt(MArray<double> a, MArray<double> b)
-		{
-			CheckMatchingShapes_ScalarExpand(ref a, ref b);
-
-			var result = new MFullArray<bool>(a.Shape);
-			for (int i = 0; i < result.Count; ++i)
-				result[i] = a[i] < b[i];
-			return result;
-		}
-
-		public static MArray<bool> ge(MArray<double> a, MArray<double> b)
-		{
-			CheckMatchingShapes_ScalarExpand(ref a, ref b);
-
-			var result = new MFullArray<bool>(a.Shape);
-			for (int i = 0; i < result.Count; ++i)
-				result[i] = a[i] >= b[i];
-			return result;
-		}
-
-		public static MArray<bool> le(MArray<double> a, MArray<double> b)
-		{
-			CheckMatchingShapes_ScalarExpand(ref a, ref b);
-
-			var result = new MFullArray<bool>(a.Shape);
-			for (int i = 0; i < result.Count; ++i)
-				result[i] = a[i] <= b[i];
-			return result;
-		}
-
-		public static bool isequal(MArray<double> a, MArray<double> b)
-		{
-			Contract.Requires(a != null);
-			Contract.Requires(b != null);
-
-			if (a.Shape != b.Shape) return false;
-
-			for (int i = 0; i < a.Count; ++i)
-				if (a[i] != b[i])
-					return false;
-
-			return true;
-		}
-		#endregion
-
-		#region Colon
-		public static MFullArray<double> colon(double low, double high)
-		{
-			if (low > high) return new MFullArray<double>(1, 0);
-
-			var count = (int)(high - low) + 1;
-			var array = new MFullArray<double>(1, count);
-			for (int i = 0; i < count; ++i)
-				array[i] = low + i;
-
-			return array;
-		}
-		#endregion
-
-		#region Private utilities
-		private static void CheckMatchingShapes_ScalarExpand<TScalar>(ref MArray<TScalar> first, ref MArray<TScalar> second)
+		/// <summary>
+		/// Checks that two arrays have matching shapes.
+		/// If either is a scalar value, it gets expanded to the size of the other.
+		/// </summary>
+		/// <typeparam name="TScalar">The type of scalar values.</typeparam>
+		/// <param name="first">The first array.</param>
+		/// <param name="second">The second array</param>
+		internal static void MatchShapes<TScalar>(ref MArray<TScalar> first, ref MArray<TScalar> second)
 		{
 			Contract.Requires(first != null);
 			Contract.Requires(second != null);
@@ -356,6 +353,5 @@ namespace McCli.Builtins
 			else if (second.IsScalar) second = MFullArray<TScalar>.ExpandScalar(second[0], first.Shape);
 			else throw new MArrayShapeException();
 		}
-		#endregion
 	}
 }

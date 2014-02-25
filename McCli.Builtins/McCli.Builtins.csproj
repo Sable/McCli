@@ -73,15 +73,19 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Arrays.cs" />
-    <Compile Include="Classes.cs" />
-    <Compile Include="CommonMath.cs" />
-    <Compile Include="Complex.cs" />
-    <Compile Include="Environment.cs" />
-    <Compile Include="Floats.cs" />
-    <Compile Include="Operators.cs" />
+    <Compile Include="ArrayDimensions.cs" />
+    <Compile Include="ArrayCreation.cs" />
+    <Compile Include="ArrayIndexing.cs" />
+    <Compile Include="ArrayManipulation.cs" />
+    <Compile Include="DataTypeIdentification.cs" />
+    <Compile Include="ElementaryOperations.cs" />
+    <Compile Include="NumericTypes.cs" />
+    <Compile Include="ExponentsAndLogarithms.cs" />
+    <Compile Include="ComplexNumbers.cs" />
+    <Compile Include="DatesAndTime.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Randomness.cs" />
+    <Compile Include="RandomNumberGeneration.cs" />
+    <Compile Include="RelationalOperations.cs" />
     <Compile Include="Trigonometry.cs" />
   </ItemGroup>
   <ItemGroup>

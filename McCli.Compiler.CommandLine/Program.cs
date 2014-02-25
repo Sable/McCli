@@ -34,7 +34,7 @@ namespace McCli.Compiler.CommandLine
 
 				// Gather the referenced builtins
 				var functionTable = new FunctionTable();
-				functionTable.AddMethodsFromAssembly(typeof(Builtins.Operators).Assembly);
+				functionTable.AddMethodsFromAssembly(typeof(Builtins.ArrayCreation).Assembly);
 
 				// Output the dll.
 				Console.WriteLine("Creating assembly builder...");

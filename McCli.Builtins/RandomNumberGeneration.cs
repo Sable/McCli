@@ -6,13 +6,14 @@ using System.Text;
 namespace McCli.Builtins
 {
 	/// <summary>
-	/// Implements random number generation-related MatLab builtins.
+	/// Implements MatLab builtins for random number generation.
+	/// http://www.mathworks.com/help/matlab/random-number-generation.html
 	/// </summary>
 	[MatlabLibrary]
-	public static class Randomness
+	public static class RandomNumberGeneration
 	{
 		#region Fields
-		private static readonly Random threadSharedRandom = new Random();
+		internal static readonly Random threadSharedRandom = new Random();
 		#endregion
 
 		#region Methods
@@ -83,7 +84,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		private static void RandomNormalBoxMuller_NoLock(out double z1, out double z2)
+		internal static void RandomNormalBoxMuller_NoLock(out double z1, out double z2)
 		{
 			// Source: http://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform
 			var u1 = threadSharedRandom.NextDouble();
