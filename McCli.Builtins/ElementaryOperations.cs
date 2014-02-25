@@ -10,6 +10,7 @@ namespace McCli.Builtins
 	/// Implements MatLab builtins for elementary operations.
 	/// http://www.mathworks.com/help/matlab/operators-and-elementary-operations.html
 	/// </summary>
+	[MatlabLibrary]
 	public static class ElementaryOperations
 	{
 		#region Additive
@@ -193,7 +194,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		public static MFullArray<double> mrdivide(MArray<double> b, MArray<double> a)
+		public static MArray<double> mrdivide(MArray<double> b, MArray<double> a)
 		{
 			Contract.Requires(b != null);
 			Contract.Requires(a != null);
@@ -211,7 +212,7 @@ namespace McCli.Builtins
 			return b / a;
 		}
 
-		public static MFullArray<double> mldivide(MArray<double> a, MArray<double> b)
+		public static MArray<double> mldivide(MArray<double> a, MArray<double> b)
 		{
 			Contract.Requires(b != null);
 			Contract.Requires(a != null);
@@ -228,6 +229,21 @@ namespace McCli.Builtins
 		{
 			return b / a;
 		}
+
+		public static MArray<double> mpower(MArray<double> @base, double exponent)
+		{
+			Contract.Requires(@base != null);
+
+			if (!@base.IsSquareMatrix) throw new MArrayShapeException();
+			if (@base.IsScalar) return mpower(@base[0], exponent);
+
+			throw new NotImplementedException("Non-scalar mpower.");
+		}
+
+		internal static double mpower(double @base, double exponent)
+		{
+			return power(@base, exponent);
+		}
 		#endregion
 
 		#region Power
@@ -236,12 +252,12 @@ namespace McCli.Builtins
 			Contract.Requires(@base != null);
 			Contract.Requires(exponent != null);
 
-			if (@base.IsScalar)
-				if (exponent.IsScalar) return power(@base, exponent[0]);
+			if (@base.IsScalar) return power(@base[0], exponent);
+			if (exponent.IsScalar) return power(@base, exponent[0]);
 
 			var result = new MFullArray<double>(@base.Shape);
 			for (int i = 0; i < @base.Count; ++i)
-				result[i] = Math.Pow(@base[i], exponent[i]);
+				result[i] = power(@base[i], exponent[i]);
 			return result;
 		}
 
@@ -251,7 +267,7 @@ namespace McCli.Builtins
 
 			var result = new MFullArray<double>(@base.Shape);
 			for (int i = 0; i < @base.Count; ++i)
-				result[i] = Math.Pow(@base[i], exponent);
+				result[i] = power(@base[i], exponent);
 			return result;
 		}
 
@@ -261,8 +277,13 @@ namespace McCli.Builtins
 
 			var result = new MFullArray<double>(exponent.Shape);
 			for (int i = 0; i < exponent.Count; ++i)
-				result[i] = Math.Pow(@base, exponent[i]);
+				result[i] = power(@base, exponent[i]);
 			return result;
+		}
+
+		internal static double power(double @base, double exponent)
+		{
+			return Math.Pow(@base, exponent);
 		}
 		#endregion
 

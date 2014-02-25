@@ -9,6 +9,7 @@ namespace McCli.Builtins
 	/// Implements MatLab builtins for array indexing.
 	/// http://www.mathworks.com/help/matlab/indexing.html
 	/// </summary>
+	[MatlabLibrary]
 	public static class ArrayIndexing
 	{
 		#region Colon

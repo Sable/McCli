@@ -113,8 +113,8 @@ namespace McCli
 		}
 		#endregion
 
-		#region Subsref/Subsasgn
-		public static MArray<TScalar> Subsref<TScalar>(MArray<TScalar> array, MArray<double> indices)
+		#region ArrayGet
+		public static MArray<TScalar> ArrayGet<TScalar>(MArray<TScalar> array, MArray<double> indices)
 		{
 			Contract.Requires(array != null);
 			Contract.Requires(indices != null);
@@ -125,39 +125,32 @@ namespace McCli
 
 			var result = new MFullArray<TScalar>(new MArrayShape(indicesShape.RowCount, 1));
 			for (int i = 0; i < indicesShape.RowCount; ++i)
-				result[i] = Subsref(array, ToInt(indices[i]));
+				result[i] = ArrayGet(array, ToInt(indices[i]));
 			return result;
 		}
 
-		public static TScalar Subsref<TScalar>(MArray<TScalar> array, double rowIndex, double columnIndex)
+		public static TScalar ArrayGet<TScalar>(MArray<TScalar> array, double rowIndex, double columnIndex)
 		{
-			return Subsref(array, ToInt(rowIndex), ToInt(columnIndex));
+			return ArrayGet(array, ToInt(rowIndex), ToInt(columnIndex));
 		}
 
-		private static TScalar Subsref<TScalar>(MArray<TScalar> array, int rowIndex, int columnIndex)
+		private static TScalar ArrayGet<TScalar>(MArray<TScalar> array, int rowIndex, int columnIndex)
 		{
 			Contract.Requires(array != null);
-			Contract.Requires(!array.IsHigherDimensional);
-
-			if (rowIndex < 1 || rowIndex > array.RowCount
-				|| columnIndex < 1 || columnIndex > array.ColumnCount)
-				throw new ArgumentOutOfRangeException();
-
-			int index = rowIndex + (columnIndex - 1) * array.RowCount;
-			return Subsref(array, index);
+			return ArrayGet(array, LinearizeIndex(array.Shape, rowIndex, columnIndex));
 		}
 
-		private static TScalar Subsref<TScalar>(MArray<TScalar> array, double index)
+		private static TScalar ArrayGet<TScalar>(MArray<TScalar> array, double index)
 		{
-			return Subsref(array, Utilities.ToInt(index));
+			return ArrayGet(array, Utilities.ToInt(index));
 		}
 
-		private static TScalar Subsref<TScalar>(MArray<TScalar> array, int index)
+		private static TScalar ArrayGet<TScalar>(MArray<TScalar> array, int index)
 		{
 			return array[index - 1];
 		}
 
-		public static MArray<TScalar> Subsref<TScalar>(MArray<TScalar> array, MArray<bool> mask)
+		public static MArray<TScalar> ArrayGet<TScalar>(MArray<TScalar> array, MArray<bool> mask)
 		{
 			Contract.Requires(array != null);
 			Contract.Requires(mask != null);
@@ -171,8 +164,10 @@ namespace McCli
 
 			return MFullArray<TScalar>.CreateColumnVector(values.ToArray());
 		}
+		#endregion
 
-		public static void Subsasgn<TScalar>(MArray<TScalar> array, MArray<double> indices, MArray<TScalar> values)
+		#region ArraySet
+		public static void ArraySet<TScalar>(MArray<TScalar> array, MArray<double> indices, MArray<TScalar> values)
 		{
 			Contract.Requires(array != null);
 			Contract.Requires(indices != null);
@@ -185,6 +180,30 @@ namespace McCli
 			
 			for (int i = 0; i < indicesShape.RowCount; ++i)
 				array[ToInt(indices[i]) - 1] = values[i];
+		}
+
+		public static void ArraySet<TScalar>(MArray<TScalar> array, double rowIndex, double columnIndex, TScalar value)
+		{
+			ArraySet(array, ToInt(rowIndex), ToInt(columnIndex), value);
+		}
+
+		internal static void ArraySet<TScalar>(MArray<TScalar> array, int rowIndex, int columnIndex, TScalar value)
+		{
+			Contract.Requires(array != null);
+
+			var index = LinearizeIndex(array.Shape, rowIndex, columnIndex);
+			array[index - 1] = value;
+		}
+		#endregion
+
+		#region LinearizeIndex
+		public static int LinearizeIndex(MArrayShape shape, int rowIndex, int columnIndex)
+		{
+			if (rowIndex < 1 || rowIndex > shape.RowCount
+				|| columnIndex < 1 || columnIndex > shape.ColumnCount)
+				throw new ArgumentOutOfRangeException();
+
+			return rowIndex + (columnIndex - 1) * shape.RowCount;
 		}
 		#endregion
 	}

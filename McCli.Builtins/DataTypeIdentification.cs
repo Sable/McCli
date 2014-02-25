@@ -10,6 +10,7 @@ namespace McCli.Builtins
 	/// Implements MatLab builtins for data type identification.
 	/// http://www.mathworks.com/help/matlab/data-type-identification.html
 	/// </summary>
+	[MatlabLibrary]
 	public static class DataTypeIdentification
 	{
 		public static string @class(MValue value)

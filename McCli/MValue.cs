@@ -101,6 +101,14 @@ namespace McCli
 		}
 
 		/// <summary>
+		/// Gets a value indicating if this value is a square matrix.
+		/// </summary>
+		public bool IsSquareMatrix
+		{
+			get { return shape.IsSquareMatrix; }
+		}
+
+		/// <summary>
 		/// Gets a value indicating if this value is an array with more than two dimensions.
 		/// </summary>
 		public bool IsHigherDimensional

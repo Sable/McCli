@@ -10,6 +10,7 @@ namespace McCli.Builtins
 	/// Implements MatLab builtins for relational operations.
 	/// http://www.mathworks.com/help/matlab/relational-operators.html
 	/// </summary>
+	[MatlabLibrary]
 	public static class RelationalOperations
 	{
 		#region Comparison
