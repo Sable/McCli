@@ -45,7 +45,7 @@ namespace McCli.Compiler.CodeGen
 
 		public override void VisitCopy(Copy node)
 		{
-			Contract.Assert(node.Value.StaticRepr == node.Target.StaticRepr);
+			Contract.Assert(node.Value.StaticRepr.Type == node.Target.StaticRepr.Type);
 
 			using (BeginEmitStore(node.Target))
 			{
@@ -97,7 +97,7 @@ namespace McCli.Compiler.CodeGen
 				else
 				{
 					var method = typeof(Utilities).GetMethods(BindingFlags.Public | BindingFlags.Static)
-						.FirstOrDefault(m => m.Name == "Subsref" && m.GetParameters().Length == node.Arguments.Length + 1);
+						.FirstOrDefault(m => m.Name == "ArrayGet" && m.GetParameters().Length == node.Arguments.Length + 1);
 					if (method.IsGenericMethodDefinition)
 						method = method.MakeGenericMethod(subjectType.Type.CliType);
 
@@ -119,7 +119,7 @@ namespace McCli.Compiler.CodeGen
 		public override void VisitStoreParenthesized(StoreParenthesized node)
 		{
 			var arrayRepr = node.Array.StaticRepr;
-			if (arrayRepr.IsArray && node.Indices.Length == 1)
+			if (arrayRepr.IsArray)
 			{
 				// TODO: should not clone the array for each subsasgn!
 				using (BeginEmitStore(node.Array))
@@ -134,7 +134,8 @@ namespace McCli.Compiler.CodeGen
 				EmitLoad(node.Value);
 				EmitConversion(node.Value.StaticRepr, arrayRepr);
 
-				var method = typeof(Utilities).GetMethod("Subsasgn")
+				var method = typeof(Utilities).GetMethods()
+					.Single(m => m.Name == "ArraySet" && m.GetParameters().Length == node.Indices.Length + 2)
 					.MakeGenericMethod(arrayRepr.Type.CliType);
 				cil.Call(method);
 			}

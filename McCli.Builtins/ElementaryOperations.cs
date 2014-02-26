@@ -231,7 +231,7 @@ namespace McCli.Builtins
 			return b / a;
 		}
 
-		public static MFullArray<double> mldivide(MArray<double> a, MArray<double> b)
+		public static MArray<double> mldivide(MArray<double> a, MArray<double> b)
 		{
 			Contract.Requires(b != null);
 			Contract.Requires(a != null);
@@ -248,6 +248,21 @@ namespace McCli.Builtins
 		{
 			return b / a;
 		}
+
+		public static MArray<double> mpower(MArray<double> @base, double exponent)
+		{
+			Contract.Requires(@base != null);
+
+			if (!@base.IsSquareMatrix) throw new MArrayShapeException();
+			if (@base.IsScalar) return mpower(@base[0], exponent);
+
+			throw new NotImplementedException("Non-scalar mpower.");
+		}
+
+		internal static double mpower(double @base, double exponent)
+		{
+			return power(@base, exponent);
+		}
 		#endregion
 
 		#region Power
@@ -256,8 +271,8 @@ namespace McCli.Builtins
 			Contract.Requires(@base != null);
 			Contract.Requires(exponent != null);
 
-			if (@base.IsScalar)
-				if (exponent.IsScalar) return power(@base, exponent[0]);
+			if (@base.IsScalar) return power(@base[0], exponent);
+			if (exponent.IsScalar) return power(@base, exponent[0]);
 
 			var result = new MFullArray<double>(@base.Shape);
 			for (int i = 0; i < @base.Count; ++i)

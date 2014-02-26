@@ -79,6 +79,11 @@ namespace McCli
 			get { return (rowCount == 1 || columnCount == 1) && !IsHigherDimensional; }
 		}
 
+		public bool IsSquareMatrix
+		{
+			get { return !IsHigherDimensional && rowCount == columnCount; }
+		}
+
 		public bool IsHigherDimensional
 		{
 			get { return dimensions != null && dimensions.Length > 2; }
