@@ -29,7 +29,7 @@ namespace McCli.Builtins
 
 		public static MFullArray<double> rand(double rowCount, double columnCount)
 		{
-			var shape = Utilities.ToShape(rowCount, columnCount);
+			var shape = PseudoBuiltins.ToShape(rowCount, columnCount);
 			var result = new MFullArray<double>(shape);
 			lock (threadSharedRandom)
 			{
@@ -54,10 +54,10 @@ namespace McCli.Builtins
 
 		public static MFullArray<double> randn(double rowCount, double columnCount)
 		{
-			int rowCountInt = Utilities.ToInt(rowCount);
-			int columnCountInt = Utilities.ToInt(columnCount);
+			int rowCountInt = PseudoBuiltins.ToInt(rowCount);
+			int columnCountInt = PseudoBuiltins.ToInt(columnCount);
 
-			var shape = Utilities.ToShape(rowCount, columnCount);
+			var shape = PseudoBuiltins.ToShape(rowCount, columnCount);
 			var result = new MFullArray<double>(shape);
 			int count = shape.Count;
 			lock (threadSharedRandom)

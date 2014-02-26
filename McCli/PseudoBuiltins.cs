@@ -10,7 +10,7 @@ namespace McCli
 	/// <summary>
 	/// Miscellaneous functions that complement MatLab builtins.
 	/// </summary>
-	public static class Utilities
+	public static class PseudoBuiltins
 	{
 		public static bool IsIntegralFloat(double value)
 		{
@@ -79,7 +79,7 @@ namespace McCli
 			throw new NotImplementedException();
 		}
 
-		public static string AsString(MFullArray<char> array)
+		public static string ToString(MFullArray<char> array)
 		{
 			Contract.Requires(array != null);
 
@@ -142,7 +142,7 @@ namespace McCli
 
 		private static TScalar ArrayGet<TScalar>(MArray<TScalar> array, double index)
 		{
-			return ArrayGet(array, Utilities.ToInt(index));
+			return ArrayGet(array, PseudoBuiltins.ToInt(index));
 		}
 
 		private static TScalar ArrayGet<TScalar>(MArray<TScalar> array, int index)

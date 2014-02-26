@@ -52,11 +52,11 @@ namespace McCli.Builtins
 			int rowCount = array.Shape.RowCount;
 			double seconds = array[rowCount * 5 + rowIndex];
 			return new DateTime(
-				Utilities.ToInt(array[rowCount * 0 + rowIndex]),
-				Utilities.ToInt(array[rowCount * 1 + rowIndex]),
-				Utilities.ToInt(array[rowCount * 2 + rowIndex]),
-				Utilities.ToInt(array[rowCount * 3 + rowIndex]),
-				Utilities.ToInt(array[rowCount * 4 + rowIndex]),
+				PseudoBuiltins.ToInt(array[rowCount * 0 + rowIndex]),
+				PseudoBuiltins.ToInt(array[rowCount * 1 + rowIndex]),
+				PseudoBuiltins.ToInt(array[rowCount * 2 + rowIndex]),
+				PseudoBuiltins.ToInt(array[rowCount * 3 + rowIndex]),
+				PseudoBuiltins.ToInt(array[rowCount * 4 + rowIndex]),
 				(int)seconds, (int)((seconds % 1) * 1000));
 		}
 		#endregion

@@ -17,29 +17,25 @@ namespace McCli.Builtins
 		{
 			Contract.Requires(array != null);
 
-			if (array.IsEmpty) return MFullArray<double>.CreateEmpty();
-
-			// TODO: handle NaNs
-			if (array.IsRowVector || array.IsColumnVector)
+			var shape = array.Shape;
+			int dimensionIndex = shape.IndexOfFirstNonSingletonDimension();
+			int sliceStep, sliceSize;
+			shape.GetDimensionStepAndSize(dimensionIndex, out sliceStep, out sliceSize);
+			
+			var result = new MFullArray<double>(MArrayShape.CollapseDimension(shape, dimensionIndex));
+			var resultArray = result.BackingArray;
+			for (int sliceIndex = 0; sliceIndex < resultArray.Length; ++sliceIndex)
 			{
-				double min = double.PositiveInfinity;
-				for (int i = 0; i < array.RowCount; ++i)
-					if (array[i] < min)
-						min = array[i];
-				return min;
+				double minimum = double.PositiveInfinity;
+				for (int sliceElementIndex = 0; sliceElementIndex < sliceSize; ++sliceElementIndex)
+				{
+					double value = array[sliceIndex * sliceSize + sliceElementIndex * sliceStep];
+					if (value < minimum) minimum = value;
+				}
+
+				resultArray[sliceIndex] = minimum;
 			}
 
-			if (array.IsHigherDimensional) throw new NotImplementedException();
-
-			var result = new MFullArray<double>(1, array.ColumnCount);
-			for (int columnIndex = 0; columnIndex < array.ColumnCount; ++columnIndex)
-			{
-				double min = double.PositiveInfinity;
-				for (int rowIndex = 0; rowIndex < array.RowCount; ++rowIndex)
-					if (array[columnIndex * array.RowCount + rowIndex] < min)
-						min = array[columnIndex];
-				result[columnIndex] = min;
-			}
 			return result;
 		}
 
@@ -47,28 +43,46 @@ namespace McCli.Builtins
 		{
 			Contract.Requires(array != null);
 
-			if (array.IsEmpty) return MFullArray<double>.CreateEmpty();
+			var shape = array.Shape;
+			int dimensionIndex = shape.IndexOfFirstNonSingletonDimension();
+			int sliceStep, sliceSize;
+			shape.GetDimensionStepAndSize(dimensionIndex, out sliceStep, out sliceSize);
 
-			// TODO: handle NaNs
-			if (array.IsRowVector || array.IsColumnVector)
+			var result = new MFullArray<double>(MArrayShape.CollapseDimension(shape, dimensionIndex));
+			var resultArray = result.BackingArray;
+			for (int sliceIndex = 0; sliceIndex < resultArray.Length; ++sliceIndex)
 			{
-				double max = double.NegativeInfinity;
-				for (int i = 0; i < array.RowCount; ++i)
-					if (array[i] > max)
-						max = array[i];
-				return max;
+				double maximum = double.NegativeInfinity;
+				for (int sliceElementIndex = 0; sliceElementIndex < sliceSize; ++sliceElementIndex)
+				{
+					double value = array[sliceIndex * sliceSize + sliceElementIndex * sliceStep];
+					if (value > maximum) maximum = value;
+				}
+
+				resultArray[sliceIndex] = maximum;
 			}
 
-			if (array.IsHigherDimensional) throw new NotImplementedException();
+			return result;
+		}
 
-			var result = new MFullArray<double>(1, array.ColumnCount);
-			for (int columnIndex = 0; columnIndex < array.ColumnCount; ++columnIndex)
+		public static MArray<double> mean(MArray<double> array)
+		{
+			Contract.Requires(array != null);
+
+			var shape = array.Shape;
+			int dimensionIndex = shape.IndexOfFirstNonSingletonDimension();
+			int sliceStep, sliceSize;
+			shape.GetDimensionStepAndSize(dimensionIndex, out sliceStep, out sliceSize);
+
+			var result = new MFullArray<double>(MArrayShape.CollapseDimension(shape, dimensionIndex));
+			var resultArray = result.BackingArray;
+			for (int sliceIndex = 0; sliceIndex < resultArray.Length; ++sliceIndex)
 			{
-				double max = double.NegativeInfinity;
-				for (int rowIndex = 0; rowIndex < array.RowCount; ++rowIndex)
-					if (array[columnIndex * array.RowCount + rowIndex] > max)
-						max = array[columnIndex];
-				result[columnIndex] = max;
+				double sum = 0;
+				for (int sliceElementIndex = 0; sliceElementIndex < sliceSize; ++sliceElementIndex)
+					sum += array[sliceIndex * sliceSize + sliceElementIndex * sliceStep];
+
+				resultArray[sliceIndex] = sum / sliceSize;
 			}
 
 			return result;

@@ -96,7 +96,7 @@ namespace McCli.Compiler.CodeGen
 				}
 				else
 				{
-					var method = typeof(Utilities).GetMethods(BindingFlags.Public | BindingFlags.Static)
+					var method = typeof(PseudoBuiltins).GetMethods(BindingFlags.Public | BindingFlags.Static)
 						.FirstOrDefault(m => m.Name == "ArrayGet" && m.GetParameters().Length == node.Arguments.Length + 1);
 					if (method.IsGenericMethodDefinition)
 						method = method.MakeGenericMethod(subjectType.Type.CliType);
@@ -134,7 +134,7 @@ namespace McCli.Compiler.CodeGen
 				EmitLoad(node.Value);
 				EmitConversion(node.Value.StaticRepr, arrayRepr);
 
-				var method = typeof(Utilities).GetMethods()
+				var method = typeof(PseudoBuiltins).GetMethods()
 					.Single(m => m.Name == "ArraySet" && m.GetParameters().Length == node.Indices.Length + 2)
 					.MakeGenericMethod(arrayRepr.Type.CliType);
 				cil.Call(method);
@@ -151,7 +151,7 @@ namespace McCli.Compiler.CodeGen
 
 			EmitLoad(node.Condition);
 			EmitConversion(node.Condition.StaticRepr, MRepr.Any);
-			cil.Call(typeof(Utilities).GetMethod("IsTrue"));
+			cil.Call(typeof(PseudoBuiltins).GetMethod("IsTrue"));
 
 			var endLabel = cil.CreateLabel("if_end");
 			if (node.Then.Length == 0)
@@ -189,7 +189,7 @@ namespace McCli.Compiler.CodeGen
 			cil.MarkLabel(continueTargetLabel);
 			EmitLoad(node.Condition);
 			EmitConversion(node.Condition.StaticRepr, MRepr.Any);
-			cil.Call(typeof(Utilities).GetMethod("IsTrue"));
+			cil.Call(typeof(PseudoBuiltins).GetMethod("IsTrue"));
 			cil.Branch(false, breakTargetLabel);
 
 			// Body

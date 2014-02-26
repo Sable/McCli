@@ -29,7 +29,7 @@ namespace McCli.Builtins
 
 		public static MFullArray<double> zeros(double rowCount, double columnCount)
 		{
-			return new MFullArray<double>(Utilities.ToShape(rowCount, columnCount));
+			return new MFullArray<double>(PseudoBuiltins.ToShape(rowCount, columnCount));
 		}
 
 		public static MFullArray<double> zeros(double sz1, double sz2, double sz3)
@@ -51,7 +51,7 @@ namespace McCli.Builtins
 
 		public static MFullArray<double> ones(double sz1, double sz2)
 		{
-			return MFullArray<double>.ExpandScalar(1, Utilities.ToShape(sz1, sz2));
+			return MFullArray<double>.ExpandScalar(1, PseudoBuiltins.ToShape(sz1, sz2));
 		}
 		#endregion
 
@@ -68,7 +68,7 @@ namespace McCli.Builtins
 
 		public static MFullArray<double> eye(double sz1, double sz2)
 		{
-			var shape = Utilities.ToShape(sz1, sz2);
+			var shape = PseudoBuiltins.ToShape(sz1, sz2);
 			var result = new MFullArray<double>(shape);
 			var array = result.BackingArray;
 			for (int i = 0; i < array.Length; ++i)
@@ -87,7 +87,7 @@ namespace McCli.Builtins
 
 		public static MFullArray<bool> @true(double sz1, double sz2)
 		{
-			return MFullArray<bool>.ExpandScalar(true, Utilities.ToShape(sz1, sz2));
+			return MFullArray<bool>.ExpandScalar(true, PseudoBuiltins.ToShape(sz1, sz2));
 		}
 		#endregion
 
@@ -101,7 +101,7 @@ namespace McCli.Builtins
 
 		public static MFullArray<bool> @false(double sz1, double sz2)
 		{
-			return new MFullArray<bool>(Utilities.ToShape(sz1, sz2));
+			return new MFullArray<bool>(PseudoBuiltins.ToShape(sz1, sz2));
 		}
 		#endregion
 

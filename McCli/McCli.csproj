@@ -119,7 +119,7 @@
     <Compile Include="ImmutableArray.cs" />
     <Compile Include="ImmutableArray.Enumerator.cs" />
     <Compile Include="GenericMTypeAttribute.cs" />
-    <Compile Include="Utilities.cs" />
+    <Compile Include="PseudoBuiltins.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

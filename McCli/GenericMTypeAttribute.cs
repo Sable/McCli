@@ -41,9 +41,14 @@ namespace McCli
 		public AnyPrimitiveAttribute() : base(MClassKinds.PrimitiveMask, allowComplex: true) { }
 	}
 
-	public sealed class AnyRealNumericAttribute : GenericMTypeAttribute
+	public sealed class AnyNumericAttribute : GenericMTypeAttribute
 	{
-		public AnyRealNumericAttribute() : base(MClassKinds.NumericMask, allowComplex: false) { }
+		public AnyNumericAttribute() : base(MClassKinds.NumericMask, allowComplex: true) { }
+	}
+
+	public sealed class AnyRealAttribute : GenericMTypeAttribute
+	{
+		public AnyRealAttribute() : base(MClassKinds.NumericMask, allowComplex: false) { }
 	}
 
 	public sealed class AnyArrayableAttribute : GenericMTypeAttribute

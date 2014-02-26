@@ -24,12 +24,12 @@ namespace McCli.Builtins
 			return Math.Abs(value);
 		}
 
-		public static MComplex<TReal> complex<[AnyRealNumeric] TReal>(TReal a) where TReal : struct
+		public static MComplex<TReal> complex<[AnyReal] TReal>(TReal a) where TReal : struct
 		{
 			return new MComplex<TReal>(a);
 		}
 
-		public static MComplex<TReal> complex<[AnyRealNumeric] TReal>(TReal a, TReal b) where TReal : struct
+		public static MComplex<TReal> complex<[AnyReal] TReal>(TReal a, TReal b) where TReal : struct
 		{
 			return new MComplex<TReal>(a, b);
 		}
@@ -44,7 +44,7 @@ namespace McCli.Builtins
 			return new MComplex<double>(0, 1);
 		}
 
-		public static MArray<TReal> real<[AnyRealNumeric] TReal>(MArray<MComplex<TReal>> array) where TReal : struct
+		public static MArray<TReal> real<[AnyReal] TReal>(MArray<MComplex<TReal>> array) where TReal : struct
 		{
 			Contract.Requires(array != null);
 
@@ -54,7 +54,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		public static MArray<TReal> imag<[AnyRealNumeric] TReal>(MArray<MComplex<TReal>> array) where TReal : struct
+		public static MArray<TReal> imag<[AnyReal] TReal>(MArray<MComplex<TReal>> array) where TReal : struct
 		{
 			Contract.Requires(array != null);
 

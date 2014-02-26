@@ -88,7 +88,7 @@ namespace McCli.Builtins
 
 		public static MArray<double> NaN(double n, double m)
 		{
-			var shape = Utilities.ToShape(n, m);
+			var shape = PseudoBuiltins.ToShape(n, m);
 			return MFullArray<double>.ExpandScalar(double.NaN, shape);
 		}
 		#endregion

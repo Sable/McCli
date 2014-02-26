@@ -39,6 +39,43 @@ namespace McCli.Builtins
 			return c;
 		}
 
+		public static MArray<TScalar> uplus<[AnyNumeric]TScalar>(MArray<TScalar> array)
+		{
+			Contract.Requires(array != null);
+			return array.DeepClone();
+		}
+
+		internal static TScalar uplus<[AnyNumeric]TScalar>(TScalar value)
+		{
+			return value;
+		}
+
+		public static MArray<double> sum(MArray<double> array)
+		{
+			Contract.Requires(array != null);
+
+			if (array.IsEmpty) return 0;
+
+			var shape = array.Shape;
+			int dimensionIndex = shape.IndexOfFirstNonSingletonDimension();
+			int sliceStep, sliceSize;
+			shape.GetDimensionStepAndSize(dimensionIndex, out sliceStep, out sliceSize);
+
+			var result = new MFullArray<double>(MArrayShape.CollapseDimension(shape, dimensionIndex));
+			var resultArray = result.BackingArray;
+			for (int sliceIndex = 0; sliceIndex < resultArray.Length; ++sliceIndex)
+			{
+				double sum = 0;
+				for (int sliceElementIndex = 0; sliceElementIndex < sliceSize; ++sliceElementIndex)
+					sum += array[sliceIndex * sliceSize + sliceElementIndex * sliceStep];
+				resultArray[sliceIndex] = sum;
+			}
+
+			return result;
+		}
+		#endregion
+
+		#region Subtractive
 		public static MArray<double> minus(MArray<double> lhs, MArray<double> rhs)
 		{
 			Contract.Requires(lhs != null);
@@ -74,12 +111,6 @@ namespace McCli.Builtins
 			return c;
 		}
 
-		public static MArray<TScalar> uplus<TScalar>(MArray<TScalar> array)
-		{
-			Contract.Requires(array != null);
-			return array.DeepClone();
-		}
-
 		public static MArray<double> uminus(MArray<double> array)
 		{
 			Contract.Requires(array != null);
@@ -91,7 +122,7 @@ namespace McCli.Builtins
 		}
 		#endregion
 
-		#region Elementwise Multiplicative
+		#region Scalar Multiplicative
 		public static MArray<double> times(MArray<double> lhs, MArray<double> rhs)
 		{
 			Contract.Requires(lhs != null);
@@ -122,6 +153,32 @@ namespace McCli.Builtins
 			return lhs * rhs;
 		}
 
+		public static MArray<double> prod(MArray<double> array)
+		{
+			Contract.Requires(array != null);
+
+			if (array.IsEmpty) return 1;
+
+			var shape = array.Shape;
+			int dimensionIndex = shape.IndexOfFirstNonSingletonDimension();
+			int sliceStep, sliceSize;
+			shape.GetDimensionStepAndSize(dimensionIndex, out sliceStep, out sliceSize);
+
+			var result = new MFullArray<double>(MArrayShape.CollapseDimension(shape, dimensionIndex));
+			var resultArray = result.BackingArray;
+			for (int sliceIndex = 0; sliceIndex < resultArray.Length; ++sliceIndex)
+			{
+				double sum = 0;
+				for (int sliceElementIndex = 0; sliceElementIndex < sliceSize; ++sliceElementIndex)
+					sum *= array[sliceIndex * sliceSize + sliceElementIndex * sliceStep];
+				resultArray[sliceIndex] = sum;
+			}
+
+			return result;
+		}
+		#endregion
+
+		#region Scalar Divisive
 		public static MArray<double> rdivide(MArray<double> lhs, MArray<double> rhs)
 		{
 			Contract.Requires(lhs != null);

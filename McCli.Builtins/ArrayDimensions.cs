@@ -33,7 +33,7 @@ namespace McCli.Builtins
 			var shape = value.Shape;
 			var result = new MFullArray<double>(MArrayShape.RowVector(shape.DimensionCount));
 			for (int i = 0; i < shape.DimensionCount; ++i)
-				result[i] = shape.GetSize(i);
+				result[i] = shape.GetDimensionSize(i);
 			return result;
 		}
 
@@ -41,7 +41,7 @@ namespace McCli.Builtins
 		{
 			Contract.Requires(value != null);
 			var shape = value.Shape;
-			return shape.GetSize(Utilities.ToInt(dim) - 1);
+			return shape.GetDimensionSize(PseudoBuiltins.ToInt(dim) - 1);
 		}
 
 		public static double length(MValue value)
@@ -51,7 +51,7 @@ namespace McCli.Builtins
 			var shape = value.Shape;
 			int result = 0;
 			for (int i = 0; i < shape.DimensionCount; ++i)
-				result = Math.Max(result, shape.GetSize(i));
+				result = Math.Max(result, shape.GetDimensionSize(i));
 			return result;
 		}
 		#endregion
