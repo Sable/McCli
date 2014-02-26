@@ -1,0 +1,1 @@
+"Binaries\Debug\mcclic.exe" %*

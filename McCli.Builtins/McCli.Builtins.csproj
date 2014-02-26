@@ -78,6 +78,7 @@
     <Compile Include="ArrayIndexing.cs" />
     <Compile Include="ArrayManipulation.cs" />
     <Compile Include="DataTypeIdentification.cs" />
+    <Compile Include="DescriptiveStatistics.cs" />
     <Compile Include="ElementaryOperations.cs" />
     <Compile Include="LogicalOperations.cs" />
     <Compile Include="NumericTypes.cs" />
