@@ -81,6 +81,7 @@
     <Compile Include="DescriptiveStatistics.cs" />
     <Compile Include="ElementaryOperations.cs" />
     <Compile Include="LogicalOperations.cs" />
+    <Compile Include="MatrixAnalysis.cs" />
     <Compile Include="NumericTypes.cs" />
     <Compile Include="ExponentsAndLogarithms.cs" />
     <Compile Include="ComplexNumbers.cs" />

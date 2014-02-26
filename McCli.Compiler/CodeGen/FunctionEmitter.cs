@@ -83,6 +83,9 @@ namespace McCli.Compiler.CodeGen
 
 			foreach (var output in function.Outputs)
 			{
+				// We might have already seen that output as an input (inout parameter)
+				if (locals.ContainsKey(output)) continue;
+
 				var localIndex = cil.DeclareLocal(output.StaticRepr.CliType, output.Name);
 				locals.Add(output, VariableLocation.Local(localIndex));
 			}

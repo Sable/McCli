@@ -15,12 +15,27 @@ namespace McCli.Builtins
 		#region Colon
 		public static MFullArray<double> colon(double low, double high)
 		{
-			if (low > high) return new MFullArray<double>(1, 0);
+			if (low > high) return MFullArray<double>.CreateEmpty();
 
 			var count = (int)(high - low) + 1;
 			var array = new MFullArray<double>(1, count);
 			for (int i = 0; i < count; ++i)
 				array[i] = low + i;
+
+			return array;
+		}
+		#endregion
+
+		#region Colon
+		public static MFullArray<double> colon(double from, double step, double to)
+		{
+			if (!(Math.Sign(to - from) * Math.Sign(step) == 1))
+				return MFullArray<double>.CreateEmpty();
+
+			var count = (int)((to - from) / step) + 1;
+			var array = new MFullArray<double>(1, count);
+			for (int i = 0; i < count; ++i)
+				array[i] = from + step * i;
 
 			return array;
 		}

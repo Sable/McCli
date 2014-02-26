@@ -101,6 +101,14 @@ namespace McCli
 		}
 
 		/// <summary>
+		/// Gets a value indicating if this value has a row or column vector shape.
+		/// </summary>
+		public bool IsVector
+		{
+			get { return shape.IsVector; }
+		}
+
+		/// <summary>
 		/// Gets a value indicating if this value is a square matrix.
 		/// </summary>
 		public bool IsSquareMatrix

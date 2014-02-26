@@ -99,5 +99,57 @@ namespace McCli.Builtins
 			return !value;
 		}
 		#endregion
+
+		#region any
+		public static MArray<bool> any(MArray<bool> array)
+		{
+			Contract.Requires(array != null);
+
+			if (array.IsEmpty) return false;
+
+			var shape = array.Shape;
+			int dimensionIndex = shape.IndexOfFirstNonSingletonDimension();
+			int sliceStep, sliceSize;
+			shape.GetDimensionStepAndSize(dimensionIndex, out sliceStep, out sliceSize);
+
+			var result = new MFullArray<bool>(MArrayShape.CollapseDimension(shape, dimensionIndex));
+			var resultArray = result.BackingArray;
+			for (int sliceIndex = 0; sliceIndex < resultArray.Length; ++sliceIndex)
+			{
+				bool value = false;
+				for (int sliceElementIndex = 0; sliceElementIndex < sliceSize; ++sliceElementIndex)
+					value |= array[sliceIndex * sliceSize + sliceElementIndex * sliceStep];
+				resultArray[sliceIndex] = value;
+			}
+
+			return result;
+		}
+		#endregion
+
+		#region all
+		public static MArray<bool> all(MArray<bool> array)
+		{
+			Contract.Requires(array != null);
+
+			if (array.IsEmpty) return true;
+
+			var shape = array.Shape;
+			int dimensionIndex = shape.IndexOfFirstNonSingletonDimension();
+			int sliceStep, sliceSize;
+			shape.GetDimensionStepAndSize(dimensionIndex, out sliceStep, out sliceSize);
+
+			var result = new MFullArray<bool>(MArrayShape.CollapseDimension(shape, dimensionIndex));
+			var resultArray = result.BackingArray;
+			for (int sliceIndex = 0; sliceIndex < resultArray.Length; ++sliceIndex)
+			{
+				bool value = true;
+				for (int sliceElementIndex = 0; sliceElementIndex < sliceSize; ++sliceElementIndex)
+					value &= array[sliceIndex * sliceSize + sliceElementIndex * sliceStep];
+				resultArray[sliceIndex] = value;
+			}
+
+			return result;
+		}
+		#endregion
 	}
 }
