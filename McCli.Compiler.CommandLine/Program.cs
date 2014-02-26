@@ -26,8 +26,8 @@ namespace McCli.Compiler.CommandLine
 			try
 			{
 				// Read the source file
-				Console.WriteLine("Reading source file...");
 				string sourceFilePath = args[0];
+				Console.WriteLine("Reading {0}...", sourceFilePath);
 				CompilationUnit compilationUnit;
 				using (var sourceFileStream = new FileStream(args[0], FileMode.Open, FileAccess.Read, FileShare.Read))
 					compilationUnit = TamerXmlReader.Read(sourceFileStream);
@@ -37,7 +37,6 @@ namespace McCli.Compiler.CommandLine
 				functionTable.AddMethodsFromAssembly(typeof(Builtins.ArrayCreation).Assembly);
 
 				// Output the dll.
-				Console.WriteLine("Creating assembly builder...");
 				string outputFilePath;
 				if (args.Length >= 2)
 				{
@@ -49,13 +48,19 @@ namespace McCli.Compiler.CommandLine
 						+ Path.GetFileNameWithoutExtension(sourceFilePath) + ".dll";
 				}
 
+				Console.WriteLine("Outputting {0}...", outputFilePath);
 				AssemblyEmitter.Emit(compilationUnit, outputFilePath, functionTable.Lookup);
 			}
 			catch (Exception exception)
 			{
-				Console.WriteLine("Compiler error: {0}", exception);
+				Console.ForegroundColor = ConsoleColor.Red;
+				Console.WriteLine(exception);
+				Console.ReadLine();
 				if (Debugger.IsAttached) Debugger.Break();
 			}
+
+			Console.ForegroundColor = ConsoleColor.Green;
+			Console.WriteLine("Success!");
 		}
 
 		private static string MakeDefaultOutputFilePath(string sourceFilePath)

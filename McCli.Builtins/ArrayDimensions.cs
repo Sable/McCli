@@ -37,6 +37,13 @@ namespace McCli.Builtins
 			return result;
 		}
 
+		public static double size(MValue value, double dim)
+		{
+			Contract.Requires(value != null);
+			var shape = value.Shape;
+			return shape.GetSize(Utilities.ToInt(dim) - 1);
+		}
+
 		public static double length(MValue value)
 		{
 			Contract.Requires(value != null);

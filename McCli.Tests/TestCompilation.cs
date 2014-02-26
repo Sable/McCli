@@ -13,16 +13,16 @@ namespace McCli
 	[TestClass]
 	public sealed class TestCompilation
 	{
-		private static readonly Variable anyInput = new Variable("input", VariableKind.Input, MRepr.Any);
-		private static readonly Variable doubleArrayInput = new Variable("input", VariableKind.Input, MPrimitiveClass.Double.ArrayRepr);
-		private static readonly Variable doubleArrayInput2 = new Variable("input2", VariableKind.Input, MPrimitiveClass.Double.ArrayRepr);
-		private static readonly Variable doubleArrayInput3 = new Variable("input3", VariableKind.Input, MPrimitiveClass.Double.ArrayRepr);
-		private static readonly Variable doubleArrayOutput = new Variable("output", VariableKind.Output, MPrimitiveClass.Double.ArrayRepr);
-		private static readonly Variable doubleArrayLocal1 = new Variable("double1", VariableKind.Local, MPrimitiveClass.Double.ArrayRepr);
-		private static readonly Variable doubleArrayLocal2 = new Variable("double2", VariableKind.Local, MPrimitiveClass.Double.ArrayRepr);
-		private static readonly Variable logicalArrayLocal = new Variable("logicals", VariableKind.Local, MPrimitiveClass.Logical.ArrayRepr);
-		private static readonly Variable logicalArrayOutput = new Variable("output", VariableKind.Output, MPrimitiveClass.Logical.ArrayRepr);
-		private static readonly Variable charArrayOutput = new Variable("output", VariableKind.Output, MPrimitiveClass.Char.ArrayRepr);
+		private static readonly Variable anyInput = new Variable("input", MRepr.Any);
+		private static readonly Variable doubleArrayInput = new Variable("input", MPrimitiveClass.Double.ArrayRepr);
+		private static readonly Variable doubleArrayInput2 = new Variable("input2", MPrimitiveClass.Double.ArrayRepr);
+		private static readonly Variable doubleArrayInput3 = new Variable("input3", MPrimitiveClass.Double.ArrayRepr);
+		private static readonly Variable doubleArrayOutput = new Variable("output", MPrimitiveClass.Double.ArrayRepr);
+		private static readonly Variable doubleArrayLocal1 = new Variable("double1", MPrimitiveClass.Double.ArrayRepr);
+		private static readonly Variable doubleArrayLocal2 = new Variable("double2", MPrimitiveClass.Double.ArrayRepr);
+		private static readonly Variable logicalArrayLocal = new Variable("logicals", MPrimitiveClass.Logical.ArrayRepr);
+		private static readonly Variable logicalArrayOutput = new Variable("output", MPrimitiveClass.Logical.ArrayRepr);
+		private static readonly Variable charArrayOutput = new Variable("output", MPrimitiveClass.Char.ArrayRepr);
 		private FunctionLookup functionLookup;
 
 		[TestInitialize]

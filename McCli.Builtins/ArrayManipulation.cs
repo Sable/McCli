@@ -10,6 +10,7 @@ namespace McCli.Builtins
 	/// Implements MatLab builtins for array manipulation.
 	/// http://www.mathworks.com/help/matlab/array-manipulation.html
 	/// </summary>
+	[MatlabLibrary]
 	public static class ArrayManipulation
 	{
 		#region Transpose

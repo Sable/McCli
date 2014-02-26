@@ -127,32 +127,11 @@ namespace McCli.Compiler.CodeGen
 		
 		private void EmitLoad(Variable variable)
 		{
-			switch (variable.Kind)
-			{
-				case VariableKind.Input:
-				case VariableKind.Local:
-				case VariableKind.Output:
-					cil.Load(GetLocalLocation(variable));
-					break;
-
-				default:
-					throw new NotImplementedException();
-			}
+			cil.Load(GetLocalLocation(variable));
 		}
 
 		private EmitStoreScope BeginEmitStore(Variable variable)
 		{
-			switch (variable.Kind)
-			{
-				case VariableKind.Input:
-				case VariableKind.Local:
-				case VariableKind.Output:
-					break;
-
-				default:
-					throw new NotImplementedException();
-			}
-
 			return new EmitStoreScope(this, variable);
 		}
 
@@ -160,17 +139,7 @@ namespace McCli.Compiler.CodeGen
 		{
 			if (variable == null) return;
 
-			switch (variable.Kind)
-			{
-				case VariableKind.Input:
-				case VariableKind.Local:
-				case VariableKind.Output:
-					cil.Store(GetLocalLocation(variable));
-					break;
-
-				default:
-					throw new NotImplementedException();
-			}
+			cil.Store(GetLocalLocation(variable));
 		}
 
 		private void EmitConversion(MRepr source, MRepr target)

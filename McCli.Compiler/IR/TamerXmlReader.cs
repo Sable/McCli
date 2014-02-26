@@ -48,12 +48,10 @@ namespace McCli.Compiler.IR
 			Contract.Requires(functionElement != null && functionElement.Name == "Function");
 
 			string name = (string)functionElement.Attribute("name");
-			entryPoint = ((bool?)functionElement.Attribute("entryPoint")).GetValueOrDefault();
+			entryPoint = ((bool?)functionElement.Attribute("entry")).GetValueOrDefault();
 
 			// "Declare" variables
 			var variables = new Dictionary<string, Variable>(StringComparer.Ordinal);
-			var inputs = new List<Variable>();
-			var outputs = new List<Variable>();
 			var variablesElement = functionElement.Element("Variables");
 			if (variablesElement != null)
 			{
@@ -61,16 +59,16 @@ namespace McCli.Compiler.IR
 				{
 					var variable = ReadVariable(variableElement);
 					variables.Add(variable.Name, variable);
-
-					if (variable.Kind == VariableKind.Input) inputs.Add(variable);
-					else if (variable.Kind == VariableKind.Output) outputs.Add(variable);
 				}
 			}
 
-			// Read the function body
-			var body = ReadStatements(functionElement.Element("Statements"), variables).ToImmutableArray();
+			var inputs = ReadVariables(functionElement.Attribute("inputs"), variables);
+			var outputs = ReadVariables(functionElement.Attribute("outputs"), variables);
 
-			return new Function(name, inputs.ToImmutableArray(), outputs.ToImmutableArray(), body);
+			// Read the function body
+			var body = ReadStatements(functionElement.Element("Body"), variables).ToImmutableArray();
+
+			return new Function(name, inputs, outputs, body);
 		}
 
 		private static Variable ReadVariable(XElement variableElement)
@@ -96,12 +94,9 @@ namespace McCli.Compiler.IR
 					constantValue = double.Parse(constantString, CultureInfo.InvariantCulture);
 			}
 
-			var kind = (VariableKind)Enum.Parse(typeof(VariableKind),
-				(string)variableElement.Attribute("scope"), ignoreCase: true);
-
 			return constantValue == null
-				? new Variable(name, kind, new MRepr(type, scalar ? MStructuralClass.Scalar : MStructuralClass.Array))
-				: new Variable(name, kind, constantValue);
+				? new Variable(name, new MRepr(type, scalar ? MStructuralClass.Scalar : MStructuralClass.Array))
+				: new Variable(name, constantValue);
 		}
 
 		private static IEnumerable<Statement> ReadStatements(XElement parentElement, IReadOnlyDictionary<string, Variable> variables)
@@ -162,11 +157,11 @@ namespace McCli.Compiler.IR
 		private static RangeFor ReadFor(XElement element, IReadOnlyDictionary<string, Variable> variables)
 		{
 			var iterator = ReadVariable(element.Attribute("iterator"), variables);
-			var lowerBound = ReadVariable(element.Attribute("lowerBound"), variables);
-			var upperBound = ReadVariable(element.Attribute("upperBound"), variables);
-			var increment = ReadVariable(element.Attribute("increment"), variables);
+			var from = ReadVariable(element.Attribute("from"), variables);
+			var to = ReadVariable(element.Attribute("to"), variables);
+			var step = ReadVariable(element.Attribute("step"), variables);
 			var body = ReadStatements(element, variables).ToImmutableArray();
-			return new RangeFor(iterator, lowerBound, increment, upperBound, body);
+			return new RangeFor(iterator, from, step, to, body);
 		}
 
 		private static If ReadIf(XElement element, IReadOnlyDictionary<string, Variable> variables)

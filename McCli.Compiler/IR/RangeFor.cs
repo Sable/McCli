@@ -14,26 +14,26 @@ namespace McCli.Compiler.IR
 	public sealed class RangeFor : ControlFlow
 	{
 		public readonly Variable Iterator;
-		public readonly Variable LowerBound;
-		public readonly Variable Increment;
-		public readonly Variable UpperBound;
+		public readonly Variable From;
+		public readonly Variable Step;
+		public readonly Variable To;
 		public readonly ImmutableArray<Statement> Body;
 
-		public RangeFor(Variable iterator, Variable lowerBound, Variable increment, Variable upperBound, ImmutableArray<Statement> body)
+		public RangeFor(Variable iterator, Variable from, Variable step, Variable to, ImmutableArray<Statement> body)
 		{
 			Contract.Requires(iterator != null);
-			Contract.Requires(lowerBound != null);
-			Contract.Requires(upperBound != null);
+			Contract.Requires(from != null);
+			Contract.Requires(to != null);
 
 			this.Iterator = iterator;
-			this.LowerBound = lowerBound;
-			this.Increment = increment;
-			this.UpperBound = upperBound;
+			this.From = from;
+			this.Step = step;
+			this.To = to;
 			this.Body = body;
 		}
 
-		public RangeFor(Variable iterator, Variable lowerBound, Variable increment, Variable upperBound, params Statement[] body)
-			: this(iterator, lowerBound, increment, upperBound, ImmutableArray.Create(body)) { }
+		public RangeFor(Variable iterator, Variable from, Variable step, Variable to, params Statement[] body)
+			: this(iterator, from, step, to, ImmutableArray.Create(body)) { }
 
 		public override void Accept(Visitor visitor)
 		{

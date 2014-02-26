@@ -19,11 +19,6 @@ namespace McCli.Compiler.IR
 		public readonly string Name;
 
 		/// <summary>
-		/// The kind of variable, describing how it was declared.
-		/// </summary>
-		public readonly VariableKind Kind;
-
-		/// <summary>
 		/// The static representation of this variable, if available.
 		/// </summary>
 		public readonly MRepr StaticRepr;
@@ -35,22 +30,21 @@ namespace McCli.Compiler.IR
 		#endregion
 
 		#region Constructors
-		public Variable(string name, VariableKind kind)
+		public Variable(string name)
 		{
 			Contract.Requires(name != null);
 
 			this.Name = name;
-			this.Kind = kind;
 		}
 
-		public Variable(string name, VariableKind kind, MRepr staticRepr)
-			: this(name, kind)
+		public Variable(string name, MRepr staticRepr)
+			: this(name)
 		{
 			this.StaticRepr = staticRepr;
 		}
 
-		public Variable(string name, VariableKind kind, object constantValue)
-			: this(name, kind)
+		public Variable(string name, object constantValue)
+			: this(name)
 		{
 			Contract.Requires(constantValue is double || constantValue is char);
 

@@ -221,26 +221,26 @@ namespace McCli.Compiler.CodeGen
 			using (var upperBoundLocal = temporaryPool.Alloc(repr.CliType))
 			{
 				// Save the lower bound to a "current" variable
-				EmitLoad(node.LowerBound);
-				EmitConversion(node.LowerBound.StaticRepr, repr);
+				EmitLoad(node.From);
+				EmitConversion(node.From.StaticRepr, repr);
 				cil.Store(currentLocal.Location);
 
 				// Save the increment to a local variable
-				if (node.Increment == null)
+				if (node.Step == null)
 				{
 					Contract.Assert(repr.Type == MClass.Double);
 					cil.LoadFloat64(1);
 				}
 				else
 				{
-					EmitLoad(node.Increment);
-					EmitConversion(node.Increment.StaticRepr, repr);
+					EmitLoad(node.Step);
+					EmitConversion(node.Step.StaticRepr, repr);
 				}
 				cil.Store(incrementLocal.Location);
 
 				// Save the upper bound to a local variable
-				EmitLoad(node.UpperBound);
-				EmitConversion(node.UpperBound.StaticRepr, repr);
+				EmitLoad(node.To);
+				EmitConversion(node.To.StaticRepr, repr);
 				cil.Store(upperBoundLocal.Location);
 
 				// Test the loop condition
