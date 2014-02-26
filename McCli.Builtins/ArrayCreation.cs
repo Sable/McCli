@@ -27,9 +27,14 @@ namespace McCli.Builtins
 			return zeros(n, n);
 		}
 
-		public static MFullArray<double> zeros(double sz1, double sz2)
+		public static MFullArray<double> zeros(double rowCount, double columnCount)
 		{
-			return new MFullArray<double>(Utilities.ToShape(sz1, sz2));
+			return new MFullArray<double>(Utilities.ToShape(rowCount, columnCount));
+		}
+
+		public static MFullArray<double> zeros(double sz1, double sz2, double sz3)
+		{
+			throw new NotImplementedException("zeros with 3 arguments.");
 		}
 		#endregion
 
@@ -122,6 +127,71 @@ namespace McCli.Builtins
 					result[leftColumnIndex * rowCount + rowIndex] = left[leftColumnIndex * rowCount + rowIndex];
 				for (int rightColumnIndex = 0; rightColumnIndex < right.ColumnCount; ++rightColumnIndex)
 					result[(left.ColumnCount + rightColumnIndex) * rowCount + rowIndex] = right[rightColumnIndex * rowCount + rowIndex];
+			}
+
+			return result;
+		}
+		
+		// TODO: remove when variadic inputs are implemented
+		public static MArray<TScalar> horzcat<[AnyPrimitive]TScalar>(
+			MArray<TScalar> array1, MArray<TScalar> array2, MArray<TScalar> array3)
+		{
+			return horzcat(new[] { array1, array2, array3 });
+		}
+
+		public static MArray<TScalar> horzcat<[AnyPrimitive]TScalar>(
+			MArray<TScalar> array1, MArray<TScalar> array2, MArray<TScalar> array3, MArray<TScalar> array4)
+		{
+			return horzcat(new[] { array1, array2, array3, array4 });
+		}
+
+		public static MArray<TScalar> horzcat<[AnyPrimitive]TScalar>(
+			MArray<TScalar> array1, MArray<TScalar> array2, MArray<TScalar> array3,
+			MArray<TScalar> array4, MArray<TScalar> array5)
+		{
+			return horzcat(new[] { array1, array2, array3, array4, array5 });
+		}
+
+		public static MArray<TScalar> horzcat<[AnyPrimitive]TScalar>(
+			MArray<TScalar> array1, MArray<TScalar> array2, MArray<TScalar> array3,
+			MArray<TScalar> array4, MArray<TScalar> array5, MArray<TScalar> array6)
+		{
+			return horzcat(new[] { array1, array2, array3, array4, array5, array6 });
+		}
+
+		internal static MArray<TScalar> horzcat<[AnyPrimitive]TScalar>(params MArray<TScalar>[] arrays)
+		{
+			Contract.Requires(arrays != null);
+
+			if (arrays.Length == 0) return MFullArray<TScalar>.CreateEmpty();
+
+			var rowCount = arrays[0].RowCount;
+			int columnCount = 0;
+			foreach (var array in arrays)
+			{
+				if (array.IsHigherDimensional)
+					throw new NotImplementedException("horzcat on higher-dimensional arrays.");
+
+				if (array.RowCount != rowCount)
+					throw new MArrayShapeException();
+
+				columnCount += array.ColumnCount;
+			}
+
+			var resultShape = new MArrayShape(rowCount, columnCount);
+			var result = new MFullArray<TScalar>(resultShape);
+
+			int resultIndex = 0;
+			foreach (var array in arrays)
+			{
+				for (int arrayColumnIndex = 0; arrayColumnIndex < array.ColumnCount; ++arrayColumnIndex)
+				{
+					for (int rowIndex = 0; rowIndex < rowCount; ++rowIndex)
+					{
+						result[resultIndex] = array[arrayColumnIndex * rowCount + rowIndex];
+						resultIndex++;
+					}
+				}
 			}
 
 			return result;

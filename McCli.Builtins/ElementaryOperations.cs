@@ -14,7 +14,7 @@ namespace McCli.Builtins
 	public static class ElementaryOperations
 	{
 		#region Additive
-		public static MFullArray<double> plus(MArray<double> lhs, MArray<double> rhs)
+		public static MArray<double> plus(MArray<double> lhs, MArray<double> rhs)
 		{
 			Contract.Requires(lhs != null);
 			Contract.Requires(rhs != null);
@@ -29,7 +29,7 @@ namespace McCli.Builtins
 			return c;
 		}
 
-		internal static MFullArray<double> plus(MArray<double> lhs, double rhs)
+		internal static MArray<double> plus(MArray<double> lhs, double rhs)
 		{
 			Contract.Requires(lhs != null);
 
@@ -39,7 +39,7 @@ namespace McCli.Builtins
 			return c;
 		}
 
-		public static MFullArray<double> minus(MArray<double> lhs, MArray<double> rhs)
+		public static MArray<double> minus(MArray<double> lhs, MArray<double> rhs)
 		{
 			Contract.Requires(lhs != null);
 			Contract.Requires(rhs != null);
@@ -54,7 +54,7 @@ namespace McCli.Builtins
 			return c;
 		}
 
-		internal static MFullArray<double> minus(MArray<double> lhs, double rhs)
+		internal static MArray<double> minus(MArray<double> lhs, double rhs)
 		{
 			Contract.Requires(lhs != null);
 
@@ -64,7 +64,7 @@ namespace McCli.Builtins
 			return c;
 		}
 
-		internal static MFullArray<double> minus(double lhs, MArray<double> rhs)
+		internal static MArray<double> minus(double lhs, MArray<double> rhs)
 		{
 			Contract.Requires(rhs != null);
 
@@ -92,7 +92,7 @@ namespace McCli.Builtins
 		#endregion
 
 		#region Elementwise Multiplicative
-		public static MFullArray<double> times(MArray<double> lhs, MArray<double> rhs)
+		public static MArray<double> times(MArray<double> lhs, MArray<double> rhs)
 		{
 			Contract.Requires(lhs != null);
 			Contract.Requires(rhs != null);
@@ -107,7 +107,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		internal static MFullArray<double> times(MArray<double> lhs, double rhs)
+		internal static MArray<double> times(MArray<double> lhs, double rhs)
 		{
 			Contract.Requires(lhs != null);
 
@@ -117,7 +117,12 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		public static MFullArray<double> rdivide(MArray<double> lhs, MArray<double> rhs)
+		internal static double times(double lhs, double rhs)
+		{
+			return lhs * rhs;
+		}
+
+		public static MArray<double> rdivide(MArray<double> lhs, MArray<double> rhs)
 		{
 			Contract.Requires(lhs != null);
 			Contract.Requires(rhs != null);
@@ -132,7 +137,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		internal static MFullArray<double> rdivide(MArray<double> lhs, double rhs)
+		internal static MArray<double> rdivide(MArray<double> lhs, double rhs)
 		{
 			Contract.Requires(lhs != null);
 
@@ -142,7 +147,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		internal static MFullArray<double> rdivide(double lhs, MArray<double> rhs)
+		internal static MArray<double> rdivide(double lhs, MArray<double> rhs)
 		{
 			Contract.Requires(rhs != null);
 
@@ -152,17 +157,50 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		public static MFullArray<double> ldivide(MArray<double> lhs, MArray<double> rhs)
+		internal static double rdivide(double lhs, double rhs)
+		{
+			return lhs / rhs;
+		}
+
+		public static MArray<double> ldivide(MArray<double> lhs, MArray<double> rhs)
 		{
 			Contract.Requires(lhs != null);
 			Contract.Requires(rhs != null);
 
 			return rdivide(rhs, lhs);
 		}
+
+		public static MArray<double> mod(MArray<double> lhs, MArray<double> rhs)
+		{
+			Contract.Requires(lhs != null);
+			Contract.Requires(rhs != null);
+
+			MatchShapes(ref lhs, ref rhs);
+			return ArrayCreation.arrayfun(mod, lhs, rhs);
+		}
+
+		internal static double mod(double lhs, double rhs)
+		{
+			return lhs - times(floor(rdivide(lhs, rhs)), rhs);
+		}
+
+		public static MArray<double> rem(MArray<double> lhs, MArray<double> rhs)
+		{
+			Contract.Requires(lhs != null);
+			Contract.Requires(rhs != null);
+
+			MatchShapes(ref lhs, ref rhs);
+			return ArrayCreation.arrayfun(rem, lhs, rhs);
+		}
+
+		internal static double rem(double lhs, double rhs)
+		{
+			return lhs - times(fix(rdivide(lhs, rhs)), rhs);
+		}
 		#endregion
 
 		#region Matrix Operations
-		public static MFullArray<double> mtimes(MArray<double> lhs, MArray<double> rhs)
+		public static MArray<double> mtimes(MArray<double> lhs, MArray<double> rhs)
 		{
 			Contract.Requires(lhs != null);
 			Contract.Requires(rhs != null);
@@ -199,10 +237,11 @@ namespace McCli.Builtins
 			return lhs * rhs;
 		}
 
-		public static MFullArray<double> mpower(MArray<double> @base, double exponent)
+		public static MArray<double> mpower(MArray<double> @base, double exponent)
 		{
 			Contract.Requires(@base != null);
 
+			if (!@base.IsSquareMatrix) throw new MArrayShapeException();
 			if (@base.IsScalar) return mpower(@base[0], exponent);
 
 			throw new NotImplementedException("Non-scalar mpower.");
@@ -213,7 +252,7 @@ namespace McCli.Builtins
 			return power(@base, exponent);
 		}
 
-		public static MFullArray<double> mrdivide(MArray<double> b, MArray<double> a)
+		public static MArray<double> mrdivide(MArray<double> b, MArray<double> a)
 		{
 			Contract.Requires(b != null);
 			Contract.Requires(a != null);
@@ -248,25 +287,10 @@ namespace McCli.Builtins
 		{
 			return b / a;
 		}
-
-		public static MArray<double> mpower(MArray<double> @base, double exponent)
-		{
-			Contract.Requires(@base != null);
-
-			if (!@base.IsSquareMatrix) throw new MArrayShapeException();
-			if (@base.IsScalar) return mpower(@base[0], exponent);
-
-			throw new NotImplementedException("Non-scalar mpower.");
-		}
-
-		internal static double mpower(double @base, double exponent)
-		{
-			return power(@base, exponent);
-		}
 		#endregion
 
 		#region Power
-		public static MFullArray<double> power(MArray<double> @base, MArray<double> exponent)
+		public static MArray<double> power(MArray<double> @base, MArray<double> exponent)
 		{
 			Contract.Requires(@base != null);
 			Contract.Requires(exponent != null);
@@ -280,7 +304,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		internal static MFullArray<double> power(MArray<double> @base, double exponent)
+		internal static MArray<double> power(MArray<double> @base, double exponent)
 		{
 			Contract.Requires(@base != null);
 
@@ -290,7 +314,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		internal static MFullArray<double> power(double @base, MArray<double> exponent)
+		internal static MArray<double> power(double @base, MArray<double> exponent)
 		{
 			Contract.Requires(exponent != null);
 
