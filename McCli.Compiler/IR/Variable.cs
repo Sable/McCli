@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
@@ -10,6 +11,7 @@ namespace McCli.Compiler.IR
 	/// <summary>
 	/// Represents a variable in a matlab program.
 	/// </summary>
+	[DebuggerDisplay("{Name} : {StaticRepr}")]
 	public sealed class Variable
 	{
 		#region Fields

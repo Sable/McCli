@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,7 @@ namespace McCli
 	/// An array in which the value of elements cannot change.
 	/// </summary>
 	/// <typeparam name="T">The type of the elements.</typeparam>
+	[DebuggerDisplay("Length = {Length}")]
 	public partial struct ImmutableArray<T> : IList<T>
 	{
 		#region Fields

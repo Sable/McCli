@@ -54,13 +54,11 @@ namespace McCli.Compiler.CodeGen
 			Contract.Requires(methodFactory != null);
 			Contract.Requires(functionLookup != null);
 
-			Contract.Assert(function.Outputs.Length <= 1);
-
 			this.function = function;
 			this.functionLookup = functionLookup;
 
 			// Determine the method signature
-			var parameterDescriptors = new List<ParameterDescriptor>(function.Inputs.Length);
+			var parameterDescriptors = new List<ParameterDescriptor>();
 			foreach (var input in function.Inputs)
 			{
 				locals.Add(input, VariableLocation.Parameter(parameterDescriptors.Count));
@@ -88,7 +86,8 @@ namespace McCli.Compiler.CodeGen
 						locals.Add(output, VariableLocation.Parameter(parameterDescriptors.Count));
 					}
 
-					parameterDescriptors.Add(new ParameterDescriptor(output.StaticCliType, ParameterAttributes.Out, name));
+					var parameterType = output.StaticCliType.MakeByRefType();
+					parameterDescriptors.Add(new ParameterDescriptor(parameterType, ParameterAttributes.Out, name));
 				}
 			}
 
@@ -106,7 +105,8 @@ namespace McCli.Compiler.CodeGen
 				// Declare a local variable for the return value
 				var output = function.Outputs[0];
 				var localIndex = cil.DeclareLocal(output.StaticCliType, output.Name);
-				locals.Add(output, VariableLocation.Local(localIndex));
+				if (!function.Inputs.Contains(output))
+					locals.Add(output, VariableLocation.Local(localIndex));
 			}
 		}
 		#endregion
@@ -173,6 +173,12 @@ namespace McCli.Compiler.CodeGen
 
 		private EmitStoreScope BeginEmitStore(Variable variable)
 		{
+			if (function.Outputs.Length >= 2 && !function.Inputs.Contains(variable))
+			{
+				// ByRef parameter
+				cil.Load(GetLocalLocation(variable));
+			}
+
 			return new EmitStoreScope(this, variable);
 		}
 
@@ -180,7 +186,15 @@ namespace McCli.Compiler.CodeGen
 		{
 			if (variable == null) return;
 
-			cil.Store(GetLocalLocation(variable));
+			if (function.Outputs.Length >= 2 && !function.Inputs.Contains(variable))
+			{
+				// ByRef parameter
+				cil.StoreIndirect(variable.StaticCliType);
+			}
+			else
+			{
+				cil.Store(GetLocalLocation(variable));
+			}
 		}
 
 		private void EmitConversion(MRepr source, MRepr target)

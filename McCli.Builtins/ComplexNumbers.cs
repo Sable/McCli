@@ -14,6 +14,7 @@ namespace McCli.Builtins
 	[MatlabLibrary]
 	public static class ComplexNumbers
 	{
+		#region abs
 		public static MArray<double> abs(MArray<double> array)
 		{
 			return ArrayCreation.arrayfun(abs, array);
@@ -23,6 +24,17 @@ namespace McCli.Builtins
 		{
 			return Math.Abs(value);
 		}
+
+		internal static MArray<double> abs(MArray<MComplex<double>> array)
+		{
+			throw new NotImplementedException();
+		}
+
+		internal static double abs(MComplex<double> value)
+		{
+			return Math.Sqrt(value.RealPart * value.RealPart + value.ImaginaryPart * value.ImaginaryPart);
+		}
+		#endregion
 
 		public static MComplex<TReal> complex<[AnyReal] TReal>(TReal a) where TReal : struct
 		{
