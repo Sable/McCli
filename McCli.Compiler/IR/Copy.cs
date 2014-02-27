@@ -28,5 +28,10 @@ namespace McCli.Compiler.IR
 		{
 			visitor.VisitCopy(this);
 		}
+
+		public override string ToDebugString()
+		{
+			return string.Format("{0} = {1}", Target.Name, Value.Name);
+		}
 	}
 }

@@ -29,5 +29,14 @@ namespace McCli.Compiler.IR
 		{
 			visitor.VisitLoadParenthesized(this);
 		}
+
+		public override string ToDebugString()
+		{
+			string format = string.Empty;
+			if (Targets.Length == 1) format += "{0} = ";
+			else if (Targets.Length >= 2) format += "[{0}] = ";
+			format += "{1}({2})";
+			return string.Format(format, CommaSeparate(Targets), Subject.Name, CommaSeparate(Arguments));
+		}
 	}
 }

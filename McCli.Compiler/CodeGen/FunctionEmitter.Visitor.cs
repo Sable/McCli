@@ -61,7 +61,7 @@ namespace McCli.Compiler.CodeGen
 			Contract.Assert(node.Targets.Length == 1);
 
 			var argumentTypes = node.Arguments.Select(a => a.StaticRepr);
-			var function = functionLookup(node.Name, argumentTypes);
+			var function = functionLookup(node.FunctionName, argumentTypes);
 
 			using (BeginEmitStore(node.Targets[0]))
 			{

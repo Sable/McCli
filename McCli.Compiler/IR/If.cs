@@ -22,9 +22,21 @@ namespace McCli.Compiler.IR
 			this.Else = @else;
 		}
 
+		public bool HasElse
+		{
+			get { return Else.Length > 0; }
+		}
+
 		public override void Accept(Visitor visitor)
 		{
 			visitor.VisitIf(this);
+		}
+
+		public override string ToDebugString()
+		{
+			string format = "if ({0}) [{1} statements]";
+			if (HasElse) format += " else [{2} statements]";
+			return string.Format(format, Condition.Name, Then.Length, Then.Length);
 		}
 	}
 }

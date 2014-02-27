@@ -208,7 +208,7 @@ namespace McCli
 		}
 
 		[TestMethod]
-		public void TestBreak()
+		public void TestBreakWhile()
 		{
 			// while (42) break;
 			// return 42;
@@ -223,7 +223,7 @@ namespace McCli
 		}
 
 		[TestMethod]
-		public void TestBreaksInNestedWhiles()
+		public void TestBreakNestedWhile()
 		{
 			// x = 42;
 			// while (x)
@@ -245,6 +245,34 @@ namespace McCli
 				));
 
 			Assert.AreEqual(666.0, function().ToScalar());
+		}
+
+		[TestMethod]
+		public void TestContinueInWhile()
+		{
+			// function output = test()
+			//   output = 1
+			//   while (output < 5)
+			//     output = 42
+			//     continue
+			//     output = 666
+
+			var output = Declare<MArray<double>>("output");
+			var constant = Declare<MArray<double>>("constant");
+			var condition = Declare<MArray<bool>>("condition");
+			var function = CompileFunction<Func<MArray<double>>>(
+				none, output,
+				new Literal(output, 1.0),
+				new Literal(constant, 5.0),
+				new StaticCall(condition, "lt", new[] { output, constant }),
+				new While(condition,
+					new Literal(output, 42.0),
+					new StaticCall(condition, "lt", new[] { output, constant }),
+					new Jump(JumpKind.Continue),
+					new Literal(output, 666.0)
+					));
+
+			Assert.AreEqual(42.0, function().ToScalar());
 		}
 
 		[TestMethod]
@@ -275,6 +303,24 @@ namespace McCli
 			Assert.AreEqual(1.0, function(MFullArray<double>.CreateScalar(1)).ToScalar());
 			Assert.AreEqual(2.0, function(MFullArray<double>.CreateScalar(2)).ToScalar());
 			Assert.AreEqual(120.0, function(MFullArray<double>.CreateScalar(5)).ToScalar());
+		}
+
+		[TestMethod]
+		public void TestReturn()
+		{
+			// function output = test()
+			//   output = 42
+			//   return
+			//   output = 666
+
+			var output = Declare<double>("output");
+			var function = CompileFunction<Func<double>>(
+				none, output,
+				new Literal(output, 42.0),
+				new Jump(JumpKind.Return),
+				new Literal(output, 666.0));
+
+			Assert.AreEqual(42.0, function());
 		}
 
 		[TestMethod]

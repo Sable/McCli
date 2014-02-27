@@ -36,6 +36,14 @@ namespace McCli.Compiler.IR
 		{
 			visitor.VisitFunction(this);
 		}
+
+		public override string ToDebugString()
+		{
+			string format = "function ";
+			if (Outputs.Length > 0) format += "[{0}] = ";
+			format += "{1}({2}) [{3} statements]";
+			return string.Format(format, CommaSeparate(Outputs), Name, CommaSeparate(Inputs), Body.Length);
+		}
 		#endregion
 	}
 }

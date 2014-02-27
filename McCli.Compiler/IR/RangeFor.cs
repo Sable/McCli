@@ -39,5 +39,11 @@ namespace McCli.Compiler.IR
 		{
 			visitor.VisitFor(this);
 		}
+
+		public override string ToDebugString()
+		{
+			return string.Format("for {0} = {1}{2}:{3} [{4} statements]",
+				Iterator.Name, From.Name, Step == null ? string.Empty : ':' + Step.Name, To.Name, Body.Length);
+		}
 	}
 }

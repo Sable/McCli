@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,6 +29,11 @@ namespace McCli.Compiler.IR
 		public override void Accept(Visitor visitor)
 		{
 			visitor.VisitWhile(this);
+		}
+
+		public override string ToDebugString()
+		{
+			return string.Format("while ({0}) [{1} statements]", Condition.Name, Body.Length);
 		}
 	}
 }

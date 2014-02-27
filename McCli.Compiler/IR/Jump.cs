@@ -22,5 +22,10 @@ namespace McCli.Compiler.IR
 		{
 			visitor.VisitJump(this);
 		}
+
+		public override string ToDebugString()
+		{
+			return Kind.ToString().ToLowerInvariant();
+		}
 	}
 }
