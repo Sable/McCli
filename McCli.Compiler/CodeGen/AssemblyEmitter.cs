@@ -34,7 +34,6 @@ namespace McCli.Compiler.CodeGen
 			var functionEmitters = new Dictionary<Function, FunctionEmitter>();
 			FunctionLookup functionLookup = (name, inputReprs) =>
 			{
-				// TODO: Return a function emitter's method if needed
 				Function function;
 				return compilationUnit.Functions.TryGetValue(name, out function)
 					? functionEmitters[function].Method : builtinLookup(name, inputReprs);
@@ -44,6 +43,7 @@ namespace McCli.Compiler.CodeGen
 			foreach (var function in compilationUnit.Functions.Values)
 				functionEmitters.Add(function, new FunctionEmitter(function, methodFactory, functionLookup));
 
+			// Emit the method bodies
 			foreach (var functionEmitter in functionEmitters.Values)
 				functionEmitter.EmitBody();
 

@@ -315,6 +315,7 @@ namespace CliKit
 		public static readonly VariableReferenceOpcode Ldloca = new VariableReferenceOpcode(OpCodes.Ldloca);
 		public static readonly VariableReferenceOpcode Ldloca_S = new VariableReferenceOpcode(OpCodes.Ldloca_S);
 		public static readonly LoadConstantOpcode Ldnull = new LoadConstantOpcode(OpCodes.Ldnull);
+		public static readonly IndirectReferenceOpcode Ldobj = new IndirectReferenceOpcode(OpCodes.Ldobj);
 		public static readonly FieldReferenceOpcode Ldsfld = new FieldReferenceOpcode(OpCodes.Ldsfld);
 		public static readonly FieldReferenceOpcode Ldsflda = new FieldReferenceOpcode(OpCodes.Ldsflda);
 		public static readonly LoadConstantOpcode Ldstr = new LoadConstantOpcode(OpCodes.Ldstr);
@@ -356,6 +357,7 @@ namespace CliKit
 		public static readonly IndirectReferenceOpcode Stind_Ref = new IndirectReferenceOpcode(OpCodes.Stind_Ref);
 		public static readonly VariableReferenceOpcode Stloc = new VariableReferenceOpcode(OpCodes.Stloc);
 		public static readonly VariableReferenceOpcode Stloc_S = new VariableReferenceOpcode(OpCodes.Stloc_S);
+		public static readonly IndirectReferenceOpcode Stobj = new IndirectReferenceOpcode(OpCodes.Stobj);
 		public static readonly FieldReferenceOpcode Stsfld = new FieldReferenceOpcode(OpCodes.Stsfld);
 		public static readonly ArithmeticOpcode Sub = new ArithmeticOpcode(OpCodes.Sub, ArithmeticOperation.Subtraction);
 		public static readonly ArithmeticOpcode Sub_Ovf = new ArithmeticOpcode(OpCodes.Sub_Ovf, ArithmeticOperation.Subtraction_OverflowCheck);
@@ -421,6 +423,48 @@ namespace CliKit
 				case Comparison.GreaterThan_Unsigned: return Cgt_Un;
 				case Comparison.LessThan: return Clt;
 				case Comparison.LessThan_Unsigned: return Clt_Un;
+				default: return null;
+			}
+		}
+
+		public static IndirectReferenceOpcode LoadIndirect(DataType type)
+		{
+			switch (type)
+			{
+				case DataType.Int8: return Ldind_I1;
+				case DataType.Int16: return Ldind_I2;
+				case DataType.Int32: return Ldind_I4;
+				case DataType.Int64: return Ldind_I8;
+				case DataType.NativeInt: return Ldind_I;
+				case DataType.UInt8: return Ldind_U1;
+				case DataType.UInt16: return Ldind_U2;
+				case DataType.UInt32: return Ldind_U4;
+				case DataType.UInt64: return Ldind_I8;
+				case DataType.NativeUInt: return Ldind_I;
+				case DataType.Float32: return Ldind_R4;
+				case DataType.Float64: return Ldind_R8;
+				case DataType.ObjectReference: return Ldind_Ref;
+				default: return null;
+			}
+		}
+
+		public static IndirectReferenceOpcode StoreIndirect(DataType type)
+		{
+			switch (type)
+			{
+				case DataType.Int8: return Stind_I1;
+				case DataType.Int16: return Stind_I2;
+				case DataType.Int32: return Stind_I4;
+				case DataType.Int64: return Stind_I8;
+				case DataType.NativeInt: return Stind_I;
+				case DataType.UInt8: return Stind_I1;
+				case DataType.UInt16: return Stind_I2;
+				case DataType.UInt32: return Stind_I4;
+				case DataType.UInt64: return Stind_I8;
+				case DataType.NativeUInt: return Stind_I;
+				case DataType.Float32: return Stind_R4;
+				case DataType.Float64: return Stind_R8;
+				case DataType.ObjectReference: return Stind_Ref;
 				default: return null;
 			}
 		}

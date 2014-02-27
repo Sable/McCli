@@ -23,6 +23,10 @@ namespace CliKit
 		}
 
 		// TODO: add type
+		public DataType? DataType
+		{
+			get { throw new NotImplementedException(); }
+		}
 		#endregion
 	}
 }

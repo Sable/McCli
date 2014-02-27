@@ -14,110 +14,68 @@ namespace McCli.Compiler
 	public sealed class FunctionSignature
 	{
 		#region Fields
-		private readonly List<MRepr> inputReprs = new List<MRepr>();
-		private readonly int variadicInputIndex;
-		private readonly List<MRepr> outputReprs = new List<MRepr>();
-		private readonly bool hasVariadicOutputs;
+		private readonly List<MRepr> inputs = new List<MRepr>();
+		private readonly List<MRepr> outputs = new List<MRepr>();
 		#endregion
 
 		#region Constructors
+		public FunctionSignature(IEnumerable<MRepr> inputs, IEnumerable<MRepr> outputs)
+		{
+			Contract.Requires(inputs != null);
+			Contract.Requires(outputs != null);
+
+			this.inputs = inputs.ToList();
+			this.outputs = outputs.ToList();
+		}
+
 		public FunctionSignature(ParameterInfo[] parameters, Type returnType)
 		{
 			Contract.Requires(parameters != null);
 			Contract.Requires(returnType != null);
 
-			variadicInputIndex = -1;
-
 			foreach (var parameter in parameters)
 			{
-				bool variadic;
-				MRepr repr;
-				if (parameter.ParameterType.IsArray)
-				{
-					variadic = true;
-					repr = MRepr.FromCliType(parameter.ParameterType.GetElementType());
-				}
-				else
-				{
-					variadic = false;
-					repr = MRepr.FromCliType(parameter.ParameterType);
-				}
-
+				MRepr repr = MRepr.FromCliType(parameter.ParameterType);
 				if (parameter.IsOut)
 				{
-					Contract.Assert(!hasVariadicOutputs);
-					if (variadic) hasVariadicOutputs = true;
-					outputReprs.Add(repr);
+					outputs.Add(repr);
 				}
 				else
 				{
-					Contract.Assert(outputReprs.Count == 0);
-					if (variadic)
-					{
-						Contract.Assert(variadicInputIndex < 0);
-						variadicInputIndex = inputReprs.Count;
-					}
-
-					inputReprs.Add(repr);
+					Contract.Assert(outputs.Count == 0);
+					inputs.Add(repr);
 				}
+			}
+
+			Contract.Assert(outputs.Count != 1);
+
+			if (returnType != typeof(void))
+			{
+				Contract.Assert(outputs.Count == 0);
+				outputs.Add(MRepr.FromCliType(returnType));
 			}
 		}
 		#endregion
 
 		#region Properties
-		public bool HasVariadicInputs
+		public IReadOnlyList<MRepr> Inputs
 		{
-			get { return variadicInputIndex >= 0; }
+			get { return inputs; }
 		}
 
-		public int? InputCount
+		public IReadOnlyList<MRepr> Outputs
 		{
-			get { return HasVariadicInputs ? (int?)null : inputReprs.Count; }
+			get { return outputs; }
 		}
 
-		public int FixedInputCount
+		public bool HasReturnValue
 		{
-			get { return HasVariadicInputs ? inputReprs.Count - 1 : inputReprs.Count; }
+			get { return outputs.Count == 1; }
 		}
 
-		public int? VariadicInputIndex
+		public int OutParameterCount
 		{
-			get { return variadicInputIndex == -1 ? (int?)null : variadicInputIndex; }
-		}
-
-		public bool HasVariadicOutputs
-		{
-			get { return hasVariadicOutputs; }
-		}
-
-		public int? OutputCount
-		{
-			get { return hasVariadicOutputs ? (int?)null : outputReprs.Count; }
-		}
-		#endregion
-
-		#region Methods
-		public MRepr GetFixedInputRepr(int index)
-		{
-			if (HasVariadicInputs && index >= variadicInputIndex) index++;
-			return inputReprs[index];
-		}
-
-		public MRepr GetInputRepr(int index, int count)
-		{
-			Contract.Requires(HasVariadicInputs ? (count >= FixedInputCount) : (count == FixedInputCount));
-			throw new NotImplementedException();
-		}
-
-		public MRepr GetVariadicInputRepr()
-		{
-			if (!HasVariadicInputs) throw new InvalidOperationException();
-			return inputReprs[variadicInputIndex];
-		}
-
-		public MRepr GetOutputRepr(int index)
-		{
-			return hasVariadicOutputs ? outputReprs[0] : outputReprs[index];
+			get { return outputs.Count >= 2 ? outputs.Count : 0; }
 		}
 		#endregion
 	}

@@ -138,6 +138,20 @@ namespace CliKit.IO
 			Contract.Requires(target != null);
 			Branch(Opcode.Br, target);
 		}
+
+		public void LoadIndirect(Type type)
+		{
+			Contract.Requires(type != null);
+			if (type.IsValueType) Instruction(Opcode.Ldobj, type);
+			else base.LoadIndirect(DataTypeEnum.FromCtsType(type));
+		}
+
+		public void StoreIndirect(Type type)
+		{
+			Contract.Requires(type != null);
+			if (type.IsValueType) Instruction(Opcode.Stobj, type);
+			else base.StoreIndirect(DataTypeEnum.FromCtsType(type));
+		}
 		#endregion
 		#endregion
 	}

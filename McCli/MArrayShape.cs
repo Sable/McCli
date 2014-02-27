@@ -14,7 +14,7 @@ namespace McCli
 	{
 		private struct Unchecked
 		{
-			public static readonly Unchecked Instance;
+			public static readonly Unchecked Instance = default(Unchecked);
 		}
 
 		#region Fields

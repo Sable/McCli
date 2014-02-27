@@ -59,34 +59,53 @@ namespace McCli.Compiler.CodeGen
 			this.function = function;
 			this.functionLookup = functionLookup;
 
-			// Handle method parameters
-			var inputDescriptorsBuilder = new ImmutableArray<ParameterDescriptor>.Builder(function.Inputs.Length);
-
-			for (int i = 0; i < function.Inputs.Length; ++i)
+			// Determine the method signature
+			var parameterDescriptors = new List<ParameterDescriptor>(function.Inputs.Length);
+			foreach (var input in function.Inputs)
 			{
-				var input = function.Inputs[i];
-				locals.Add(input, VariableLocation.Parameter(i));
-				inputDescriptorsBuilder[i] = new ParameterDescriptor(input.StaticRepr.CliType, ParameterAttributes.In, input.Name);
+				locals.Add(input, VariableLocation.Parameter(parameterDescriptors.Count));
+				parameterDescriptors.Add(new ParameterDescriptor(input.StaticCliType, ParameterAttributes.None, input.Name));
 			}
-			
-			var inputDescriptors = inputDescriptorsBuilder.Complete();
-			var outputType = function.Outputs.Length == 0 ? typeof(void) : function.Outputs[0].StaticRepr.CliType;
+
+			Type outputType = typeof(void);
+			if (function.Outputs.Length == 1)
+			{
+				outputType = function.Outputs[0].StaticCliType; // 1 output, use return value
+			}
+			else if (function.Outputs.Length >= 2)
+			{
+				// 2 or more outputs, use 'out' parameters
+				foreach (var output in function.Outputs)
+				{
+					string name = output.Name;
+					if (locals.ContainsKey(output))
+					{
+						// inout parameter, rename not to clash with input
+						name += "$out";
+					}
+					else
+					{
+						locals.Add(output, VariableLocation.Parameter(parameterDescriptors.Count));
+					}
+
+					parameterDescriptors.Add(new ParameterDescriptor(output.StaticCliType, ParameterAttributes.Out, name));
+				}
+			}
 
 			// Create the method and get its IL generator
 			ILGenerator ilGenerator;
-			var methodInfo = methodFactory(function.Name, inputDescriptors, outputType, out ilGenerator);
+			var methodInfo = methodFactory(function.Name, parameterDescriptors, outputType, out ilGenerator);
 
-			this.method = new FunctionMethod(methodInfo, inputDescriptors.Select(i => i.Type).ToArray(), outputType);
+			this.method = new FunctionMethod(methodInfo, parameterDescriptors.Select(i => i.Type).ToArray(), outputType);
 
 			cil = new ILGeneratorMethodBodyWriter(ilGenerator);
 			temporaryPool = new TemporaryLocalPool(cil, "$temp");
 
-			foreach (var output in function.Outputs)
+			if (function.Outputs.Length == 1)
 			{
-				// We might have already seen that output as an input (inout parameter)
-				if (locals.ContainsKey(output)) continue;
-
-				var localIndex = cil.DeclareLocal(output.StaticRepr.CliType, output.Name);
+				// Declare a local variable for the return value
+				var output = function.Outputs[0];
+				var localIndex = cil.DeclareLocal(output.StaticCliType, output.Name);
 				locals.Add(output, VariableLocation.Local(localIndex));
 			}
 		}
@@ -118,7 +137,26 @@ namespace McCli.Compiler.CodeGen
 			EmitStatements(function.Body);
 
 			cil.MarkLabel(returnTargetLabel);
-			if (function.Outputs.Length == 1) EmitLoad(function.Outputs[0]);
+			if (function.Outputs.Length == 1)
+			{
+				// Load the return value
+				EmitLoad(function.Outputs[0]);
+			}
+			else if (function.Outputs.Length >= 2)
+			{
+				// Copy inout parameters from their input to their outputs (since we operate only on the input)
+				for (int inputIndex = 0; inputIndex < function.Inputs.Length; ++inputIndex)
+				{
+					var input = function.Inputs[inputIndex];
+					int outputIndex = function.Outputs.IndexOf(input);
+					if (outputIndex > -1)
+					{
+						cil.LoadLocal(function.Inputs.Length + outputIndex);
+						cil.LoadLocal(inputIndex);
+						cil.StoreIndirect(input.StaticCliType);
+					}
+				}
+			}
 			cil.Ret();
 		}
 

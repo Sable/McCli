@@ -10,6 +10,6 @@ using System.Threading.Tasks;
 namespace McCli.Compiler.CodeGen
 {
 	public delegate MethodInfo MethodFactory(string name,
-		ImmutableArray<ParameterDescriptor> parameters, Type returnType,
+		IReadOnlyList<ParameterDescriptor> parameters, Type returnType,
 		out ILGenerator ilGenerator);
 }

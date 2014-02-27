@@ -124,6 +124,20 @@ namespace CliKit.IO
 			Instruction(opcode);
 		}
 
+		public void LoadIndirect(DataType type)
+		{
+			var opcode = Opcode.LoadIndirect(type);
+			if (opcode == null) throw new ArgumentException("type");
+			Instruction(opcode);
+		}
+
+		public void StoreIndirect(DataType type)
+		{
+			var opcode = Opcode.StoreIndirect(type);
+			if (opcode == null) throw new ArgumentException("type");
+			Instruction(opcode);
+		}
+
 		public void Pop() { Instruction(Opcode.Pop); }
 		public void Dup() { Instruction(Opcode.Dup); }
 		public void Ret() { Instruction(Opcode.Ret); }

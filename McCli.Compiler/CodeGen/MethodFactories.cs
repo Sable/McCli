@@ -13,7 +13,7 @@ namespace McCli.Compiler.CodeGen
 	public static class MethodFactories
 	{
 		public static DynamicMethod Dynamic(string name,
-			ImmutableArray<ParameterDescriptor> parameters, Type returnType,
+			IReadOnlyList<ParameterDescriptor> parameters, Type returnType,
 			out ILGenerator ilGenerator)
 		{
 			Contract.Requires(name != null);
@@ -21,7 +21,7 @@ namespace McCli.Compiler.CodeGen
 			var method = new DynamicMethod(name, returnType, GetTypeArray(parameters));
 
 			// Define the input/output parameters
-			for (int i = 0; i < parameters.Length; ++i)
+			for (int i = 0; i < parameters.Count; ++i)
 				method.DefineParameter(i + 1, parameters[i].Attributes, parameters[i].Name ?? string.Empty);
 			
 			ilGenerator = method.GetILGenerator();
@@ -34,12 +34,12 @@ namespace McCli.Compiler.CodeGen
 			Contract.Requires(typeBuilder != null);
 			Contract.Requires((attributes & MethodAttributes.Static) == MethodAttributes.Static);
 
-			return delegate(string name, ImmutableArray<ParameterDescriptor> parameters,
+			return delegate(string name, IReadOnlyList<ParameterDescriptor> parameters,
 				Type returnType, out ILGenerator ilGenerator)
 			{
 				var methodBuilder = typeBuilder.DefineMethod(name, attributes, returnType, GetTypeArray(parameters));
 
-				for (int i = 0; i < parameters.Length; ++i)
+				for (int i = 0; i < parameters.Count; ++i)
 					methodBuilder.DefineParameter(i + 1, parameters[i].Attributes, parameters[i].Name ?? string.Empty);
 
 				ilGenerator = methodBuilder.GetILGenerator();
@@ -48,10 +48,10 @@ namespace McCli.Compiler.CodeGen
 			};
 		}
 
-		private static Type[] GetTypeArray(ImmutableArray<ParameterDescriptor> parameters)
+		private static Type[] GetTypeArray(IReadOnlyList<ParameterDescriptor> parameters)
 		{
-			var parameterTypes = new Type[parameters.Length];
-			for (int i = 0; i < parameters.Length; ++i)
+			var parameterTypes = new Type[parameters.Count];
+			for (int i = 0; i < parameters.Count; ++i)
 				parameterTypes[i] = parameters[i].Type;
 			return parameterTypes;
 		}

@@ -52,5 +52,12 @@ namespace McCli.Compiler.IR
 			this.ConstantValue = constantValue;
 		}
 		#endregion
+
+		#region Properties
+		public Type StaticCliType
+		{
+			get { return StaticRepr.CliType; }
+		}
+		#endregion
 	}
 }
