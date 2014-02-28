@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace McCli
 {
 	[TestClass]
-	public sealed class TestCompilation
+	public sealed class CompilationTests
 	{
 		private delegate void In2Out2<TIn1, TIn2, TOut1, TOut2>(
 			TIn1 input1, TIn2 input2, out TOut1 output1, out TOut2 output2);
@@ -19,22 +19,12 @@ namespace McCli
 
 		private static readonly ImmutableArray.EmptyType none = ImmutableArray.Empty;
 
-		private FunctionLookup functionLookup;
-
-		[TestInitialize]
-		public void Initialize()
-		{
-			var functionTable = new FunctionTable();
-			functionTable.AddMethodsFromAssembly(typeof(Builtins.ArrayCreation).Assembly);
-			functionLookup = functionTable.Lookup;
-		}
-
 		private TDelegate CompileFunction<TDelegate>(
 			ImmutableArray<Variable> inputs, ImmutableArray<Variable> outputs,
 			params Statement[] statements) where TDelegate : class
 		{
 			var function = new Function("generated", inputs, outputs, ImmutableArray.Create(statements));
-			var functionMethod = FunctionEmitter.Emit(function, MethodFactories.Dynamic, functionLookup);
+			var functionMethod = FunctionEmitter.Emit(function, MethodFactories.Dynamic, DummyFunctions.Lookup);
 			return (TDelegate)(object)functionMethod.Method.CreateDelegate(typeof(TDelegate));
 		}
 
@@ -46,7 +36,7 @@ namespace McCli
 		}
 
 		[TestMethod]
-		public void TestCopyAssignment()
+		public void TestCopyAssignmentWithMArray()
 		{
 			// function result = copy(x)
 			//   result = x;
@@ -66,60 +56,86 @@ namespace McCli
 		}
 
 		[TestMethod]
+		public void TestCopyAssignmentWithScalar()
+		{
+			// function result = copy(x)
+			//   result = x;
+
+			var input = Declare<double>("input");
+			var output = Declare<double>("output");
+			var function = CompileFunction<Func<double, double>>(
+				input, output,
+				new Copy(output, input));
+
+			Assert.AreEqual(42.0, function(42));
+		}
+
+		[TestMethod]
 		public void TestParameterlessCall()
 		{
-			var output = Declare<MArray<double>>("output");
-			var function = CompileFunction<Func<MArray<double>>>(
+			var output = Declare<double>("output");
+			var function = CompileFunction<Func<double>>(
 				none, output,
-				new StaticCall(output, "eye", ImmutableArray.Empty));
+				new StaticCall(output, "Get42Scalar", ImmutableArray.Empty));
 
-			Assert.AreEqual(1.0, function().ToScalar());
+			Assert.AreEqual(42.0, function());
 		}
 
 		[TestMethod]
 		public void TestDoubleLiteral()
 		{
-			var output = Declare<MArray<double>>("output");
-			var function = CompileFunction<Func<MArray<double>>>(
+			var output = Declare<double>("output");
+			var function = CompileFunction<Func<double>>(
 				none, output,
 				new Literal(output, 42.0));
 
-			Assert.AreEqual(42.0, function().ToScalar());
+			Assert.AreEqual(42.0, function());
 		}
 
 		[TestMethod]
 		public void TestCharLiteral()
 		{
+			var output = Declare<char>("output");
+			var function = CompileFunction<Func<char>>(
+				none, output,
+				new Literal(output, "a"));
+
+			Assert.AreEqual('a', function());
+		}
+
+		[TestMethod]
+		public void TestStringLiteral()
+		{
 			var output = Declare<MArray<char>>("output");
 			var function = CompileFunction<Func<MArray<char>>>(
 				none, output,
-				new Literal(output, 'a'));
+				new Literal(output, "foobar"));
 
-			Assert.AreEqual('a', function().ToScalar());
+			Assert.AreEqual("foobar", PseudoBuiltins.CharArrayToString(function()));
 		}
 
 		[TestMethod]
 		public void TestParameterizedCall()
 		{
-			var lhsInput = Declare<MArray<double>>("lhs");
-			var rhsInput = Declare<MArray<double>>("rhs");
-			var output = Declare<MArray<double>>("output");
-			var function = CompileFunction<Func<MArray<double>, MArray<double>, MArray<double>>>(
-				new[] { lhsInput, rhsInput }, output,
-				new StaticCall(output, "plus", new[] { lhsInput, rhsInput }));
+			// function output = add(lhs, rhs)
+			//   output = AddDoubleScalars(lhs, rhs)
 
-			var arg1 = new MFullArray<double>(2, 1);
-			arg1[0] = 42;
-			arg1[1] = 666;
-			var result = function(arg1, MFullArray<double>.CreateScalar(1));
-			Assert.AreEqual(arg1.Shape, result.Shape);
-			Assert.AreEqual(43, result[0]);
-			Assert.AreEqual(667, result[1]);
+			var lhsInput = Declare<double>("lhs");
+			var rhsInput = Declare<double>("rhs");
+			var output = Declare<double>("output");
+			var function = CompileFunction<Func<double, double, double>>(
+				new[] { lhsInput, rhsInput }, output,
+				new StaticCall(output, "AddDoubleScalars", new[] { lhsInput, rhsInput }));
+
+			Assert.AreEqual(708.0, function(42, 666));
 		}
 
 		[TestMethod]
 		public void TestArrayLoad()
 		{
+			// function value = arrayload(array, index)
+			//   value = array(index)
+
 			var arrayInput = Declare<MArray<double>>("array");
 			var indexInput = Declare<MArray<double>>("index");
 			var valueOutput = Declare<MArray<double>>("value");
@@ -138,7 +154,7 @@ namespace McCli
 		[TestMethod]
 		public void TestArrayStore()
 		{
-			// function output = subsasgn(array, index, value)
+			// function output = arraystore(array, index, value)
 			//   array(index) = value;
 			//   output = array;
 			// end
@@ -168,43 +184,43 @@ namespace McCli
 			const double falseDouble = 666;
 
 			var input = Declare<MValue>("input");
-			var output = Declare<MArray<double>>("output");
-			var function = CompileFunction<Func<MValue, MArray<double>>>(
+			var output = Declare<double>("output");
+			var function = CompileFunction<Func<MValue, double>>(
 				input, output,
 				new If(input,
 					new Literal(output, trueDouble),
 					new Literal(output, falseDouble)));
 
-			Assert.AreEqual(trueDouble, function(MFullArray<double>.CreateScalar(1)).ToScalar());
-			Assert.AreEqual(falseDouble, function(MFullArray<double>.CreateScalar(0)).ToScalar());
-			Assert.AreEqual(falseDouble, function(MFullArray<double>.CreateRowVector(0, 0, 1, 0)).ToScalar());
-			Assert.AreEqual(trueDouble, function(MFullArray<double>.CreateRowVector(1, 1, 1, 1)).ToScalar());
+			Assert.AreEqual(trueDouble, function(MFullArray<double>.CreateScalar(1)));
+			Assert.AreEqual(falseDouble, function(MFullArray<double>.CreateScalar(0)));
+			Assert.AreEqual(falseDouble, function(MFullArray<double>.CreateRowVector(0, 0, 1, 0)));
+			Assert.AreEqual(trueDouble, function(MFullArray<double>.CreateRowVector(1, 1, 1, 1)));
 		}
 
 		[TestMethod]
 		public void TestWhile()
 		{
-			// function y = squareuntil100(x)
-			//   y = x;
-			//   while (y < 100) y *= x;
+			// function y = firstMultipleOver100(x)
+			//   y = x
+			//   while (y < 100) y *= xy;
 
-			var input = Declare<MArray<double>>("input");
-			var oneHundredConstant = Declare<MArray<double>>("100");
-			var output = Declare<MArray<double>>("output");
-			var conditionVariable = Declare<MArray<bool>>("condition");
-			var function = CompileFunction<Func<MArray<double>, MArray<double>>>(
+			var input = Declare<double>("input");
+			var oneHundredConstant = Declare<double>("100");
+			var output = Declare<double>("output");
+			var conditionVariable = Declare<bool>("condition");
+			var function = CompileFunction<Func<double, double>>(
 				input, output,
 				new Copy(output, input),
 				new Literal(oneHundredConstant, 100.0),
-				new StaticCall(conditionVariable, "lt", new[] { output, oneHundredConstant }),
-				new While(conditionVariable, 
-					new StaticCall(output, "times", new[] { output, input }),
-					new StaticCall(conditionVariable, "lt", new[] { output, oneHundredConstant })
+				new StaticCall(conditionVariable, "LessThanDoubleScalar", new[] { output, oneHundredConstant }),
+				new While(conditionVariable,
+					new StaticCall(output, "SquareDoubleScalar", output),
+					new StaticCall(conditionVariable, "LessThanDoubleScalar", new[] { output, oneHundredConstant })
 				));
 
-			Assert.AreEqual(125.0, function(MFullArray<double>.CreateScalar(5)).ToScalar());
-			Assert.AreEqual(100.0, function(MFullArray<double>.CreateScalar(10)).ToScalar());
-			Assert.AreEqual(101.0, function(MFullArray<double>.CreateScalar(101)).ToScalar());
+			Assert.AreEqual(256.0, function(2));
+			Assert.AreEqual(625.0, function(5));
+			Assert.AreEqual(100.0, function(10));
 		}
 
 		[TestMethod]
@@ -213,13 +229,16 @@ namespace McCli
 			// while (42) break;
 			// return 42;
 
-			var output = Declare<MArray<double>>("output");
-			var function = CompileFunction<Func<MArray<double>>>(
+			var output = Declare<double>("output");
+			var function = CompileFunction<Func<double>>(
 				none, output,
 				new Literal(output, 42.0),
-				new While(output, new Jump(JumpKind.Break)));
+				new While(output,
+					new Jump(JumpKind.Break),
+					new Literal(output, 666.0))
+				);
 
-			Assert.AreEqual(42.0, function().ToScalar());
+			Assert.AreEqual(42.0, function());
 		}
 
 		[TestMethod]
@@ -227,24 +246,28 @@ namespace McCli
 		{
 			// x = 42;
 			// while (x)
-			// {
-			//   while (x) break;
+			//   while (x)
+			//     break
+			//     x = 13
 			//   x = 666;
-			//   break;
-			// }
-			// return x;
+			//   break
+			//   x = 7
+			// return x
 
-			var output = Declare<MArray<double>>("output");
-			var function = CompileFunction<Func<MArray<double>>>(
+			var output = Declare<double>("output");
+			var function = CompileFunction<Func<double>>(
 				none, output,
 				new Literal(output, 42.0),
 				new While(output,
-					new While(output, new Jump(JumpKind.Break)),
-					new Literal(output, 666.0),
-					new Jump(JumpKind.Break)
+					new While(output,
+						new Jump(JumpKind.Break),
+						new Literal(output, 13)),
+					new Literal(output, 666),
+					new Jump(JumpKind.Break),
+					new Literal(output, 7)
 				));
 
-			Assert.AreEqual(666.0, function().ToScalar());
+			Assert.AreEqual(666.0, function());
 		}
 
 		[TestMethod]
@@ -257,33 +280,31 @@ namespace McCli
 			//     continue
 			//     output = 666
 
-			var output = Declare<MArray<double>>("output");
-			var constant = Declare<MArray<double>>("constant");
-			var condition = Declare<MArray<bool>>("condition");
-			var function = CompileFunction<Func<MArray<double>>>(
+			var output = Declare<double>("output");
+			var constant = Declare<double>("constant");
+			var condition = Declare<bool>("condition");
+			var function = CompileFunction<Func<double>>(
 				none, output,
 				new Literal(output, 1.0),
 				new Literal(constant, 5.0),
-				new StaticCall(condition, "lt", new[] { output, constant }),
+				new StaticCall(condition, "LessThanDoubleScalar", new[] { output, constant }),
 				new While(condition,
 					new Literal(output, 42.0),
-					new StaticCall(condition, "lt", new[] { output, constant }),
+					new StaticCall(condition, "LessThanDoubleScalar", new[] { output, constant }),
 					new Jump(JumpKind.Continue),
 					new Literal(output, 666.0)
 					));
 
-			Assert.AreEqual(42.0, function().ToScalar());
+			Assert.AreEqual(42.0, function());
 		}
 
 		[TestMethod]
 		public void TestForLoop()
 		{
-			// function result = factorial(n)
-			//   result = 1;
+			// function result = repeatedsquare(n)
+			//   result = 2;
 			//   for i = 1:n
-			//   {
-			//     result = result * i;
-			//   }
+			//     result = SquareDoubleScalar(result)
 			//   return result;
 
 			var input = Declare<MArray<double>>("input");
@@ -293,16 +314,16 @@ namespace McCli
 
 			var function = CompileFunction<Func<MArray<double>, MArray<double>>>(
 				input, output,
-				new Literal(output, 1.0),
+				new Literal(output, 2.0),
 				new Literal(oneConstant, 1.0),
 				new RangeFor(iteratorVariable, oneConstant, null, input,
-					new StaticCall(output, "times", new[] { output, iteratorVariable })
+					new StaticCall(output, "SquareDoubleScalar", output)
 				));
 
-			Assert.AreEqual(1.0, function(MFullArray<double>.CreateScalar(0)).ToScalar());
-			Assert.AreEqual(1.0, function(MFullArray<double>.CreateScalar(1)).ToScalar());
-			Assert.AreEqual(2.0, function(MFullArray<double>.CreateScalar(2)).ToScalar());
-			Assert.AreEqual(120.0, function(MFullArray<double>.CreateScalar(5)).ToScalar());
+			Assert.AreEqual(2.0, function(0).ToScalar());
+			Assert.AreEqual(4.0, function(1).ToScalar());
+			Assert.AreEqual(16.0, function(2).ToScalar());
+			Assert.AreEqual(256.0, function(3).ToScalar());
 		}
 
 		[TestMethod]
@@ -364,15 +385,15 @@ namespace McCli
 		[TestMethod]
 		public void TestInout()
 		{
-			// function x = twice(x)
-			//   x = x + x
+			// function x = square(x)
+			//   x *= x
 
-			var variable = Declare<MArray<double>>("x");
-			var function = CompileFunction<Func<MArray<double>, MArray<double>>>(
+			var variable = Declare<double>("x");
+			var function = CompileFunction<Func<double, double>>(
 				variable, variable,
-				new StaticCall(variable, "plus", new[] { variable, variable }));
+				new StaticCall(variable, "SquareDoubleScalar", variable));
 
-			Assert.AreEqual(6.0, function(3).ToScalar());
+			Assert.AreEqual(9.0, function(3));
 		}
 	}
 }

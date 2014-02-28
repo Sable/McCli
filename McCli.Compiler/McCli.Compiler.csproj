@@ -82,6 +82,7 @@
     <Compile Include="FunctionTable.cs" />
     <Compile Include="IR\CompilationUnit.cs" />
     <Compile Include="IR\Copy.cs" />
+    <Compile Include="IR\LiteralType.cs" />
     <Compile Include="IR\RangeFor.cs" />
     <Compile Include="IR\Jump.cs" />
     <Compile Include="IR\JumpKind.cs" />

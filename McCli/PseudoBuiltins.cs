@@ -79,14 +79,21 @@ namespace McCli
 			throw new NotImplementedException();
 		}
 
-		public static string ToString(MFullArray<char> array)
+		public static string CharArrayToString(MArray<char> array)
 		{
 			Contract.Requires(array != null);
 
 			var shape = array.Shape;
 			if (!shape.IsRowVector) throw new MArrayShapeException();
 
-			return new string(array.BackingArray, 0, shape.ColumnCount);
+			// TODO: Don't assume a full array
+			return new string(((MFullArray<char>)array).BackingArray, 0, shape.ColumnCount);
+		}
+
+		public static MFullArray<char> StringToCharArray(string str)
+		{
+			Contract.Requires(str != null);
+			return MFullArray<char>.CreateRowVector(str.ToCharArray());
 		}
 
 		#region For Loops

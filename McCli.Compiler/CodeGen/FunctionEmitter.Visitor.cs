@@ -29,14 +29,24 @@ namespace McCli.Compiler.CodeGen
 					cil.LoadFloat64((double)node.Value);
 					sourceRepr = MClass.Double.ScalarRepr;
 				}
-				else if (node.Value is char)
+				else if (node.Value is string)
 				{
-					cil.LoadInt32((int)(char)node.Value);
-					sourceRepr = MClass.Char.ScalarRepr;
+					var str = (string)node.Value;
+					if (str.Length == 1)
+					{
+						cil.LoadInt32((int)str[0]);
+						sourceRepr = MClass.Char.ScalarRepr;
+					}
+					else
+					{
+						cil.LoadString(str);
+						cil.Call(typeof(PseudoBuiltins).GetMethod("StringToCharArray"));
+						sourceRepr = MClass.Char.FullArrayRepr;
+					}
 				}
 				else
 				{
-					throw new NotImplementedException();
+					throw new NotImplementedException("Literals of type " + node.Value.GetType());
 				}
 
 				EmitConversion(sourceRepr, node.Target.StaticRepr);

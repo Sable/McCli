@@ -6,7 +6,7 @@ using System.Diagnostics;
 namespace McCli
 {
 	[TestClass]
-	public class TestArrays
+	public class ArraysTests
 	{
 		[TestMethod]
 		public void TestBasicIndexing()

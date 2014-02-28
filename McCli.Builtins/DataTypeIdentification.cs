@@ -25,7 +25,7 @@ namespace McCli.Builtins
 			Contract.Requires(className != null);
 
 			var @class = value.Class;
-			var classNameString = PseudoBuiltins.ToString(className);
+			var classNameString = PseudoBuiltins.CharArrayToString(className);
 			if (@class.Name == classNameString) return true;
 
 			// "categories"
