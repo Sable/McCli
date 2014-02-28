@@ -78,5 +78,35 @@ namespace McCli.Compiler
 			get { return outputs.Count >= 2 ? outputs.Count : 0; }
 		}
 		#endregion
+
+		#region Methods
+		public override string ToString()
+		{
+			var stringBuilder = new StringBuilder();
+
+			stringBuilder.Append('(');
+			bool needsComma = false;
+			foreach (var input in inputs)
+			{
+				if (needsComma) stringBuilder.Append(", ");
+				stringBuilder.Append(input);
+				needsComma = true;
+			}
+
+			if (OutParameterCount > 0)
+			{
+				foreach (var output in outputs)
+				{
+					if (needsComma) stringBuilder.Append(", ");
+					stringBuilder.Append("out ").Append(output);
+					needsComma = true;
+				}
+			}
+
+			stringBuilder.Append(") -> ").Append(HasReturnValue ? outputs[0].ToString() : "()");
+
+			return stringBuilder.ToString();
+		}
+		#endregion
 	}
 }

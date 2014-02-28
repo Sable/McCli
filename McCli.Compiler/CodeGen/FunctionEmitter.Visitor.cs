@@ -58,22 +58,59 @@ namespace McCli.Compiler.CodeGen
 
 		public override void VisitStaticCall(StaticCall node)
 		{
-			Contract.Assert(node.Targets.Length == 1);
-
+			// Resolve the function
 			var argumentTypes = node.Arguments.Select(a => a.StaticRepr);
 			var function = functionLookup(node.FunctionName, argumentTypes);
+			var signature = function.Signature;
+			Contract.Assert(node.Arguments.Length == signature.Inputs.Count);
+			Contract.Assert(node.Targets.Length <= signature.Outputs.Count);
 
-			using (BeginEmitStore(node.Targets[0]))
+			// Prepare the eventual return value store
+			if (signature.HasReturnValue && node.Targets.Length == 1)
+				BeginEmitStore(node.Targets[0]);
+			
+			// Push the input arguments
+			for (int i = 0; i < node.Arguments.Length; ++i)
 			{
-				for (int i = 0; i < node.Arguments.Length; ++i)
-				{
-					var argument = node.Arguments[i];
-					EmitLoad(argument);
-					EmitConversion(argument.StaticRepr, function.InputReprs[i]);
-				}
+				var argument = node.Arguments[i];
+				EmitLoad(argument);
+				EmitConversion(argument.StaticRepr, signature.Inputs[i]);
+			}
 
-				cil.Call(function.Method);
-				EmitConversion(function.OutputRepr, node.Targets[0].StaticRepr);
+			if (signature.OutParameterCount > 0)
+			{
+				// Push the pointers to the output arguments
+				for (int i = 0; i < signature.Outputs.Count; ++i)
+				{
+					if (i < node.Targets.Length)
+					{
+						// TODO: Handle byref targets
+						cil.LoadAddress(GetLocalLocation(node.Targets[i]));
+					}
+					else
+					{
+						throw new NotImplementedException("Ignored outputs of a multi-output function.");
+					}
+				}
+			}
+
+			// Call the function
+			cil.Call(function.Method);
+
+			// Handle the return value, if any
+			if (signature.HasReturnValue)
+			{
+				if (node.Targets.Length == 1)
+				{
+					EmitConversion(signature.Outputs[0], node.Targets[0].StaticRepr);
+					EndEmitStore(node.Targets[0]);
+				}
+				else
+				{
+					// Return value ignored.
+					Contract.Assert(node.Targets.Length == 0);
+					cil.Pop();
+				}
 			}
 		}
 
@@ -87,11 +124,10 @@ namespace McCli.Compiler.CodeGen
 
 			using (BeginEmitStore(target))
 			{
-				EmitLoad(node.Subject);
-
 				if (node.Arguments.Length == 0)
 				{
 					// "foo = array()", same as "foo = array"
+					EmitLoad(node.Subject);
 					EmitCloneIfNeeded(node.Subject.StaticRepr);
 				}
 				else
@@ -102,12 +138,14 @@ namespace McCli.Compiler.CodeGen
 						method = method.MakeGenericMethod(subjectType.Type.CliType);
 
 					var arrayType = subjectType.WithStructuralClass(MStructuralClass.Array);
+
+					EmitLoad(node.Subject);
 					EmitConversion(subjectType, arrayType);
 
 					foreach (var argument in node.Arguments)
 					{
 						EmitLoad(argument);
-						EmitConversion(argument.StaticRepr, arrayType);
+						EmitConversion(argument.StaticRepr, MClass.Double.ArrayRepr);
 					}
 
 					cil.Call(method);

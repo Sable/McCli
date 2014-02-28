@@ -56,6 +56,7 @@ namespace McCli.Compiler.CodeGen
 
 			this.function = function;
 			this.functionLookup = functionLookup;
+			var signature = new FunctionSignature(function.Inputs.Select(i => i.StaticRepr), function.Outputs.Select(o => o.StaticRepr));
 
 			// Determine the method signature
 			var parameterDescriptors = new List<ParameterDescriptor>();
@@ -94,8 +95,7 @@ namespace McCli.Compiler.CodeGen
 			// Create the method and get its IL generator
 			ILGenerator ilGenerator;
 			var methodInfo = methodFactory(function.Name, parameterDescriptors, outputType, out ilGenerator);
-
-			this.method = new FunctionMethod(methodInfo, parameterDescriptors.Select(i => i.Type).ToArray(), outputType);
+			this.method = new FunctionMethod(methodInfo, signature);
 
 			cil = new ILGeneratorMethodBodyWriter(ilGenerator);
 			temporaryPool = new TemporaryLocalPool(cil, "$temp");

@@ -12,8 +12,7 @@ namespace McCli.Compiler
 	{
 		#region Fields
 		private readonly MethodInfo method;
-		private readonly ImmutableArray<MRepr> inputReprs;
-		private readonly MRepr outputType;
+		private readonly FunctionSignature signature;
 		#endregion
 
 		#region Constructors
@@ -22,19 +21,16 @@ namespace McCli.Compiler
 			Contract.Requires(method != null);
 
 			this.method = method;
-			inputReprs = method.GetParameters().Select(p => MRepr.FromCliType(p.ParameterType)).ToImmutableArray();
-			outputType = MRepr.FromCliType(method.ReturnType);
+			this.signature = new FunctionSignature(method.GetParameters(), method.ReturnType);
 		}
 
-		public FunctionMethod(MethodInfo method, Type[] inputTypes, Type returnType)
+		public FunctionMethod(MethodInfo method, FunctionSignature signature)
 		{
 			Contract.Requires(method != null);
-			Contract.Requires(inputTypes != null);
-			Contract.Requires(returnType != null);
+			Contract.Requires(signature != null);
 
 			this.method = method;
-			inputReprs = inputTypes.Select(t => MRepr.FromCliType(t)).ToImmutableArray();
-			outputType = MRepr.FromCliType(returnType);
+			this.signature = signature;
 		}
 		#endregion
 
@@ -49,32 +45,16 @@ namespace McCli.Compiler
 			get { return method; }
 		}
 
-		public ImmutableArray<MRepr> InputReprs
+		public FunctionSignature Signature
 		{
-			get { return inputReprs; }
-		}
-
-		public MRepr OutputRepr
-		{
-			get { return outputType; }
+			get { return signature; }
 		}
 		#endregion
 
 		#region Methods
 		public override string ToString()
 		{
-			var stringBuilder = new StringBuilder();
-
-			stringBuilder.Append(method.Name).Append(" : (");
-			for (int i = 0; i < inputReprs.Length; ++i)
-			{
-				if (i > 0) stringBuilder.Append(", ");
-				stringBuilder.Append(inputReprs[i]);
-			}
-
-			stringBuilder.Append(") -> ").Append(outputType);
-
-			return stringBuilder.ToString();
+			return string.Format("{0} : {1}", method.Name, signature);
 		}
 		#endregion
 	}
