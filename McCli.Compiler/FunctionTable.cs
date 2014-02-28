@@ -11,6 +11,7 @@ namespace McCli.Compiler
 {
 	public sealed class FunctionTable
 	{
+		#region GroupKey
 		private struct GroupKey : IEquatable<GroupKey>
 		{
 			public readonly string Name;
@@ -37,6 +38,7 @@ namespace McCli.Compiler
 				return Name.GetHashCode() ^ InputArity;
 			}
 		}
+		#endregion
 
 		#region Fields
 		private readonly Dictionary<GroupKey, FunctionMethod> functions = new Dictionary<GroupKey, FunctionMethod>();
@@ -73,12 +75,18 @@ namespace McCli.Compiler
 			}
 
 			// TODO: Support variadic arguments
-			// TODO: Support multiple return parameters
 			// TODO: Support variadic return parameters
 			// TODO: Support overloading
-			var key = new GroupKey(method.Name, method.GetParameters().Length);
-			var functionInfo = new FunctionMethod(method);
-			functions.Add(key, functionInfo);
+			var function = new FunctionMethod(method);
+			AddFunction(function);
+		}
+
+		public void AddFunction(FunctionMethod function)
+		{
+			Contract.Requires(function != null);
+
+			var key = new GroupKey(function.Name, function.Signature.Inputs.Count);
+			functions.Add(key, function);
 		}
 
 		public FunctionMethod Lookup(string name, ImmutableArray<MRepr> argumentTypes)

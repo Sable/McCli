@@ -383,7 +383,7 @@ namespace McCli
 		}
 
 		[TestMethod]
-		public void TestInout()
+		public void TestInoutParameter()
 		{
 			// function x = square(x)
 			//   x *= x
@@ -394,6 +394,42 @@ namespace McCli
 				new StaticCall(variable, "SquareDoubleScalar", variable));
 
 			Assert.AreEqual(9.0, function(3));
+		}
+
+		[TestMethod]
+		public void TestCallVoidReturningFunction()
+		{
+			// function x = square()
+			//   x = 42
+			//   ConsumeDouble(x)
+
+			var variable = Declare<double>("x");
+			var function = CompileFunction<Func<double>>(
+				none, variable,
+				new Literal(variable, 42),
+				new StaticCall(none, "ConsumeDoubleScalar", variable));
+
+			Assert.AreEqual(42.0, function());
+		}
+
+		[TestMethod]
+		public void TestCallTwoOutputFunction()
+		{
+			// function [out1, out2] = swap(in1, in2)
+			//   [out1, out2] = SwapDoubleScalars(in1, in2)
+
+			var input1 = Declare<double>("input1");
+			var input2 = Declare<double>("input2");
+			var output1 = Declare<double>("output1");
+			var output2 = Declare<double>("output2");
+			var function = CompileFunction<In2Out2<double, double, double, double>>(
+				new[] { input1, input2 }, new[] { output1, output2 },
+				new StaticCall(new[] { output1, output2 }, "SwapDoubleScalars", new[] { input1, input2 }));
+
+			double result1, result2;
+			function(42, 666, out result1, out result2);
+			Assert.AreEqual(666.0, result1);
+			Assert.AreEqual(42.0, result2);
 		}
 	}
 }

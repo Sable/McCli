@@ -47,5 +47,13 @@ namespace McCli
 		{
 			return lhs < rhs;
 		}
+
+		public static void ConsumeDoubleScalar(double value) { }
+
+		public static void SwapDoubleScalars(double in1, double in2, out double out1, out double out2)
+		{
+			out1 = in2;
+			out2 = in1;
+		}
 	}
 }

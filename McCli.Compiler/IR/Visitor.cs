@@ -12,16 +12,16 @@ namespace McCli.Compiler.IR
 	public abstract class Visitor
 	{
 		// Concrete classes
-		public virtual void VisitCopy(Copy node) { VisitExpression((Expression)node); }
-		public virtual void VisitFor(RangeFor node) { VisitNode((ControlFlow)node); }
-		public virtual void VisitFunction(Function node) { VisitNode((Node)node); }
-		public virtual void VisitIf(If node) { VisitNode((ControlFlow)node); }
-		public virtual void VisitJump(Jump node) { VisitNode((ControlFlow)node); }
-		public virtual void VisitLiteral(Literal node) { VisitExpression((Expression)node); }
-		public virtual void VisitLoadParenthesized(LoadParenthesized node) { VisitExpression((Expression)node); }
-		public virtual void VisitStaticCall(StaticCall node) { VisitExpression((Expression)node); }
-		public virtual void VisitStoreParenthesized(StoreParenthesized node) { VisitExpression((Expression)node); }
-		public virtual void VisitWhile(While node) { VisitNode((ControlFlow)node); }
+		public virtual void VisitCopy(Copy node) { VisitExpression(node); }
+		public virtual void VisitFor(RangeFor node) { VisitControlFlow(node); }
+		public virtual void VisitFunction(Function node) { VisitNode(node); }
+		public virtual void VisitIf(If node) { VisitControlFlow(node); }
+		public virtual void VisitJump(Jump node) { VisitControlFlow(node); }
+		public virtual void VisitLiteral(Literal node) { VisitExpression(node); }
+		public virtual void VisitLoadParenthesized(LoadParenthesized node) { VisitExpression(node); }
+		public virtual void VisitStaticCall(StaticCall node) { VisitExpression(node); }
+		public virtual void VisitStoreParenthesized(StoreParenthesized node) { VisitExpression(node); }
+		public virtual void VisitWhile(While node) { VisitControlFlow(node); }
 
 		// Intermediate/categorization abstract base classes
 		public virtual void VisitControlFlow(ControlFlow node) { VisitNode((Node)node); }
