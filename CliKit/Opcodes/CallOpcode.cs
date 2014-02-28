@@ -7,6 +7,9 @@ using Emit = System.Reflection.Emit;
 
 namespace CliKit
 {
+	/// <summary>
+	/// Represents CLI opcodes performing calls (early bound, virtual, constructor or jump).
+	/// </summary>
 	public sealed class CallOpcode : Opcode
 	{
 		#region Constructors
@@ -28,6 +31,13 @@ namespace CliKit
 					default: throw new InvalidOperationException();
 				}
 			}
+		}
+		#endregion
+
+		#region Methods
+		public override void Accept<T>(OpcodeVisitor<T> visitor, T param)
+		{
+			visitor.VisitCall(this, param);
 		}
 		#endregion
 	}

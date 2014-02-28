@@ -27,5 +27,12 @@ namespace CliKit
 			get { return opcode.StackBehaviourPop == Emit.StackBehaviour.Pop0; }
 		}
 		#endregion
+
+		#region Methods
+		public override void Accept<T>(OpcodeVisitor<T> visitor, T param)
+		{
+			visitor.VisitFieldReference(this, param);
+		}
+		#endregion
 	}
 }

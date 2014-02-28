@@ -8,7 +8,7 @@ using Emit = System.Reflection.Emit;
 namespace CliKit
 {
 	/// <summary>
-	/// An opcode that refers to a variable
+	/// Represents CIL opcodes that refers to a local variable or argument.
 	/// </summary>
 	public sealed class VariableReferenceOpcode : Opcode
 	{
@@ -53,6 +53,10 @@ namespace CliKit
 		#endregion
 
 		#region Methods
+		public override void Accept<T>(OpcodeVisitor<T> visitor, T param)
+		{
+			visitor.VisitVariableReference(this, param);
+		}
 		#endregion
 	}
 }

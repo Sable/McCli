@@ -28,5 +28,12 @@ namespace CliKit
 			get { throw new NotImplementedException(); }
 		}
 		#endregion
+
+		#region Methods
+		public override void Accept<T>(OpcodeVisitor<T> visitor, T param)
+		{
+			visitor.VisitIndirectReference(this, param);
+		}
+		#endregion
 	}
 }

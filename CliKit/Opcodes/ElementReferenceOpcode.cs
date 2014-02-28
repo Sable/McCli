@@ -43,5 +43,12 @@ namespace CliKit
 			get { return dataType; }
 		}
 		#endregion
+
+		#region Methods
+		public override void Accept<T>(OpcodeVisitor<T> visitor, T param)
+		{
+			visitor.VisitElementReference(this, param);
+		}
+		#endregion
 	}
 }

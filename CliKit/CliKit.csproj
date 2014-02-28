@@ -97,6 +97,7 @@
     <Compile Include="Conversion.cs" />
     <Compile Include="Opcodes\ConversionOpcode.cs" />
     <Compile Include="NumericalOperand.cs" />
+    <Compile Include="Opcodes\OpcodeVisitor.cs" />
     <Compile Include="ReflectionEmitEnums.cs" />
     <Compile Include="LocationReferenceKind.cs" />
     <Compile Include="IO\ILGeneratorExtensions.cs" />

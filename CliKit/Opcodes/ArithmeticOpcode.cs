@@ -7,6 +7,9 @@ using Emit = System.Reflection.Emit;
 
 namespace CliKit
 {
+	/// <summary>
+	/// Represents opcode which perform arithmetic operations.
+	/// </summary>
 	public sealed class ArithmeticOpcode : Opcode
 	{
 		#region Fields
@@ -50,6 +53,13 @@ namespace CliKit
 		public bool IsValidOnFloats
 		{
 			get { return operation.IsValidOnFloats(); }
+		}
+		#endregion
+
+		#region Methods
+		public override void Accept<T>(OpcodeVisitor<T> visitor, T param)
+		{
+			visitor.VisitArithmetic(this, param);
 		}
 		#endregion
 	}

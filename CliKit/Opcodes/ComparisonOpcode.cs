@@ -7,6 +7,9 @@ using Emit = System.Reflection.Emit;
 
 namespace CliKit
 {
+	/// <summary>
+	/// Represents IL opcodes which compare two values.
+	/// </summary>
 	public sealed class ComparisonOpcode : Opcode
 	{
 		#region Fields
@@ -24,6 +27,13 @@ namespace CliKit
 		public Comparison Comparison
 		{
 			get { return comparison; }
+		}
+		#endregion
+
+		#region Methods
+		public override void Accept<T>(OpcodeVisitor<T> visitor, T param)
+		{
+			visitor.VisitComparison(this, param);
 		}
 		#endregion
 	}

@@ -67,6 +67,11 @@ namespace CliKit
 			verifiable = false;
 			return false;
 		}
+
+		public override void Accept<T>(OpcodeVisitor<T> visitor, T param)
+		{
+			visitor.VisitConversion(this, param);
+		}
 		#endregion
 	}
 }

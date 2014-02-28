@@ -1,6 +1,6 @@
 arglist
 box
-break
+break*
 castclass*
 ckfinite
 constrained.
@@ -14,11 +14,8 @@ initobj
 isinst
 ldftn
 ldlen*
-ldobj
 ldtoken
 ldvirtftn
-leave
-leave.s
 localloc
 mkrefany
 newarr
@@ -38,8 +35,6 @@ refanyval
 ret*
 rethrow
 sizeof
-stobj
-switch
 tail.
 throw
 unaligned.

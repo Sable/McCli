@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -34,11 +35,15 @@ namespace CliKit
 			{
 				switch (opcode.StackBehaviourPop)
 				{
-					case Emit.StackBehaviour.Pop0: return CliKit.BranchKind.Unconditional;
-					case Emit.StackBehaviour.Popi: return CliKit.BranchKind.Boolean;
-					case Emit.StackBehaviour.Pop1_pop1: return CliKit.BranchKind.Comparison;
-					default: throw new NotImplementedException();
+					case Emit.StackBehaviour.Pop0: return BranchKind.Unconditional;
+					case Emit.StackBehaviour.Popi: return BranchKind.Boolean;
+					case Emit.StackBehaviour.Pop1_pop1: return BranchKind.Comparison;
+					default: break;
 				}
+
+				if (opcode.Value == 0x45) return BranchKind.Switch;
+				if (opcode.Value == 0xDD || opcode.Value == 0xDE) return BranchKind.Leave;
+				throw new NotImplementedException();
 			}
 		}
 
@@ -63,6 +68,13 @@ namespace CliKit
 		public bool IsShortForm
 		{
 			get { return opcode.OperandType == Emit.OperandType.ShortInlineBrTarget; }
+		}
+		#endregion
+
+		#region Methods
+		public override void Accept<T>(OpcodeVisitor<T> visitor, T param)
+		{
+			visitor.VisitBranch(this, param);
 		}
 		#endregion
 	}

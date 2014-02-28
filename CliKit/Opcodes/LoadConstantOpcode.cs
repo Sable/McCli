@@ -7,6 +7,9 @@ using Emit = System.Reflection.Emit;
 
 namespace CliKit
 {
+	/// <summary>
+	/// Represents CIL opcodes which load constant values.
+	/// </summary>
 	public sealed class LoadConstantOpcode : Opcode
 	{
 		#region Fields
@@ -65,6 +68,10 @@ namespace CliKit
 		#endregion
 
 		#region Methods
+		public override void Accept<T>(OpcodeVisitor<T> visitor, T param)
+		{
+			visitor.VisitLoadConstant(this, param);
+		}
 		#endregion
 	}
 }

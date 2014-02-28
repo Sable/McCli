@@ -171,6 +171,18 @@ namespace CliKit
 			opCode = this.opcode;
 		}
 
+		/// <summary>
+		/// Calls a visitor's visit method for the runtime type of this opcode.
+		/// </summary>
+		/// <typeparam name="T">The visitor parameter type.</typeparam>
+		/// <param name="visitor">The visitor.</param>
+		/// <param name="param">The parameter to be provided to the visitor's visit method.</param>
+		public virtual void Accept<T>(OpcodeVisitor<T> visitor, T param)
+		{
+			Contract.Requires(visitor != null);
+			visitor.VisitOther(this, param);
+		}
+
 		public override string ToString()
 		{
 			return Name;
@@ -206,6 +218,7 @@ namespace CliKit
 		public static readonly BranchOpcode Bne_Un_S = new BranchOpcode(OpCodes.Bne_Un_S, Comparison.NotEqual_Unsigned);
 		public static readonly BranchOpcode Br = new BranchOpcode(OpCodes.Br);
 		public static readonly BranchOpcode Br_S = new BranchOpcode(OpCodes.Br_S);
+		public static readonly Opcode Break = new Opcode(OpCodes.Break);
 		public static readonly BranchOpcode Brfalse = new BranchOpcode(OpCodes.Brfalse);
 		public static readonly BranchOpcode Brfalse_S = new BranchOpcode(OpCodes.Brfalse_S);
 		public static readonly BranchOpcode Brtrue = new BranchOpcode(OpCodes.Brtrue);
@@ -320,6 +333,8 @@ namespace CliKit
 		public static readonly FieldReferenceOpcode Ldsflda = new FieldReferenceOpcode(OpCodes.Ldsflda);
 		public static readonly LoadConstantOpcode Ldstr = new LoadConstantOpcode(OpCodes.Ldstr);
 		public static readonly Opcode Ldtoken = new Opcode(OpCodes.Ldtoken);
+		public static readonly BranchOpcode Leave = new BranchOpcode(OpCodes.Leave);
+		public static readonly BranchOpcode Leave_S = new BranchOpcode(OpCodes.Leave_S);
 		public static readonly ArithmeticOpcode Mul = new ArithmeticOpcode(OpCodes.Mul, ArithmeticOperation.Multiplication);
 		public static readonly ArithmeticOpcode Mul_Ovf = new ArithmeticOpcode(OpCodes.Mul_Ovf, ArithmeticOperation.Multiplication_OverflowCheck);
 		public static readonly ArithmeticOpcode Mul_Ovf_Un = new ArithmeticOpcode(OpCodes.Mul_Ovf_Un, ArithmeticOperation.Multiplication_UnsignedWithOverflowCheck);
@@ -362,6 +377,7 @@ namespace CliKit
 		public static readonly ArithmeticOpcode Sub = new ArithmeticOpcode(OpCodes.Sub, ArithmeticOperation.Subtraction);
 		public static readonly ArithmeticOpcode Sub_Ovf = new ArithmeticOpcode(OpCodes.Sub_Ovf, ArithmeticOperation.Subtraction_OverflowCheck);
 		public static readonly ArithmeticOpcode Sub_Ovf_Un = new ArithmeticOpcode(OpCodes.Sub_Ovf_Un, ArithmeticOperation.Subtraction_UnsignedWithOverflowCheck);
+		public static readonly BranchOpcode Switch = new BranchOpcode(OpCodes.Switch);
 		public static readonly ArithmeticOpcode Xor = new ArithmeticOpcode(OpCodes.Xor, ArithmeticOperation.BitwiseXor);
 		#endregion
 
