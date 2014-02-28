@@ -1,7 +1,5 @@
 arglist
-box
 break*
-castclass*
 ckfinite
 constrained.
 cpblk
@@ -11,7 +9,6 @@ endfilter
 endfinally
 initblk
 initobj
-isinst
 ldftn
 ldlen*
 ldtoken
@@ -38,6 +35,4 @@ sizeof
 tail.
 throw
 unaligned.
-unbox
-unbox.any
 volatile.

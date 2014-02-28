@@ -15,6 +15,7 @@ namespace CliKit
 		public virtual void VisitArithmetic(ArithmeticOpcode opcode, T param) { VisitFallback(opcode, param); }
 		public virtual void VisitBranch(BranchOpcode opcode, T param) { VisitFallback(opcode, param); }
 		public virtual void VisitCall(CallOpcode opcode, T param) { VisitFallback(opcode, param); }
+		public virtual void VisitCast(CastOpcode opcode, T param) { VisitFallback(opcode, param); }
 		public virtual void VisitComparison(ComparisonOpcode opcode, T param) { VisitFallback(opcode, param); }
 		public virtual void VisitConversion(ConversionOpcode opcode, T param) { VisitFallback(opcode, param); }
 		public virtual void VisitElementReference(ElementReferenceOpcode opcode, T param) { VisitFallback(opcode, param); }

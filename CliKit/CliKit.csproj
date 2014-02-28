@@ -72,6 +72,7 @@
     <Compile Include="ArithmeticOperation.cs" />
     <Compile Include="BranchKind.cs" />
     <Compile Include="CallKind.cs" />
+    <Compile Include="CastKind.cs" />
     <Compile Include="Comparison.cs" />
     <Compile Include="Conversions.cs" />
     <Compile Include="IO\ILAsmMethodBodyWriter.cs" />
@@ -95,9 +96,12 @@
     <Compile Include="MetadataToken.cs" />
     <Compile Include="MetadataTokenKind.cs" />
     <Compile Include="Conversion.cs" />
+    <Compile Include="Opcode.Definitions.cs" />
     <Compile Include="Opcodes\ConversionOpcode.cs" />
     <Compile Include="NumericalOperand.cs" />
     <Compile Include="Opcodes\OpcodeVisitor.cs" />
+    <Compile Include="Opcodes\CastOpcode.cs" />
+    <Compile Include="OpcodeValue.cs" />
     <Compile Include="ReflectionEmitEnums.cs" />
     <Compile Include="LocationReferenceKind.cs" />
     <Compile Include="IO\ILGeneratorExtensions.cs" />
