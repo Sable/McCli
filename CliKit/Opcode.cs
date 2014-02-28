@@ -151,7 +151,29 @@ namespace CliKit
 		public virtual void Accept<T>(OpcodeVisitor<T> visitor, T param)
 		{
 			Contract.Requires(visitor != null);
-			visitor.VisitOther(this, param);
+
+			switch (Value)
+			{
+				case OpcodeValue.Break: visitor.VisitBreak(param); break;
+				case OpcodeValue.Nop: visitor.VisitNop(param); break;
+				case OpcodeValue.Sizeof: visitor.VisitSizeof(param); break;
+				case OpcodeValue.Ret: visitor.VisitReturn(param); break;
+
+				case OpcodeValue.Throw:
+				case OpcodeValue.Rethrow:
+					visitor.VisitThrowOrRethrow(this, param);
+					break;
+
+				case OpcodeValue.Pop:
+				case OpcodeValue.Dup:
+					visitor.VisitPopOrDup(this, param);
+					break;
+
+
+				default:
+					visitor.VisitOther(this, param);
+					break;
+			}
 		}
 
 		public override string ToString()

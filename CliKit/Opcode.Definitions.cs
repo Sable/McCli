@@ -168,9 +168,11 @@ namespace CliKit
 		public static readonly ArithmeticOpcode Rem = new ArithmeticOpcode(OpCodes.Rem, ArithmeticOperation.Remainder);
 		public static readonly ArithmeticOpcode Rem_Un = new ArithmeticOpcode(OpCodes.Rem_Un, ArithmeticOperation.Remainder_Unsigned);
 		public static readonly Opcode Ret = new Opcode(OpCodes.Ret);
+		public static readonly Opcode Rethrow = new Opcode(OpCodes.Rethrow);
 		public static readonly ArithmeticOpcode Shl = new ArithmeticOpcode(OpCodes.Shl, ArithmeticOperation.BitShiftLeft);
 		public static readonly ArithmeticOpcode Shr = new ArithmeticOpcode(OpCodes.Shr, ArithmeticOperation.BitShiftRight);
 		public static readonly ArithmeticOpcode Shr_Un = new ArithmeticOpcode(OpCodes.Shr_Un, ArithmeticOperation.BitShiftRight_Unsigned);
+		public static readonly Opcode Sizeof = new Opcode(OpCodes.Sizeof);
 		public static readonly VariableReferenceOpcode Starg = new VariableReferenceOpcode(OpCodes.Starg);
 		public static readonly VariableReferenceOpcode Starg_S = new VariableReferenceOpcode(OpCodes.Starg_S);
 		public static readonly ElementReferenceOpcode Stelem = new ElementReferenceOpcode(OpCodes.Stelem);
@@ -199,6 +201,7 @@ namespace CliKit
 		public static readonly ArithmeticOpcode Sub_Ovf = new ArithmeticOpcode(OpCodes.Sub_Ovf, ArithmeticOperation.Subtraction_OverflowCheck);
 		public static readonly ArithmeticOpcode Sub_Ovf_Un = new ArithmeticOpcode(OpCodes.Sub_Ovf_Un, ArithmeticOperation.Subtraction_UnsignedWithOverflowCheck);
 		public static readonly BranchOpcode Switch = new BranchOpcode(OpCodes.Switch);
+		public static readonly Opcode Throw = new Opcode(OpCodes.Throw);
 		public static readonly CastOpcode Unbox = new CastOpcode(OpCodes.Unbox);
 		public static readonly CastOpcode Unbox_Any = new CastOpcode(OpCodes.Unbox_Any);
 		public static readonly ArithmeticOpcode Xor = new ArithmeticOpcode(OpCodes.Xor, ArithmeticOperation.BitwiseXor);

@@ -9,6 +9,7 @@ namespace CliKit
 {
 	/// <summary>
 	/// Represents CIL opcodes for type casting and testing, boxing and unboxing.
+	/// All opcodes of this class take type tokens as inline operands.
 	/// </summary>
 	public sealed class CastOpcode : Opcode
 	{
