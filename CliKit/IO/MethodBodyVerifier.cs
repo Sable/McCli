@@ -13,8 +13,9 @@ namespace CliKit.IO
 	/// <summary>
 	/// Performs CIL verification of an method bodies.
 	/// </summary>
-	public abstract class MethodBodyVerifier : MethodBodyWriter
+	public sealed partial class MethodBodyVerifier : MethodBodyWriter
 	{
+		#region Structures
 		private struct StackEntry
 		{
 			public readonly DataType DataType;
@@ -40,6 +41,7 @@ namespace CliKit.IO
 			public StackEntry[] StackState;
 			public bool Marked;
 		}
+		#endregion
 
 		#region Fields
 		private readonly MethodBase method;
@@ -118,8 +120,12 @@ namespace CliKit.IO
 				case BranchKind.Unconditional: break;
 
 				// TODO: Check operand types
-				case BranchKind.Boolean: PopStack(); break;
-				case BranchKind.Comparison: PopStack(); PopStack(); break;
+				case BranchKind.Boolean: PopStack(opcode); break;
+				case BranchKind.Comparison:
+					RequireStackSize(opcode, 2);
+					PopStack(opcode);
+					PopStack(opcode);
+					break;
 
 				default: throw new NotImplementedException();
 			}
@@ -132,21 +138,24 @@ namespace CliKit.IO
 		public override void Call(CallOpcode opcode, MethodBase method)
 		{
 			if (method.DeclaringType.IsGenericTypeDefinition)
-				ReportError("Call to a member of a generic type definition: {0}.", GetFullName(method));
+				throw Error("Call to a member of a generic type definition: {0}.", GetFullName(method));
 			if (method.IsGenericMethodDefinition)
-				ReportError("Call to generic method definition: {0}.", GetFullName(method));
-
+				throw Error("Call to generic method definition: {0}.", GetFullName(method));
 			if (opcode.Kind == CallKind.Constructor && !(method is ConstructorInfo))
-				ReportError("New object by calling a non-constructor: {0}.", GetFullName(method));
+				throw Error("New object by calling a non-constructor: {0}.", GetFullName(method));
 
 			var parameters = method.GetParameters();
-			if (stack.Count < parameters.Length)
-				ReportError("Not enough stack values for call to {0}.", GetFullName(method));
+			
+			int requiredStackSize = parameters.Length;
+			if (!method.IsStatic) ++requiredStackSize;
+
+			if (stack.Count < requiredStackSize)
+				throw Error("Calling {0} requires {1} stack operands, but the stack has size {2}.", GetFullName(method), requiredStackSize, stack.Count);
 
 			for (int i = parameters.Length - 1; i >= 0; --i)
-				PopAssignableTo(parameters[i].ParameterType);
+				PopAssignableTo(opcode, parameters[i].ParameterType);
 
-			if (!method.IsStatic) PopAssignableTo(method.DeclaringType);
+			if (!method.IsStatic) PopAssignableTo(opcode, method.DeclaringType);
 
 			if (sink != null) sink.Call(opcode, method);
 		}
@@ -160,19 +169,33 @@ namespace CliKit.IO
 		public override void FieldReference(FieldReferenceOpcode opcode, FieldInfo field)
 		{
 			if (opcode.IsStatic && !field.IsStatic)
-				ReportError("Static field reference to non-static field {0}.", GetFullName(field));
+				throw Error("Static field reference to non-static field {0}.", GetFullName(field));
 			if (field.DeclaringType.IsGenericTypeDefinition)
-				ReportError("Field reference to a field from a generic type definition: {0}.", GetFullName(field));
+				throw Error("Field reference to a field from a generic type definition: {0}.", GetFullName(field));
 
 			if (opcode.ReferenceKind == LocationReferenceKind.Store)
-				PopAssignableTo(field.FieldType);
+				PopAssignableTo(opcode, field.FieldType);
 
-			if (!field.IsStatic) PopAssignableTo(field.DeclaringType);
+			if (!field.IsStatic) PopAssignableTo(opcode, field.DeclaringType);
 
-			if (opcode.ReferenceKind == LocationReferenceKind.Load) Push(field.FieldType);
-			else if (opcode.ReferenceKind == LocationReferenceKind.LoadAddress) Push(field.FieldType.MakeByRefType());
+			if (opcode.ReferenceKind == LocationReferenceKind.Load)
+				Push(field.FieldType);
+			else if (opcode.ReferenceKind == LocationReferenceKind.LoadAddress)
+			{
+				var managedPointerType = field.FieldType.MakeByRefType();
+				var dataType = field.IsInitOnly ? DataType.ReadonlyManagedPointer : DataType.MutableManagedPointer;
+				stack.Add(new StackEntry(dataType, managedPointerType));
+			}
 
 			if (sink != null) sink.FieldReference(opcode, field);
+		}
+
+		public override void Instruction(Opcode opcode, NumericalOperand operand)
+		{
+			var param = new VisitorParam(this, operand);
+			opcode.Accept(Visitor.Instance, param);
+
+			if (sink != null) sink.Instruction(opcode, operand);
 		}
 
 		public override void Instruction(Opcode opcode, Type type)
@@ -187,15 +210,16 @@ namespace CliKit.IO
 		{
 			switch (member.MemberType)
 			{
-				case MemberTypes.Field: 
-				case MemberTypes.Method:
+				case MemberTypes.Field: Push(typeof(RuntimeFieldHandle)); break;
+				case MemberTypes.Method: Push(typeof(RuntimeMethodHandle)); break;
+
 				case MemberTypes.TypeInfo:
 				case MemberTypes.NestedType:
+					Push(typeof(RuntimeTypeHandle));
 					break;
 
 				default:
-					ReportError("Cannot load a token for {0} {1}.", member.MemberType, GetFullName(member));
-					break;
+					throw Error("Cannot load a token for {0} {1}.", member.MemberType, GetFullName(member));
 			}
 
 			if (sink != null) sink.LoadToken(member);
@@ -203,11 +227,9 @@ namespace CliKit.IO
 
 		public override void Switch(Label[] jumpTable)
 		{
-			StackEntry top;
-			if (TryPopStack(out top) && !top.DataType.IsInteger())
-			{
-				ReportError("Invalid non-integral operand for switch opcode.");
-			}
+			var top = PopStack(Opcode.Switch);
+			if (!top.DataType.IsInteger())
+				throw Error("Switch requires an integral stack, but the stack top is of type {0}.", top.DataType);
 
 			foreach (var label in jumpTable)
 				SetLabelStackState(GetLabelInfo(label));
@@ -217,15 +239,7 @@ namespace CliKit.IO
 
 		public override void Switch(int[] jumpTable)
 		{
-			StackEntry top;
-			if (TryPopStack(out top) && !top.DataType.IsInteger())
-			{
-				ReportError("Invalid non-integral operand for switch opcode.");
-			}
-
-			// TODO: Report non-verifiable warning?
-
-			if (sink != null) sink.Switch(jumpTable);
+			throw RequiresSymbolicOverload(Opcode.Switch);
 		}
 
 		private LabelInfo GetLabelInfo(Label label)
@@ -245,48 +259,38 @@ namespace CliKit.IO
 			throw new NotImplementedException();
 		}
 
-		private bool TryPopStack(out StackEntry stackEntry)
+		private void RequireStackSize(Opcode opcode, int size)
+		{
+			if (stack.Count < size)
+				throw Error("{0} expects {1} stack operands, but the stack has size {2}.", opcode.Name, size, stack.Count);
+		}
+
+		private StackEntry PopStack(Opcode opcode)
 		{
 			if (stack.Count == 0)
-			{
-				ReportError("Pop operation on empty evaluation stack.");
-				stackEntry = default(StackEntry);
-				return false;
-			}
+				throw Error("{0} expects a stack operand, but the stack is empty.", opcode.Name);
 
-			stackEntry = stack[stack.Count - 1];
+			var stackEntry = stack[stack.Count - 1];
 			stack.RemoveAt(stack.Count - 1);
-			return true;
+			return stackEntry;
 		}
 
-		private void PopStack()
-		{
-			StackEntry entry;
-			TryPopStack(out entry);
-		}
-
-		private void PopAssignableTo(Type targetType)
+		private void PopAssignableTo(Opcode opcode, Type targetType)
 		{
 			Contract.Requires(targetType != null);
 
 			if (stack.Count == 0)
-			{
-				ReportError("Expected {0} but evaluation stack was empty.", targetType.FullName);
-			}
-			else
-			{
-				Type poppedType = stack[stack.Count - 1].CtsType;
-				if (targetType.IsAssignableFrom(poppedType))
-					ReportError("Type mismatch, expected {0} but got {1}", targetType.FullName, poppedType.FullName);
-			}
+				throw Error("{0} expects a stack operand of type {1}, but the stack is empty.", opcode.Name, targetType.FullName);
 
+			Type poppedType = stack[stack.Count - 1].CtsType;
 			stack.RemoveAt(stack.Count - 1);
+			if (targetType.IsAssignableFrom(poppedType))
+				throw Error("{0} expects a stack operand of type {1} but the stack top is of type {2}.", opcode.Name, targetType.FullName, poppedType.FullName);
 		}
 
 		private void Push(Type type)
 		{
 			Contract.Requires(type != null);
-
 			stack.Add(new StackEntry(DataTypeEnum.FromCtsType(type), type));
 		}
 
@@ -298,14 +302,22 @@ namespace CliKit.IO
 			return info.DeclaringType.FullName + '.' + info.Name;
 		}
 
-		private static void ReportError(string message)
+		private static Exception Error(string message)
 		{
-			throw new InvalidOperationException(message);
+			return new InvalidOperationException(message);
 		}
 
-		private static void ReportError(string format, params object[] args)
+		private static Exception Error(string format, params object[] args)
 		{
-			ReportError(string.Format(CultureInfo.InvariantCulture, format, args));
+			return Error(string.Format(CultureInfo.InvariantCulture, format, args));
+		}
+
+		private static Exception RequiresSymbolicOverload(Opcode opcode)
+		{
+			string message = string.Format(
+				"Cannot verify opcode {0} with a numeric operand, "
+				+ "use an overload which accepts a symbolic operand.", opcode.Name);
+			return new NotSupportedException(message);
 		}
 		#endregion
 	}

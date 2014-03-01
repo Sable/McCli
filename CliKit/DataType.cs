@@ -32,8 +32,8 @@ namespace CliKit
 		NativeFloat,
 
 		ObjectReference,
-		NormalMutabilityManagedPointer,
-		ControlledMutabilityManagedPointer,
+		MutableManagedPointer,
+		ReadonlyManagedPointer,
 		ValueType,
 
 		/// <summary>
@@ -75,7 +75,7 @@ namespace CliKit
 		private const int numeric64Mask = integer64Mask | (1 << (int)DataType.Float64);
 		private const int nativeNumericMask = nativeIntegerMask | (1 << (int)DataType.NativeFloat);
 		private const int numericMask = integerMask | floatMask;
-		private const int managedPointerMask = (1 << (int)DataType.NormalMutabilityManagedPointer) | (1 << (int)DataType.ControlledMutabilityManagedPointer);
+		private const int managedPointerMask = (1 << (int)DataType.MutableManagedPointer) | (1 << (int)DataType.ReadonlyManagedPointer);
 		private const int referenceOrManagedPointerMask = (1 << (int)DataType.ObjectReference) | managedPointerMask;
 		private const int numericStackTypeMask = (1 << (int)DataType.Int32) | (1 << (int)DataType.Int64)
 			| (1 << (int)DataType.NativeInt) | (1 << (int)DataType.NativeFloat);
@@ -93,7 +93,7 @@ namespace CliKit
 				{ "r", DataType.NativeFloat },
 				{ "r4", DataType.Float32 },
 				{ "r8", DataType.Float64 },
-				{ "ref", DataType.NormalMutabilityManagedPointer },
+				{ "ref", DataType.MutableManagedPointer },
 				{ "u", DataType.NativeUInt },
 				{ "u1", DataType.UInt8 },
 				{ "u2", DataType.UInt16 },
@@ -141,7 +141,7 @@ namespace CliKit
 			if (ctsDataTypes.TryGetValue(type, out dataType)) return dataType;
 
 			if (type.IsValueType) return DataType.ValueType;
-			if (type.IsByRef) return DataType.NormalMutabilityManagedPointer;
+			if (type.IsByRef) return DataType.MutableManagedPointer;
 			return DataType.ObjectReference;
 		}
 

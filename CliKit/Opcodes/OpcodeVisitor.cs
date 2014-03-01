@@ -25,10 +25,11 @@ namespace CliKit
 		public virtual void VisitVariableReference(VariableReferenceOpcode opcode, T param) { VisitFallback(opcode, param); }
 
 		public virtual void VisitBreak(T param) { VisitFallback(Opcode.Break, param); }
+		public virtual void VisitDup(T param) { VisitFallback(Opcode.Dup, param); }
 		public virtual void VisitNop(T param) { VisitFallback(Opcode.Nop, param); }
+		public virtual void VisitPop(T param) { VisitFallback(Opcode.Pop, param); }
 		public virtual void VisitReturn(T param) { VisitFallback(Opcode.Ret, param); }
 		public virtual void VisitSizeof(T param) { VisitFallback(Opcode.Sizeof, param); }
-		public virtual void VisitPopOrDup(Opcode opcode, T param) { VisitFallback(opcode, param); }
 		public virtual void VisitThrowOrRethrow(Opcode opcode, T param) { VisitFallback(opcode, param); }
 		public virtual void VisitOther(Opcode opcode, T param) { VisitFallback(opcode, param); }
 

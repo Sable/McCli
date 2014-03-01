@@ -27,6 +27,31 @@ namespace CliKit
 			get { return ReflectionEmitEnums.GetLocationReferenceKind(ref opcode); }
 		}
 
+		public bool IsParameter
+		{
+			get { return VariableKind == VariableKind.Parameter; }
+		}
+
+		public bool IsLocal
+		{
+			get { return VariableKind == VariableKind.Local; }
+		}
+
+		public bool IsLoad
+		{
+			get { return ReferenceKind == LocationReferenceKind.Load; }
+		}
+
+		public bool IsLoadAddress
+		{
+			get { return ReferenceKind == LocationReferenceKind.LoadAddress; }
+		}
+
+		public bool IsStore
+		{
+			get { return ReferenceKind == LocationReferenceKind.Store; }
+		}
+
 		public bool IsLongForm
 		{
 			get { return OperandType == Emit.OperandType.InlineVar; }

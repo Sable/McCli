@@ -77,6 +77,7 @@
     <Compile Include="IO\ILAsmMethodBodyWriter.cs" />
     <Compile Include="IO\ILGeneratorMethodBodyWriter.cs" />
     <Compile Include="IO\MethodBodyVerifier.cs" />
+    <Compile Include="IO\MethodBodyVerifier.Visitor.cs" />
     <Compile Include="IO\MethodBodyWriter.cs" />
     <Compile Include="IO\PE\CodedIndex.cs" />
     <Compile Include="IO\PE\IMAGE_COR20_HEADER.cs" />

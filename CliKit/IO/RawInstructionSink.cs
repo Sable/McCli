@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -41,20 +40,59 @@ namespace CliKit.IO
 			Instruction(Opcode.LoadInt32(value), value);
 		}
 
-		public void LoadFloat32(float value)
-		{
-			Instruction(Opcode.Ldc_R4, value);
-		}
-
 		public void LoadInt64(long value)
 		{
 			Instruction(Opcode.Ldc_I8, value);
+		}
+
+		#region Floats
+		public void LoadFloat32(float value)
+		{
+			Instruction(Opcode.Ldc_R4, value);
 		}
 
 		public void LoadFloat64(double value)
 		{
 			Instruction(Opcode.Ldc_R8, value);
 		}
+		
+		public void LoadFloat(float value)
+		{
+			LoadFloat(value, Opcode.Conv_R4);
+		}
+
+		public void LoadFloat(double value)
+		{
+			float floatValue = (float)value;
+			if (floatValue == value)
+			{
+				// We can actually encode it as a float
+				LoadFloat(floatValue, Opcode.Conv_R8);
+				return;
+			}
+
+			Instruction(Opcode.Ldc_R8, value);
+		}
+
+		private void LoadFloat(float value, Opcode intToFloatConversionOpcode)
+		{
+			if (value >= -1 && value <= 8)
+			{
+				int intValue = (int)value;
+				if (intValue == value)
+				{
+					// We can actually encode it as an int followed by a conversion
+					var opcode = Opcode.LoadInt32(intValue);
+					Contract.Assert(opcode.ConstantValue == intValue);
+					Instruction(opcode);
+					Instruction(intToFloatConversionOpcode);
+					return;
+				}
+			}
+
+			Instruction(Opcode.Ldc_R4, value);
+		}
+		#endregion
 
 		public void LoadNull()
 		{

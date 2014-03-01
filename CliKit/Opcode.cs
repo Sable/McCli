@@ -155,7 +155,9 @@ namespace CliKit
 			switch (Value)
 			{
 				case OpcodeValue.Break: visitor.VisitBreak(param); break;
+				case OpcodeValue.Dup: visitor.VisitDup(param); break;
 				case OpcodeValue.Nop: visitor.VisitNop(param); break;
+				case OpcodeValue.Pop: visitor.VisitPop(param); break;
 				case OpcodeValue.Sizeof: visitor.VisitSizeof(param); break;
 				case OpcodeValue.Ret: visitor.VisitReturn(param); break;
 
@@ -163,12 +165,6 @@ namespace CliKit
 				case OpcodeValue.Rethrow:
 					visitor.VisitThrowOrRethrow(this, param);
 					break;
-
-				case OpcodeValue.Pop:
-				case OpcodeValue.Dup:
-					visitor.VisitPopOrDup(this, param);
-					break;
-
 
 				default:
 					visitor.VisitOther(this, param);
