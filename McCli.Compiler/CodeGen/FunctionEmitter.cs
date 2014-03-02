@@ -66,10 +66,10 @@ namespace McCli.Compiler.CodeGen
 				parameterDescriptors.Add(new ParameterDescriptor(input.StaticCliType, ParameterAttributes.None, input.Name));
 			}
 
-			Type outputType = typeof(void);
+			Type returnType = typeof(void);
 			if (function.Outputs.Length == 1)
 			{
-				outputType = function.Outputs[0].StaticCliType; // 1 output, use return value
+				returnType = function.Outputs[0].StaticCliType; // 1 output, use return value
 			}
 			else if (function.Outputs.Length >= 2)
 			{
@@ -94,10 +94,19 @@ namespace McCli.Compiler.CodeGen
 
 			// Create the method and get its IL generator
 			ILGenerator ilGenerator;
-			var methodInfo = methodFactory(function.Name, parameterDescriptors, outputType, out ilGenerator);
+			var methodInfo = methodFactory(function.Name, parameterDescriptors, returnType, out ilGenerator);
 			this.method = new FunctionMethod(methodInfo, signature);
 
 			cil = new ILGeneratorMethodBodyWriter(ilGenerator);
+			cil = new MethodBodyVerifier(new MethodBodyVerificationContext
+			{
+				Method = methodInfo,
+				ParameterTypes = parameterDescriptors.Select(p => p.Type).ToArray(),
+				ReturnType = returnType,
+				HasInitLocals = true,
+				MaxStackSize = ushort.MaxValue
+			}, cil);
+			
 			temporaryPool = new TemporaryLocalPool(cil, "$temp");
 
 			if (function.Outputs.Length == 1)

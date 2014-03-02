@@ -16,18 +16,6 @@ namespace CliKit.IO
 	public sealed partial class MethodBodyVerifier : MethodBodyWriter
 	{
 		#region Structures
-		private struct StackEntry
-		{
-			public readonly DataType DataType;
-			public readonly Type CtsType;
-
-			public StackEntry(DataType dataType, Type ctsType)
-			{
-				Contract.Requires(ctsType != null);
-				this.DataType = dataType;
-				this.CtsType = ctsType;
-			}
-		}
 
 		private struct LocalInfo
 		{
@@ -45,27 +33,49 @@ namespace CliKit.IO
 
 		#region Fields
 		private readonly MethodBase method;
+		private readonly Type[] argumentTypes; // Includes "this"
+		private readonly Type returnType;
+		private readonly bool hasInitLocals;
 		private readonly MethodBodyWriter sink;
 		private readonly List<LocalInfo> locals = new List<LocalInfo>();
 		private readonly List<LabelInfo> labels = new List<LabelInfo>();
-		private readonly List<StackEntry> stack = new List<StackEntry>();
+		private readonly Stack stack;
 		#endregion
 
 		#region Constructors
-		public MethodBodyVerifier(MethodBase method, MethodBodyWriter sink)
+		public MethodBodyVerifier(MethodBodyVerificationContext context, MethodBodyWriter sink)
 		{
-			Contract.Requires(method != null);
+			Contract.Requires(context.Method != null);
 			Contract.Requires(sink != null);
 
-			this.method = method;
+			this.method = context.Method;
+			this.returnType = context.ReturnType ?? (context.Method is MethodInfo ? ((MethodInfo)context.Method).ReturnType : typeof(void));
+			this.hasInitLocals = context.HasInitLocals;
 			this.sink = sink;
+			this.stack = new Stack(context.MaxStackSize);
+
+			int thisArgumentCount = method.IsStatic ? 0 : 1;
+			if (context.ParameterTypes == null)
+			{
+				argumentTypes = new Type[context.ParameterTypes.Length + thisArgumentCount];
+				context.ParameterTypes.CopyTo(argumentTypes, thisArgumentCount);
+			}
+			else
+			{
+				var parameters = context.Method.GetParameters();
+				argumentTypes = new Type[parameters.Length + thisArgumentCount];
+				for (int i = 0; i < parameters.Length; ++i)
+					argumentTypes[i + thisArgumentCount] = parameters[i].ParameterType;
+			}
+
+			if (!method.IsStatic) argumentTypes[0] = method.DeclaringType;
 		}
 		#endregion
 
 		#region Properties
-		public int? StackDepth
+		public int StackSize
 		{
-			get { return stack.Count; }
+			get { return stack.Size; }
 		}
 		#endregion
 
@@ -119,12 +129,31 @@ namespace CliKit.IO
 			{
 				case BranchKind.Unconditional: break;
 
+				case BranchKind.Boolean:
+				{
+					var dataType = stack.Pop(opcode).DataType;
+					switch (dataType)
+					{
+						case DataType.Int32:
+						case DataType.Int64:
+						case DataType.NativeInt:
+						case DataType.ObjectReference:
+						case DataType.MutableManagedPointer:
+						case DataType.ReadonlyManagedPointer:
+							break;
+
+						default:
+							throw Error("{0} requires an int, reference or pointer stack operand, but the top of the stack has type {1}.",
+								opcode.Name, dataType);
+					}
+					break;
+				}
+
 				// TODO: Check operand types
-				case BranchKind.Boolean: PopStack(opcode); break;
 				case BranchKind.Comparison:
-					RequireStackSize(opcode, 2);
-					PopStack(opcode);
-					PopStack(opcode);
+					stack.RequireSize(opcode, 2);
+					stack.Pop(opcode);
+					stack.Pop(opcode);
 					break;
 
 				default: throw new NotImplementedException();
@@ -149,20 +178,20 @@ namespace CliKit.IO
 			int requiredStackSize = parameters.Length;
 			if (!method.IsStatic) ++requiredStackSize;
 
-			if (stack.Count < requiredStackSize)
-				throw Error("Calling {0} requires {1} stack operands, but the stack has size {2}.", GetFullName(method), requiredStackSize, stack.Count);
+			if (StackSize < requiredStackSize)
+				throw Error("Calling {0} requires {1} stack operands, but the stack has size {2}.", GetFullName(method), requiredStackSize, stack.Size);
 
 			for (int i = parameters.Length - 1; i >= 0; --i)
-				PopAssignableTo(opcode, parameters[i].ParameterType);
+				stack.PopAssignableTo(opcode, parameters[i].ParameterType);
 
-			if (!method.IsStatic) PopAssignableTo(opcode, method.DeclaringType);
+			if (!method.IsStatic) stack.PopAssignableTo(opcode, method.DeclaringType);
 
 			if (sink != null) sink.Call(opcode, method);
 		}
 
 		public override void LoadString(string str)
 		{
-			stack.Add(new StackEntry(DataType.ObjectReference, typeof(string)));
+			stack.Push(typeof(string));
 			if (sink != null) sink.LoadString(str);
 		}
 
@@ -174,17 +203,19 @@ namespace CliKit.IO
 				throw Error("Field reference to a field from a generic type definition: {0}.", GetFullName(field));
 
 			if (opcode.ReferenceKind == LocationReferenceKind.Store)
-				PopAssignableTo(opcode, field.FieldType);
+				stack.PopAssignableTo(opcode, field.FieldType);
 
-			if (!field.IsStatic) PopAssignableTo(opcode, field.DeclaringType);
+			if (!field.IsStatic) stack.PopAssignableTo(opcode, field.DeclaringType);
 
 			if (opcode.ReferenceKind == LocationReferenceKind.Load)
-				Push(field.FieldType);
+				stack.Push(field.FieldType);
 			else if (opcode.ReferenceKind == LocationReferenceKind.LoadAddress)
 			{
 				var managedPointerType = field.FieldType.MakeByRefType();
-				var dataType = field.IsInitOnly ? DataType.ReadonlyManagedPointer : DataType.MutableManagedPointer;
-				stack.Add(new StackEntry(dataType, managedPointerType));
+				// InitOnly fields are loaded a controlled-mutability managed pointers unless in the constructor
+				bool mutable = !field.IsInitOnly
+					|| (method is ConstructorInfo && method.DeclaringType == field.DeclaringType);
+				stack.PushManagedPointer(managedPointerType, mutable);
 			}
 
 			if (sink != null) sink.FieldReference(opcode, field);
@@ -210,12 +241,12 @@ namespace CliKit.IO
 		{
 			switch (member.MemberType)
 			{
-				case MemberTypes.Field: Push(typeof(RuntimeFieldHandle)); break;
-				case MemberTypes.Method: Push(typeof(RuntimeMethodHandle)); break;
+				case MemberTypes.Field: stack.Push(typeof(RuntimeFieldHandle)); break;
+				case MemberTypes.Method: stack.Push(typeof(RuntimeMethodHandle)); break;
 
 				case MemberTypes.TypeInfo:
 				case MemberTypes.NestedType:
-					Push(typeof(RuntimeTypeHandle));
+					stack.Push(typeof(RuntimeTypeHandle));
 					break;
 
 				default:
@@ -227,7 +258,7 @@ namespace CliKit.IO
 
 		public override void Switch(Label[] jumpTable)
 		{
-			var top = PopStack(Opcode.Switch);
+			var top = stack.Pop(Opcode.Switch);
 			if (!top.DataType.IsInteger())
 				throw Error("Switch requires an integral stack, but the stack top is of type {0}.", top.DataType);
 
@@ -251,47 +282,12 @@ namespace CliKit.IO
 		{
 			if (labelInfo.StackState == null)
 			{
-				labelInfo.StackState = stack.ToArray();
+				labelInfo.StackState = stack.TakeSnapshot();
 				return;
 			}
 
 			// TODO: merge stack states
 			throw new NotImplementedException();
-		}
-
-		private void RequireStackSize(Opcode opcode, int size)
-		{
-			if (stack.Count < size)
-				throw Error("{0} expects {1} stack operands, but the stack has size {2}.", opcode.Name, size, stack.Count);
-		}
-
-		private StackEntry PopStack(Opcode opcode)
-		{
-			if (stack.Count == 0)
-				throw Error("{0} expects a stack operand, but the stack is empty.", opcode.Name);
-
-			var stackEntry = stack[stack.Count - 1];
-			stack.RemoveAt(stack.Count - 1);
-			return stackEntry;
-		}
-
-		private void PopAssignableTo(Opcode opcode, Type targetType)
-		{
-			Contract.Requires(targetType != null);
-
-			if (stack.Count == 0)
-				throw Error("{0} expects a stack operand of type {1}, but the stack is empty.", opcode.Name, targetType.FullName);
-
-			Type poppedType = stack[stack.Count - 1].CtsType;
-			stack.RemoveAt(stack.Count - 1);
-			if (targetType.IsAssignableFrom(poppedType))
-				throw Error("{0} expects a stack operand of type {1} but the stack top is of type {2}.", opcode.Name, targetType.FullName, poppedType.FullName);
-		}
-
-		private void Push(Type type)
-		{
-			Contract.Requires(type != null);
-			stack.Add(new StackEntry(DataTypeEnum.FromCtsType(type), type));
 		}
 
 		private static string GetFullName(MemberInfo info)

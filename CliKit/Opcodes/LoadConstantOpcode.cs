@@ -8,7 +8,8 @@ using Emit = System.Reflection.Emit;
 namespace CliKit
 {
 	/// <summary>
-	/// Represents CIL opcodes which load constant values.
+	/// Represents CIL opcodes which load constant values,
+	/// including integral and float types, plus ldnull and ldstr.
 	/// </summary>
 	public sealed class LoadConstantOpcode : Opcode
 	{
@@ -35,7 +36,7 @@ namespace CliKit
 		#endregion
 
 		#region Properties
-		public DataType ConstantDataType
+		public DataType DataType
 		{
 			get
 			{

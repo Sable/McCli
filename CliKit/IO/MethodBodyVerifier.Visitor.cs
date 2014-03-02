@@ -58,12 +58,38 @@ namespace CliKit.IO
 			}
 			#endregion
 
+			public override void VisitLoadConstant(LoadConstantOpcode opcode, VisitorParam param)
+			{
+				switch (opcode.Value)
+				{
+					case OpcodeValue.Ldnull: param.This.stack.PushNull(); break;
+					case OpcodeValue.Ldstr: throw RequiresSymbolicOverload(opcode);
+					default: param.This.stack.Push(opcode.DataType); break;
+				}
+			}
+
+			public override void VisitReturn(VisitorParam param)
+			{
+				if (param.This.returnType == typeof(void))
+				{
+					if (param.This.StackSize > 0)
+						throw Error("Returning from a void method with a non-empty stack.");
+				}
+				else
+				{
+					if (param.This.StackSize > 1)
+						throw Error("Return instruction with more than one value on the stack.");
+
+					param.This.stack.PopAssignableTo(Opcode.Ret, param.This.returnType);
+				}
+			}
+
 			public override void VisitVariableReference(VariableReferenceOpcode opcode, VisitorParam param)
 			{
 				Type variableType;
+				uint index = (uint?)opcode.ConstantIndex ?? param.Operand.UIntValue;
 				if (opcode.IsLocal)
 				{
-					uint index = (uint?)opcode.ConstantIndex ?? param.Operand.UIntValue;
 					if (index >= (uint)param.This.locals.Count)
 						throw Error("Reference to undeclared local {0}.", index);
 
@@ -71,22 +97,24 @@ namespace CliKit.IO
 				}
 				else
 				{
-					// parameters
-					throw new NotImplementedException();
+					if (index >= (uint)param.This.argumentTypes.Length)
+						throw Error("Reference to out-of-bound argument {0}.", index);
+
+					variableType = param.This.argumentTypes[(int)index];
 				}
 
 				switch (opcode.ReferenceKind)
 				{
 					case LocationReferenceKind.Load:
-						param.This.Push(variableType);
+						param.This.stack.Push(variableType);
 						break;
 
 					case LocationReferenceKind.LoadAddress:
-						param.This.Push(variableType.MakeByRefType());
+						param.This.stack.PushManagedPointer(variableType.MakeByRefType(), mutable: true);
 						break;
 
 					case LocationReferenceKind.Store:
-						param.This.PopAssignableTo(opcode, variableType);
+						param.This.stack.PopAssignableTo(opcode, variableType);
 						break;
 
 					default:
@@ -96,14 +124,14 @@ namespace CliKit.IO
 
 			public override void VisitDup(VisitorParam param)
 			{
-				var top = param.This.PopStack(Opcode.Dup);
-				param.This.stack.Add(top);
-				param.This.stack.Add(top);
+				var top = param.This.stack.Pop(Opcode.Dup);
+				param.This.stack.Push(top);
+				param.This.stack.Push(top);
 			}
 
 			public override void VisitPop(VisitorParam param)
 			{
-				param.This.PopStack(Opcode.Pop);
+				param.This.stack.Pop(Opcode.Pop);
 			}
 
 			public override void VisitFallback(Opcode opcode, VisitorParam param)
