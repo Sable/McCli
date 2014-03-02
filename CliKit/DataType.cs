@@ -10,11 +10,9 @@ namespace CliKit
 	/// <summary>
 	/// Identifies one of the "Data Types Directly Supported by the CLI" (ISO 23271 - §I.12.1).
 	/// </summary>
-	[Flags]
 	public enum DataType
 	{
 		// Check DataTypeEnum methods below if enumerant values change.
-
 		Int8,
 		UInt8,
 		Int16,

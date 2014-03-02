@@ -59,7 +59,7 @@ namespace CliKit.IO
 			if (name == null) name = generatedLabelNamePrefix + labelNames.Count;
 			int labelIndex = labelNames.Count;
 			labelNames.Add(name);
-			return CreateLabel(labelIndex);
+			return MakeLabel(labelIndex);
 		}
 
 		public string GetString()

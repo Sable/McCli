@@ -47,7 +47,7 @@ namespace CliKit.IO
 		public override Label CreateLabel(string name)
 		{
 			emitLabels.Add(generator.DefineLabel());
-			return CreateLabel(emitLabels.Count - 1);
+			return MakeLabel(emitLabels.Count - 1);
 		}
 
 		public override void MarkLabel(Label label)

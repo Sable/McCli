@@ -48,7 +48,7 @@ namespace CliKit.IO
 		/// </summary>
 		/// <param name="index">The index of the label.</param>
 		/// <returns>The newly created label.</returns>
-		protected Label CreateLabel(int index)
+		protected Label MakeLabel(int index)
 		{
 			return new Label(index);
 		}

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
@@ -9,6 +10,7 @@ namespace CliKit.IO
 {
 	partial class MethodBodyVerifier
 	{
+		[DebuggerDisplay("{DataType} ({CtsType})")]
 		private struct StackEntry
 		{
 			public readonly DataType DataType;
@@ -16,12 +18,14 @@ namespace CliKit.IO
 
 			public StackEntry(DataType dataType, Type ctsType)
 			{
+				Contract.Requires(dataType.IsStackType());
 				Contract.Requires(ctsType != null || dataType == DataType.ObjectReference);
 				this.DataType = dataType;
 				this.CtsType = ctsType;
 			}
 		}
 
+		[DebuggerDisplay("Size = {Size}")]
 		private struct Stack
 		{
 			#region Fields
@@ -74,17 +78,23 @@ namespace CliKit.IO
 				if (entries.Count == 0)
 					throw Error("{0} expects a stack operand of type {1}, but the stack is empty.", opcode.Name, targetType.FullName);
 
-				var poppedType = entries[entries.Count - 1].CtsType;
-				entries.RemoveAt(entries.Count - 1);
+				var poppedEntry = Pop(opcode);
 
-				if (poppedType == null)
+				if (poppedEntry.CtsType == null)
 				{
 					if (targetType.IsValueType)
 						throw Error("{0} expects a stack operand of type {1}, but the top of the stack is a null value.", opcode.Name, targetType.FullName);
 
 				}
-				else if (!targetType.IsAssignableFrom(poppedType))
-					throw Error("{0} expects a stack operand of type {1} but the stack top has type {2}.", opcode.Name, targetType.FullName, poppedType.FullName);
+				else if (!targetType.IsAssignableFrom(poppedEntry.CtsType))
+				{
+					var targetDataType = DataTypeEnum.FromCtsType(targetType);
+					if (targetDataType.ToStackType() != poppedEntry.DataType)
+					{
+						throw Error("{0} expects a stack operand of type {1} but the stack top has type {2}.",
+							opcode.Name, targetType.FullName, poppedEntry.CtsType.FullName);
+					}
+				}
 			}
 
 			public void Push(StackEntry entry)
@@ -107,7 +117,15 @@ namespace CliKit.IO
 			public void Push(Type ctsType)
 			{
 				Contract.Requires(ctsType != null);
-				Push(new StackEntry(DataTypeEnum.FromCtsType(ctsType), ctsType));
+
+				var dataType = DataTypeEnum.FromCtsType(ctsType);
+				if (!dataType.IsStackType())
+				{
+					dataType = dataType.ToStackType();
+					ctsType = dataType.TryGetCtsType() ?? ctsType;
+				}
+
+				Push(new StackEntry(dataType, ctsType));
 			}
 
 			public void PushManagedPointer(Type type, bool mutable)
@@ -119,6 +137,11 @@ namespace CliKit.IO
 			public void PushNull()
 			{
 				Push(new StackEntry(DataType.ObjectReference, null));
+			}
+			
+			public void Clear()
+			{
+				entries.Clear();
 			}
 			#endregion
 		}

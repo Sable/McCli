@@ -16,7 +16,6 @@ namespace CliKit.IO
 	public sealed partial class MethodBodyVerifier : MethodBodyWriter
 	{
 		#region Structures
-
 		private struct LocalInfo
 		{
 			public Type Type;
@@ -25,9 +24,16 @@ namespace CliKit.IO
 
 		private sealed class LabelInfo
 		{
-			public string Name;
+			public readonly string Name;
+			public readonly Label SinkLabel;
 			public StackEntry[] StackState;
 			public bool Marked;
+
+			public LabelInfo(string name, Label sinkLabel)
+			{
+				this.Name = name;
+				this.SinkLabel = sinkLabel;
+			}
 		}
 		#endregion
 
@@ -97,15 +103,17 @@ namespace CliKit.IO
 		public override Label CreateLabel(string name)
 		{
 			int labelIndex = labels.Count;
-			labels.Add(new LabelInfo { Name = name });
 
+			var sinkLabel = default(Label);
 			if (sink != null)
 			{
-				var sinkLabel = sink.CreateLabel(name);
+				sinkLabel = sink.CreateLabel(name);
 				Contract.Assert(GetLabelIndex(sinkLabel) == labelIndex);
 			}
 
-			return CreateLabel(labelIndex);
+			var labelInfo = new LabelInfo(name, sinkLabel);
+			labels.Add(labelInfo);
+			return MakeLabel(labelIndex);
 		}
 
 		public override void MarkLabel(Label label)
@@ -121,6 +129,8 @@ namespace CliKit.IO
 			labelInfo.Marked = true;
 
 			SetLabelStackState(labelInfo);
+
+			if (sink != null) sink.MarkLabel(labelInfo.SinkLabel);
 		}
 
 		public override void Branch(BranchOpcode opcode, Label target)
@@ -159,13 +169,22 @@ namespace CliKit.IO
 				default: throw new NotImplementedException();
 			}
 
-			SetLabelStackState(GetLabelInfo(target));
+			var labelInfo = GetLabelInfo(target);
+			SetLabelStackState(labelInfo);
+
+			if (opcode.BranchKind == BranchKind.Unconditional && !labelInfo.Marked)
+			{
+				// Forward jump, can assume the stack is empty (ECMA 335 III.1.7.5)
+				// TODO: Not necessarily, there could have been a prior branch to here
+				stack.Clear();
+			}
 
 			if (sink != null) sink.Branch(opcode, target);
 		}
 
 		public override void Call(CallOpcode opcode, MethodBase method)
 		{
+			// Sanity checks
 			if (method.DeclaringType.IsGenericTypeDefinition)
 				throw Error("Call to a member of a generic type definition: {0}.", GetFullName(method));
 			if (method.IsGenericMethodDefinition)
@@ -173,6 +192,7 @@ namespace CliKit.IO
 			if (opcode.Kind == CallKind.Constructor && !(method is ConstructorInfo))
 				throw Error("New object by calling a non-constructor: {0}.", GetFullName(method));
 
+			// Pop arguments
 			var parameters = method.GetParameters();
 			
 			int requiredStackSize = parameters.Length;
@@ -186,6 +206,13 @@ namespace CliKit.IO
 
 			if (!method.IsStatic) stack.PopAssignableTo(opcode, method.DeclaringType);
 
+			// Push return value
+			if (opcode.Kind == CallKind.Constructor)
+				stack.Push(method.DeclaringType);
+			else if (returnType != typeof(void))
+				stack.Push(((MethodInfo)method).ReturnType);
+
+			// Forward to sink
 			if (sink != null) sink.Call(opcode, method);
 		}
 
@@ -285,6 +312,9 @@ namespace CliKit.IO
 				labelInfo.StackState = stack.TakeSnapshot();
 				return;
 			}
+
+			if (stack.Size == 0 && labelInfo.StackState.Length == 0)
+				return;
 
 			// TODO: merge stack states
 			throw new NotImplementedException();
