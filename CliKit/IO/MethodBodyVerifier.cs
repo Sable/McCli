@@ -63,15 +63,16 @@ namespace CliKit.IO
 			int thisArgumentCount = method.IsStatic ? 0 : 1;
 			if (context.ParameterTypes == null)
 			{
-				argumentTypes = new Type[context.ParameterTypes.Length + thisArgumentCount];
-				context.ParameterTypes.CopyTo(argumentTypes, thisArgumentCount);
-			}
-			else
-			{
+				// Must call MethodInfo.GetParameters(), which fails on dynamic methods
 				var parameters = context.Method.GetParameters();
 				argumentTypes = new Type[parameters.Length + thisArgumentCount];
 				for (int i = 0; i < parameters.Length; ++i)
 					argumentTypes[i + thisArgumentCount] = parameters[i].ParameterType;
+			}
+			else
+			{
+				argumentTypes = new Type[context.ParameterTypes.Length + thisArgumentCount];
+				context.ParameterTypes.CopyTo(argumentTypes, thisArgumentCount);
 			}
 
 			if (!method.IsStatic) argumentTypes[0] = method.DeclaringType;
