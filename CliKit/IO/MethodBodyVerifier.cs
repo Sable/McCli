@@ -209,8 +209,12 @@ namespace CliKit.IO
 			// Push return value
 			if (opcode.Kind == CallKind.Constructor)
 				stack.Push(method.DeclaringType);
-			else if (returnType != typeof(void))
-				stack.Push(((MethodInfo)method).ReturnType);
+			else
+			{
+				var methodInfo = (MethodInfo)method;
+				if (methodInfo.ReturnType != typeof(void))
+					stack.Push(methodInfo.ReturnType);
+			}
 
 			// Forward to sink
 			if (sink != null) sink.Call(opcode, method);

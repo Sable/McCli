@@ -75,8 +75,8 @@ namespace CliKit
 		private const int numericMask = integerMask | floatMask;
 		private const int managedPointerMask = (1 << (int)DataType.MutableManagedPointer) | (1 << (int)DataType.ReadonlyManagedPointer);
 		private const int referenceOrManagedPointerMask = (1 << (int)DataType.ObjectReference) | managedPointerMask;
-		private const int numericStackTypeMask = (1 << (int)DataType.Int32) | (1 << (int)DataType.Int64)
-			| (1 << (int)DataType.NativeInt) | (1 << (int)DataType.NativeFloat);
+		private const int integerStackTypeMask = (1 << (int)DataType.Int32) | (1 << (int)DataType.Int64) | (1 << (int)DataType.NativeInt);
+		private const int numericStackTypeMask = integerStackTypeMask | (1 << (int)DataType.NativeFloat);
 		private const int stackTypeExceptValueTypeMask = numericStackTypeMask | referenceOrManagedPointerMask;
 		private const int stackTypeMask = stackTypeExceptValueTypeMask | (1 << (int)DataType.ValueType);
 
@@ -208,6 +208,8 @@ namespace CliKit
 		public static bool IsManagedPointer(this DataType type) { return MatchesMask(type, managedPointerMask); }
 		[Pure]
 		public static bool IsReferenceOrManagedPointer(this DataType type) { return MatchesMask(type, referenceOrManagedPointerMask); }
+		[Pure]
+		public static bool IsIntegerStackType(this DataType type) { return MatchesMask(type, integerStackTypeMask); }
 		[Pure]
 		public static bool IsNumericStackType(this DataType type) { return MatchesMask(type, numericStackTypeMask); }
 		[Pure]

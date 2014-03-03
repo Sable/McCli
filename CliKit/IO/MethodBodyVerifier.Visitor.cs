@@ -58,6 +58,33 @@ namespace CliKit.IO
 			}
 			#endregion
 
+			public override void VisitArithmetic(ArithmeticOpcode opcode, VisitorParam param)
+			{
+				if (opcode.IsUnary)
+				{
+					var operand = param.This.stack.Pop(opcode);
+					var resultType = opcode.Operation.GetResult(operand.DataType);
+					if (!resultType.HasValue)
+						throw Error("{0} expects an integral stack operand, but the top of the stack has type {1}.", opcode.Name, operand.DataType);
+
+					param.This.stack.Push(resultType.Value);
+				}
+				else
+				{
+					param.This.stack.RequireSize(opcode, 2);
+					var lhs = param.This.stack.Pop(opcode);
+					var rhs = param.This.stack.Pop(opcode);
+
+					bool verifiable;
+					var resultType = opcode.Operation.GetResult(lhs.DataType, rhs.DataType, out verifiable);
+					if (!resultType.HasValue)
+						throw Error("{0} cannot operate on stack operands of type {1} and {2}.", opcode.Name, lhs.DataType, rhs.DataType);
+
+					// TODO: Assert verifiable?
+					param.This.stack.Push(resultType.Value);
+				}
+			}
+
 			public override void VisitLoadConstant(LoadConstantOpcode opcode, VisitorParam param)
 			{
 				switch (opcode.Value)

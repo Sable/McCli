@@ -40,7 +40,7 @@ namespace McCli.Compiler.CodeGen
 					else
 					{
 						cil.LoadString(str);
-						cil.Call(typeof(PseudoBuiltins).GetMethod("StringToCharArray"));
+						cil.CallDefault(typeof(PseudoBuiltins).GetMethod("StringToCharArray"));
 						sourceRepr = MClass.Char.FullArrayRepr;
 					}
 				}
@@ -105,7 +105,7 @@ namespace McCli.Compiler.CodeGen
 			}
 
 			// Call the function
-			cil.Call(function.Method);
+			cil.CallDefault(function.Method);
 
 			// Handle the return value, if any
 			if (signature.HasReturnValue)
@@ -158,7 +158,7 @@ namespace McCli.Compiler.CodeGen
 						EmitConversion(argument.StaticRepr, MClass.Double.ArrayRepr);
 					}
 
-					cil.Call(method);
+					cil.CallDefault(method);
 					EmitConversion(MRepr.FromCliType(method.ReturnType), target.StaticRepr);
 				}
 			}
@@ -185,7 +185,7 @@ namespace McCli.Compiler.CodeGen
 				var method = typeof(PseudoBuiltins).GetMethods()
 					.Single(m => m.Name == "ArraySet" && m.GetParameters().Length == node.Indices.Length + 2)
 					.MakeGenericMethod(arrayRepr.Type.CliType);
-				cil.Call(method);
+				cil.CallDefault(method);
 			}
 			else
 			{
@@ -199,7 +199,7 @@ namespace McCli.Compiler.CodeGen
 
 			EmitLoad(node.Condition);
 			EmitConversion(node.Condition.StaticRepr, MRepr.Any);
-			cil.Call(typeof(PseudoBuiltins).GetMethod("IsTrue"));
+			cil.CallDefault(typeof(PseudoBuiltins).GetMethod("IsTrue"));
 
 			var endLabel = cil.CreateLabel("if_end");
 			if (node.Then.Length == 0)
@@ -237,7 +237,7 @@ namespace McCli.Compiler.CodeGen
 			cil.MarkLabel(continueTargetLabel);
 			EmitLoad(node.Condition);
 			EmitConversion(node.Condition.StaticRepr, MRepr.Any);
-			cil.Call(typeof(PseudoBuiltins).GetMethod("IsTrue"));
+			cil.CallDefault(typeof(PseudoBuiltins).GetMethod("IsTrue"));
 			cil.Branch(false, breakTargetLabel);
 
 			// Body
@@ -347,7 +347,7 @@ namespace McCli.Compiler.CodeGen
 			if (typeof(MValue).IsAssignableFrom(sourceType))
 			{
 				var deepCloneMethod = sourceType.GetMethod("DeepClone");
-				cil.Call(deepCloneMethod);
+				cil.CallDefault(deepCloneMethod);
 				if (!sourceType.IsAssignableFrom(deepCloneMethod.ReturnType))
 					cil.Instruction(Opcode.Castclass, sourceType);
 			}

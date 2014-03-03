@@ -238,7 +238,7 @@ namespace McCli.Compiler.CodeGen
 					&& target.StructuralClass == MStructuralClass.Scalar)
 				{
 					// Convert an array assumed to have size 1x1 to a scalar.
-					cil.Call(typeof(MArray<>).MakeGenericType(type.CliType).GetMethod("ToScalar"));
+					cil.CallDefault(typeof(MArray<>).MakeGenericType(type.CliType).GetMethod("ToScalar"));
 					return;
 				}
 
@@ -252,7 +252,7 @@ namespace McCli.Compiler.CodeGen
 
 		private void EmitBoxScalar(MType type)
 		{
-			cil.Call(typeof(MFullArray<>).MakeGenericType(type.CliType).GetMethod("CreateScalar"));
+			cil.CallDefault(typeof(MFullArray<>).MakeGenericType(type.CliType).GetMethod("CreateScalar"));
 		}
 
 		private VariableLocation GetLocalLocation(Variable variable)
