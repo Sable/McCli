@@ -12,13 +12,26 @@ namespace CliKit.IO
 		private struct VisitorParam
 		{
 			public readonly MethodBodyVerifier This;
-			public readonly NumericalOperand Operand;
+			public readonly NumericalOperand NumericalOperand;
+			public readonly object SymbolicOperand;
 
 			public VisitorParam(MethodBodyVerifier @this, NumericalOperand operand)
 			{
 				Contract.Requires(@this != null);
+				
 				this.This = @this;
-				this.Operand = operand;
+				this.NumericalOperand = operand;
+				this.SymbolicOperand = null;
+			}
+
+			public VisitorParam(MethodBodyVerifier @this, object symbolicOperand)
+			{
+				Contract.Requires(@this != null);
+				Contract.Requires(symbolicOperand != null);
+
+				this.This = @this;
+				this.NumericalOperand = default(NumericalOperand);
+				this.SymbolicOperand = symbolicOperand;
 			}
 		}
 
@@ -85,6 +98,13 @@ namespace CliKit.IO
 				}
 			}
 
+			public override void VisitDup(VisitorParam param)
+			{
+				var top = param.This.stack.Pop(Opcode.Dup);
+				param.This.stack.Push(top);
+				param.This.stack.Push(top);
+			}
+
 			public override void VisitLoadConstant(LoadConstantOpcode opcode, VisitorParam param)
 			{
 				switch (opcode.Value)
@@ -92,6 +112,83 @@ namespace CliKit.IO
 					case OpcodeValue.Ldnull: param.This.stack.PushNull(); break;
 					case OpcodeValue.Ldstr: throw RequiresSymbolicOverload(opcode);
 					default: param.This.stack.Push(opcode.DataType); break;
+				}
+			}
+
+			public override void VisitIndirectReference(IndirectReferenceOpcode opcode, VisitorParam param)
+			{
+				var dataType = opcode.DataType;
+
+				if (opcode.IsLoad)
+				{
+					var entry = param.This.stack.Pop(opcode);
+					if (!entry.DataType.IsPointer())
+						throw Error("{0} expects a pointer but the top of the stack has type {1}.", opcode.Name, entry.DataType);
+					
+					var ctsType = dataType.HasValue ? dataType.Value.ToStackType().ToCtsType() : (Type)param.SymbolicOperand;
+					Contract.Assert(ctsType != null);
+
+					param.This.stack.Push(ctsType);
+				}
+				else
+				{
+					param.This.stack.RequireSize(opcode, 2);
+					var value = param.This.stack.Pop(opcode);
+					var target = param.This.stack.Pop(opcode);
+
+					if (!target.DataType.IsPointer())
+						throw Error("{0} expects a pointer but the stack has type {1}.", opcode.Name, target.DataType);
+
+					// TODO: Assignment compatibility tests
+				}
+			}
+
+			public override void VisitPop(VisitorParam param)
+			{
+				param.This.stack.Pop(Opcode.Pop);
+			}
+
+			public override void VisitVariableReference(VariableReferenceOpcode opcode, VisitorParam param)
+			{
+				Type variableType;
+				int index = opcode.ConstantIndex ?? param.NumericalOperand.IntValue;
+				if (opcode.IsLocal)
+				{
+					if (index >= param.This.locals.Count)
+						throw Error("Reference to undeclared local {0}.", index);
+
+					variableType = param.This.locals[index].Type;
+				}
+				else
+				{
+					if (index >= param.This.argumentTypes.Length)
+						throw Error("Reference to out-of-bound argument {0}.", index);
+
+					variableType = param.This.argumentTypes[index];
+				}
+
+				switch (opcode.ReferenceKind)
+				{
+					case LocationReferenceKind.Load:
+						param.This.stack.Push(variableType);
+						break;
+
+					case LocationReferenceKind.LoadAddress:
+						if (variableType.IsByRef)
+						{
+							throw Error("Cannot load the address of byref variable {0}.",
+								param.This.GetVariableName(opcode.VariableKind, (int)index));
+						}
+
+						param.This.stack.PushManagedPointer(variableType.MakeByRefType(), mutable: true);
+						break;
+
+					case LocationReferenceKind.Store:
+						param.This.stack.PopAssignableTo(opcode, variableType);
+						break;
+
+					default:
+						throw new NotImplementedException();
 				}
 			}
 
@@ -109,56 +206,6 @@ namespace CliKit.IO
 
 					param.This.stack.PopAssignableTo(Opcode.Ret, param.This.returnType);
 				}
-			}
-
-			public override void VisitVariableReference(VariableReferenceOpcode opcode, VisitorParam param)
-			{
-				Type variableType;
-				uint index = (uint?)opcode.ConstantIndex ?? param.Operand.UIntValue;
-				if (opcode.IsLocal)
-				{
-					if (index >= (uint)param.This.locals.Count)
-						throw Error("Reference to undeclared local {0}.", index);
-
-					variableType = param.This.locals[(int)index].Type;
-				}
-				else
-				{
-					if (index >= (uint)param.This.argumentTypes.Length)
-						throw Error("Reference to out-of-bound argument {0}.", index);
-
-					variableType = param.This.argumentTypes[(int)index];
-				}
-
-				switch (opcode.ReferenceKind)
-				{
-					case LocationReferenceKind.Load:
-						param.This.stack.Push(variableType);
-						break;
-
-					case LocationReferenceKind.LoadAddress:
-						param.This.stack.PushManagedPointer(variableType.MakeByRefType(), mutable: true);
-						break;
-
-					case LocationReferenceKind.Store:
-						param.This.stack.PopAssignableTo(opcode, variableType);
-						break;
-
-					default:
-						throw new NotImplementedException();
-				}
-			}
-
-			public override void VisitDup(VisitorParam param)
-			{
-				var top = param.This.stack.Pop(Opcode.Dup);
-				param.This.stack.Push(top);
-				param.This.stack.Push(top);
-			}
-
-			public override void VisitPop(VisitorParam param)
-			{
-				param.This.stack.Pop(Opcode.Pop);
 			}
 
 			public override void VisitFallback(Opcode opcode, VisitorParam param)

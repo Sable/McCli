@@ -38,7 +38,7 @@ namespace McCli.Compiler.CodeGen
 		#endregion
 
 		#region Fields
-		private readonly IR.Function function;
+		private readonly IR.Function declaration;
 		private readonly FunctionLookup functionLookup;
 		private readonly FunctionMethod method;
 		private readonly MethodBodyWriter cil;
@@ -54,7 +54,7 @@ namespace McCli.Compiler.CodeGen
 			Contract.Requires(methodFactory != null);
 			Contract.Requires(functionLookup != null);
 
-			this.function = function;
+			this.declaration = function;
 			this.functionLookup = functionLookup;
 			var signature = new FunctionSignature(function.Inputs.Select(i => i.StaticRepr), function.Outputs.Select(o => o.StaticRepr));
 
@@ -143,24 +143,24 @@ namespace McCli.Compiler.CodeGen
 		{
 			returnTargetLabel = cil.CreateLabel("return");
 
-			EmitStatements(function.Body);
+			EmitStatements(declaration.Body);
 
 			cil.MarkLabel(returnTargetLabel);
-			if (function.Outputs.Length == 1)
+			if (declaration.Outputs.Length == 1)
 			{
 				// Load the return value
-				EmitLoad(function.Outputs[0]);
+				EmitLoad(declaration.Outputs[0]);
 			}
-			else if (function.Outputs.Length >= 2)
+			else if (declaration.Outputs.Length >= 2)
 			{
 				// Copy inout parameters from their input to their outputs (since we operate only on the input)
-				for (int inputIndex = 0; inputIndex < function.Inputs.Length; ++inputIndex)
+				for (int inputIndex = 0; inputIndex < declaration.Inputs.Length; ++inputIndex)
 				{
-					var input = function.Inputs[inputIndex];
-					int outputIndex = function.Outputs.IndexOf(input);
+					var input = declaration.Inputs[inputIndex];
+					int outputIndex = declaration.Outputs.IndexOf(input);
 					if (outputIndex > -1)
 					{
-						cil.LoadLocal(function.Inputs.Length + outputIndex);
+						cil.LoadLocal(declaration.Inputs.Length + outputIndex);
 						cil.LoadLocal(inputIndex);
 						cil.StoreIndirect(input.StaticCliType);
 					}
@@ -177,15 +177,15 @@ namespace McCli.Compiler.CodeGen
 		
 		private void EmitLoad(Variable variable)
 		{
-			cil.Load(GetLocalLocation(variable));
+			cil.Load(GetLocation(variable));
 		}
 
 		private EmitStoreScope BeginEmitStore(Variable variable)
 		{
-			if (function.Outputs.Length >= 2 && !function.Inputs.Contains(variable))
+			if (declaration.Outputs.Length >= 2 && !declaration.Inputs.Contains(variable))
 			{
 				// ByRef parameter
-				cil.Load(GetLocalLocation(variable));
+				cil.Load(GetLocation(variable));
 			}
 
 			return new EmitStoreScope(this, variable);
@@ -195,14 +195,14 @@ namespace McCli.Compiler.CodeGen
 		{
 			if (variable == null) return;
 
-			if (function.Outputs.Length >= 2 && !function.Inputs.Contains(variable))
+			if (declaration.Outputs.Length >= 2 && !declaration.Inputs.Contains(variable))
 			{
 				// ByRef parameter
 				cil.StoreIndirect(variable.StaticCliType);
 			}
 			else
 			{
-				cil.Store(GetLocalLocation(variable));
+				cil.Store(GetLocation(variable));
 			}
 		}
 
@@ -238,7 +238,7 @@ namespace McCli.Compiler.CodeGen
 					&& target.StructuralClass == MStructuralClass.Scalar)
 				{
 					// Convert an array assumed to have size 1x1 to a scalar.
-					cil.CallDefault(typeof(MArray<>).MakeGenericType(type.CliType).GetMethod("ToScalar"));
+					cil.Invoke(typeof(MArray<>).MakeGenericType(type.CliType).GetMethod("ToScalar"));
 					return;
 				}
 
@@ -252,10 +252,10 @@ namespace McCli.Compiler.CodeGen
 
 		private void EmitBoxScalar(MType type)
 		{
-			cil.CallDefault(typeof(MFullArray<>).MakeGenericType(type.CliType).GetMethod("CreateScalar"));
+			cil.Invoke(typeof(MFullArray<>).MakeGenericType(type.CliType).GetMethod("CreateScalar"));
 		}
 
-		private VariableLocation GetLocalLocation(Variable variable)
+		private VariableLocation GetLocation(Variable variable)
 		{
 			VariableLocation location;
 			if (!locals.TryGetValue(variable, out location))

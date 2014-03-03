@@ -8,7 +8,7 @@ using Emit = System.Reflection.Emit;
 namespace CliKit
 {
 	/// <summary>
-	/// Represents CIL opcodes that refers to a local variable or argument.
+	/// Represents CIL opcodes that refers to a local variable or argument. <c>[ls]darg(\.[0123s])?</c>
 	/// </summary>
 	public sealed class VariableReferenceOpcode : Opcode
 	{
@@ -19,17 +19,23 @@ namespace CliKit
 		#region Properties
 		public VariableKind VariableKind
 		{
-			get { return opcode.Name[2] == 'a' ? VariableKind.Parameter : VariableKind.Local; }
+			get { return opcode.Name[2] == 'a' ? VariableKind.Argument : VariableKind.Local; }
 		}
 
 		public LocationReferenceKind ReferenceKind
 		{
-			get { return ReflectionEmitEnums.GetLocationReferenceKind(ref opcode); }
+			get
+			{
+				var name = Name;
+				if (name[0] == 's') return LocationReferenceKind.Store;
+				if (name.Length >= 6 && name[5] == 'a') return LocationReferenceKind.LoadAddress;
+				return LocationReferenceKind.Load;
+			}
 		}
 
 		public bool IsParameter
 		{
-			get { return VariableKind == VariableKind.Parameter; }
+			get { return VariableKind == VariableKind.Argument; }
 		}
 
 		public bool IsLocal

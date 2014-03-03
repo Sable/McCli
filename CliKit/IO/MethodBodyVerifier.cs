@@ -88,6 +88,9 @@ namespace CliKit.IO
 		#region Methods
 		public override int DeclareLocal(Type type, bool pinned, string name)
 		{
+			if (type.IsByRef || type.IsGenericTypeDefinition)
+				throw Error("Cannot declare a local of type {0}.", type.FullName);
+
 			int index = locals.Count;
 			locals.Add(new LocalInfo { Type = type, Name = name });
 
@@ -262,8 +265,8 @@ namespace CliKit.IO
 
 		public override void Instruction(Opcode opcode, Type type)
 		{
-			if (opcode.PopCount > 0 || opcode.PushCount > 0)
-				throw new NotImplementedException();
+			var param = new VisitorParam(this, type);
+			opcode.Accept(Visitor.Instance, param);
 
 			if (sink != null) sink.Instruction(opcode, type);
 		}
@@ -322,6 +325,22 @@ namespace CliKit.IO
 
 			// TODO: merge stack states
 			throw new NotImplementedException();
+		}
+
+		private string GetVariableName(VariableLocation location)
+		{
+			if (location.IsLocal && location.Index < locals.Count)
+			{
+				string name = locals[location.Index].Name;
+				if (name != null) return name;
+			}
+
+			return location.ToString();
+		}
+
+		private string GetVariableName(VariableKind kind, int index)
+		{
+			return GetVariableName(new VariableLocation(kind, index));
 		}
 
 		private static string GetFullName(MemberInfo info)

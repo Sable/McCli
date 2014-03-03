@@ -108,7 +108,7 @@ namespace CliKit.IO
 			{
 				Contract.Requires(dataType.IsNumeric());
 				dataType = dataType.ToStackType();
-				var ctsType = dataType.TryGetCtsType();
+				var ctsType = dataType.ToCtsType();
 				if (dataType == DataType.NativeFloat) ctsType = typeof(double);
 				Contract.Assert(ctsType != null);
 				Push(new StackEntry(dataType, ctsType));
@@ -122,7 +122,7 @@ namespace CliKit.IO
 				if (!dataType.IsStackType())
 				{
 					dataType = dataType.ToStackType();
-					ctsType = dataType.TryGetCtsType() ?? ctsType;
+					ctsType = dataType.ToCtsType() ?? ctsType;
 				}
 
 				Push(new StackEntry(dataType, ctsType));

@@ -32,7 +32,14 @@ namespace CliKit
 		/// </summary>
 		public LocationReferenceKind ReferenceKind
 		{
-			get { return ReflectionEmitEnums.GetLocationReferenceKind(ref opcode); }
+			get
+			{
+				// (ld|st)elema?
+				var name = Name;
+				if (name[0] == 's') return LocationReferenceKind.Store;
+				if (name.Length >= 7 && name[6] == 'a') return LocationReferenceKind.LoadAddress;
+				return LocationReferenceKind.Load;
+			}
 		}
 
 		/// <summary>

@@ -40,7 +40,7 @@ namespace McCli.Compiler.CodeGen
 					else
 					{
 						cil.LoadString(str);
-						cil.CallDefault(typeof(PseudoBuiltins).GetMethod("StringToCharArray"));
+						cil.Invoke(typeof(PseudoBuiltins).GetMethod("StringToCharArray"));
 						sourceRepr = MClass.Char.FullArrayRepr;
 					}
 				}
@@ -94,8 +94,12 @@ namespace McCli.Compiler.CodeGen
 				{
 					if (i < node.Targets.Length)
 					{
-						// TODO: Handle byref targets
-						cil.LoadAddress(GetLocalLocation(node.Targets[i]));
+						var target = node.Targets[i];
+						var location = GetLocation(target);
+						if (declaration.Outputs.Contains(target) && declaration.Outputs.Length >= 2)
+							cil.Load(location); // Target is a ByRef parameter, so already a (managed) pointer
+						else
+							cil.LoadAddress(location);
 					}
 					else
 					{
@@ -105,7 +109,7 @@ namespace McCli.Compiler.CodeGen
 			}
 
 			// Call the function
-			cil.CallDefault(function.Method);
+			cil.Invoke(function.Method);
 
 			// Handle the return value, if any
 			if (signature.HasReturnValue)
@@ -158,7 +162,7 @@ namespace McCli.Compiler.CodeGen
 						EmitConversion(argument.StaticRepr, MClass.Double.ArrayRepr);
 					}
 
-					cil.CallDefault(method);
+					cil.Invoke(method);
 					EmitConversion(MRepr.FromCliType(method.ReturnType), target.StaticRepr);
 				}
 			}
@@ -185,7 +189,7 @@ namespace McCli.Compiler.CodeGen
 				var method = typeof(PseudoBuiltins).GetMethods()
 					.Single(m => m.Name == "ArraySet" && m.GetParameters().Length == node.Indices.Length + 2)
 					.MakeGenericMethod(arrayRepr.Type.CliType);
-				cil.CallDefault(method);
+				cil.Invoke(method);
 			}
 			else
 			{
@@ -199,7 +203,7 @@ namespace McCli.Compiler.CodeGen
 
 			EmitLoad(node.Condition);
 			EmitConversion(node.Condition.StaticRepr, MRepr.Any);
-			cil.CallDefault(typeof(PseudoBuiltins).GetMethod("IsTrue"));
+			cil.Invoke(typeof(PseudoBuiltins).GetMethod("IsTrue"));
 
 			var endLabel = cil.CreateLabel("if_end");
 			if (node.Then.Length == 0)
@@ -237,7 +241,7 @@ namespace McCli.Compiler.CodeGen
 			cil.MarkLabel(continueTargetLabel);
 			EmitLoad(node.Condition);
 			EmitConversion(node.Condition.StaticRepr, MRepr.Any);
-			cil.CallDefault(typeof(PseudoBuiltins).GetMethod("IsTrue"));
+			cil.Invoke(typeof(PseudoBuiltins).GetMethod("IsTrue"));
 			cil.Branch(false, breakTargetLabel);
 
 			// Body
@@ -302,7 +306,7 @@ namespace McCli.Compiler.CodeGen
 				// Setup the iterator variable (which can be modified inside the loop)
 				cil.Load(currentLocal.Location);
 				EmitConversion(repr, node.Iterator.StaticRepr);
-				cil.Store(GetLocalLocation(node.Iterator));
+				cil.Store(GetLocation(node.Iterator));
 
 				// body
 				EmitStatements(node.Body);
@@ -347,7 +351,7 @@ namespace McCli.Compiler.CodeGen
 			if (typeof(MValue).IsAssignableFrom(sourceType))
 			{
 				var deepCloneMethod = sourceType.GetMethod("DeepClone");
-				cil.CallDefault(deepCloneMethod);
+				cil.Invoke(deepCloneMethod);
 				if (!sourceType.IsAssignableFrom(deepCloneMethod.ReturnType))
 					cil.Instruction(Opcode.Castclass, sourceType);
 			}

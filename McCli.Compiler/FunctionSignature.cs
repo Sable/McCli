@@ -35,15 +35,16 @@ namespace McCli.Compiler
 
 			foreach (var parameter in parameters)
 			{
-				MRepr repr = MRepr.FromCliType(parameter.ParameterType);
-				if (parameter.IsOut)
+				var parameterType = parameter.ParameterType;
+				if (parameterType.IsByRef)
 				{
-					outputs.Add(repr);
+					Contract.Assert(parameter.IsOut);
+					outputs.Add(MRepr.FromCliType(parameterType.GetElementType()));
 				}
 				else
 				{
 					Contract.Assert(outputs.Count == 0);
-					inputs.Add(repr);
+					inputs.Add(MRepr.FromCliType(parameterType));
 				}
 			}
 
@@ -71,6 +72,11 @@ namespace McCli.Compiler
 		public bool HasReturnValue
 		{
 			get { return outputs.Count == 1; }
+		}
+
+		public bool UsesOutParameters
+		{
+			get { return outputs.Count >= 2; }
 		}
 
 		public int OutParameterCount

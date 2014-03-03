@@ -19,13 +19,39 @@ namespace CliKit
 		#region Properties
 		public LocationReferenceKind ReferenceKind
 		{
-			get { return ReflectionEmitEnums.GetLocationReferenceKind(ref opcode); }
+			get
+			{
+				return opcode.StackBehaviourPush == Emit.StackBehaviour.Push0
+					? LocationReferenceKind.Store : LocationReferenceKind.Load;
+			}
 		}
 
-		// TODO: add type
+		public bool IsLoad
+		{
+			get { return opcode.StackBehaviourPush != Emit.StackBehaviour.Push0; }
+		}
+
+		public bool IsStore
+		{
+			get { return opcode.StackBehaviourPush == Emit.StackBehaviour.Push0; }
+		}
+
+		public bool HasTypeOperand
+		{
+			get { return opcode.OperandType == Emit.OperandType.InlineType; }
+		}
+
 		public DataType? DataType
 		{
-			get { throw new NotImplementedException(); }
+			get
+			{
+				var name = opcode.Name;
+				int dotIndex = name.IndexOf('.');
+				if (dotIndex < 0) return null; // ldobj, stobj
+
+				var typeName = name.Substring(dotIndex + 1);
+				return DataTypeEnum.TryParseNameInOpcode(typeName);
+			}
 		}
 		#endregion
 

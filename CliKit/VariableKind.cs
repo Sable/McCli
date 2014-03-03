@@ -12,9 +12,9 @@ namespace CliKit
 	public enum VariableKind
 	{
 		/// <summary>
-		/// Denotes a formal method parameter.
+		/// Denotes a formal method parameter, or implicit "this" argument.
 		/// </summary>
-		Parameter,
+		Argument,
 
 		/// <summary>
 		/// Denotes a local variable used in the body of a method.

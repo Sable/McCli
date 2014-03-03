@@ -64,32 +64,5 @@ namespace CliKit
 					throw new ArgumentException("stackBehaviour");
 			}
 		}
-
-		public static LocationReferenceKind GetLocationReferenceKind(ref Emit.OpCode opcode)
-		{
-			return GetLocationReferenceKindFromStackBehaviourPush(opcode.StackBehaviourPush);
-		}
-
-		public static LocationReferenceKind GetLocationReferenceKindFromStackBehaviourPush(Emit.StackBehaviour stackBehaviour)
-		{
-			switch (stackBehaviour)
-			{
-				case Emit.StackBehaviour.Push1:
-				case Emit.StackBehaviour.Pushi:
-				case Emit.StackBehaviour.Pushi8:
-				case Emit.StackBehaviour.Pushr4:
-				case Emit.StackBehaviour.Pushr8:
-					return LocationReferenceKind.Load;
-
-				case Emit.StackBehaviour.Pushref:
-					return LocationReferenceKind.LoadAddress;
-
-				case Emit.StackBehaviour.Push0:
-					return LocationReferenceKind.Store;
-
-				default:
-					throw new ArgumentException("stackBehaviour");
-			}
-		}
 	}
 }

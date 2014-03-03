@@ -8,7 +8,7 @@ using Emit = System.Reflection.Emit;
 namespace CliKit
 {
 	/// <summary>
-	/// Represents opcode which reference a field (load, load address, store).
+	/// Represents opcode which reference a field.
 	/// </summary>
 	public sealed class FieldReferenceOpcode : Opcode
 	{
@@ -19,12 +19,22 @@ namespace CliKit
 		#region Properties
 		public LocationReferenceKind ReferenceKind
 		{
-			get { return ReflectionEmitEnums.GetLocationReferenceKind(ref opcode); }
+			get
+			{
+				var name = Name;
+				if (name[0] == 's') return LocationReferenceKind.Store;
+				if (name[name.Length - 1] == 'a') return LocationReferenceKind.LoadAddress;
+				return LocationReferenceKind.Load;
+			}
 		}
 
 		public bool IsStatic
 		{
-			get { return opcode.StackBehaviourPop == Emit.StackBehaviour.Pop0; }
+			get
+			{
+				var name = Name;
+				return name[2] == 's';
+			}
 		}
 		#endregion
 

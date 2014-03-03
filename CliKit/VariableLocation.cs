@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -10,7 +12,6 @@ namespace CliKit
 	/// <summary>
 	/// Identifies a variable's location as either an indexed parameter or an indexed local variable.
 	/// </summary>
-	[Serializable]
 	public struct VariableLocation : IEquatable<VariableLocation>
 	{
 		#region Instance
@@ -35,9 +36,9 @@ namespace CliKit
 			get { return (VariableKind)kind; }
 		}
 
-		public bool IsParameter
+		public bool IsArgument
 		{
-			get { return Kind == VariableKind.Parameter; }
+			get { return Kind == VariableKind.Argument; }
 		}
 
 		public bool IsLocal
@@ -57,14 +58,19 @@ namespace CliKit
 			return kind == other.kind && index == other.index;
 		}
 
+		public override bool Equals(object obj)
+		{
+			return obj is VariableLocation && Equals((VariableLocation)obj);
+		}
+
 		public override int GetHashCode()
 		{
 			return ((int)kind << 16) | (int)index;
 		}
 
-		public override bool Equals(object obj)
+		public override string ToString()
 		{
-			return obj is VariableLocation && Equals((VariableLocation)obj);
+			return (IsArgument ? "argument " : "local ") + index.ToString(CultureInfo.InvariantCulture); 
 		}
 		#endregion
 		#endregion
@@ -83,7 +89,7 @@ namespace CliKit
 
 		public static VariableLocation Parameter(int index)
 		{
-			return new VariableLocation(VariableKind.Parameter, index);
+			return new VariableLocation(VariableKind.Argument, index);
 		}
 
 		public static VariableLocation Local(int index)

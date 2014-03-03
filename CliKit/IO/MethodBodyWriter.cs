@@ -91,7 +91,8 @@ namespace CliKit.IO
 			Call(Opcode.GetCall(kind), method);
 		}
 
-		public void CallDefault(MethodInfo method)
+		// 'Invoke' rather than 'call' since it might not use the 'call' opcode
+		public void Invoke(MethodInfo method)
 		{
 			Contract.Requires(method != null);
 			Call(method.IsStatic ? Opcode.Call : Opcode.Callvirt, method);
