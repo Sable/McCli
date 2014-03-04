@@ -250,6 +250,11 @@ namespace McCli.Compiler.CodeGen
 				string.Format("Conversion from {0} to {1}.", source, target));
 		}
 
+		private void EmitConversion(MRepr source, MStructuralClass target)
+		{
+			if (source.StructuralClass != target) EmitConversion(source, source.WithStructuralClass(target));
+		}
+
 		private void EmitBoxScalar(MType type)
 		{
 			cil.Invoke(typeof(MFullArray<>).MakeGenericType(type.CliType).GetMethod("CreateScalar"));

@@ -144,8 +144,8 @@ namespace McCli.Compiler.CodeGen
 			Contract.Assert(node.Targets.Length == 1);
 
 			var target = node.Targets[0];
-			var subjectType = node.Subject.StaticRepr;
-			Contract.Assert(subjectType.IsArray);
+			var subjectRepr = node.Subject.StaticRepr;
+			Contract.Assert(subjectRepr.IsArray);
 
 			using (BeginEmitStore(target))
 			{
@@ -154,23 +154,22 @@ namespace McCli.Compiler.CodeGen
 					// "foo = array()", same as "foo = array"
 					EmitLoad(node.Subject);
 					EmitCloneIfNeeded(node.Subject.StaticRepr);
+					EmitConversion(node.Subject.StaticRepr, target.StaticRepr);
 				}
 				else
 				{
 					var method = typeof(PseudoBuiltins).GetMethods(BindingFlags.Public | BindingFlags.Static)
 						.FirstOrDefault(m => m.Name == "ArrayGet" && m.GetParameters().Length == node.Arguments.Length + 1);
 					if (method.IsGenericMethodDefinition)
-						method = method.MakeGenericMethod(subjectType.Type.CliType);
-
-					var arrayType = subjectType.WithStructuralClass(MStructuralClass.Array);
+						method = method.MakeGenericMethod(subjectRepr.Type.CliType);
 
 					EmitLoad(node.Subject);
-					EmitConversion(subjectType, arrayType);
+					EmitConversion(subjectRepr, MStructuralClass.Array);
 
 					foreach (var argument in node.Arguments)
 					{
 						EmitLoad(argument);
-						EmitConversion(argument.StaticRepr, MClass.Double.ArrayRepr);
+						EmitConversion(argument.StaticRepr, MStructuralClass.Array);
 					}
 
 					cil.Invoke(method);
@@ -192,8 +191,13 @@ namespace McCli.Compiler.CodeGen
 				}
 
 				EmitLoad(node.Array);
-				EmitLoad(node.Indices[0]);
-				EmitConversion(node.Indices[0].StaticRepr, MClass.Double.ArrayRepr);
+				
+				for (int i = 0; i < node.Indices.Length; ++i)
+				{
+					EmitLoad(node.Indices[i]);
+					EmitConversion(node.Indices[i].StaticRepr, MClass.Double.ArrayRepr);
+				}
+					
 				EmitLoad(node.Value);
 				EmitConversion(node.Value.StaticRepr, arrayRepr);
 

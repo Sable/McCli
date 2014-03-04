@@ -136,27 +136,6 @@ namespace McCli
 			return result;
 		}
 
-		public static TScalar ArrayGet<TScalar>(MArray<TScalar> array, double rowIndex, double columnIndex)
-		{
-			return ArrayGet(array, ToInt(rowIndex), ToInt(columnIndex));
-		}
-
-		private static TScalar ArrayGet<TScalar>(MArray<TScalar> array, int rowIndex, int columnIndex)
-		{
-			Contract.Requires(array != null);
-			return ArrayGet(array, LinearizeIndex(array.Shape, rowIndex, columnIndex));
-		}
-
-		private static TScalar ArrayGet<TScalar>(MArray<TScalar> array, double index)
-		{
-			return ArrayGet(array, PseudoBuiltins.ToInt(index));
-		}
-
-		private static TScalar ArrayGet<TScalar>(MArray<TScalar> array, int index)
-		{
-			return array[index - 1];
-		}
-
 		public static MArray<TScalar> ArrayGet<TScalar>(MArray<TScalar> array, MArray<bool> mask)
 		{
 			Contract.Requires(array != null);
@@ -171,6 +150,55 @@ namespace McCli
 
 			return MFullArray<TScalar>.CreateColumnVector(values.ToArray());
 		}
+
+		public static MArray<TScalar> ArrayGet<TScalar>(MArray<TScalar> array, MArray<double> rowIndices, MArray<double> columnIndices)
+		{
+			Contract.Requires(array != null);
+			Contract.Requires(rowIndices != null);
+			Contract.Requires(columnIndices != null);
+
+			var indexedShape = new MArrayShape(rowIndices.Count, columnIndices.Count);
+			var result = new MFullArray<TScalar>(indexedShape);
+
+			for (int i = 0; i < rowIndices.Count; ++i)
+			{
+				int rowIndex = ToInt(rowIndices[i]);
+				if (rowIndex < 1 || rowIndex > array.RowCount)
+					throw new IndexOutOfRangeException();
+
+				for (int j = 0; j < columnIndices.Count; ++j)
+				{
+					int columnIndex = ToInt(columnIndices[i]);
+					if (columnIndex < 1 || columnIndex > array.ColumnCount)
+						throw new IndexOutOfRangeException();
+
+					result[j * indexedShape.RowCount + i] = array[(columnIndex - 1) * array.RowCount + (columnIndex - 1)];
+				}
+			}
+
+			return result;
+		}
+
+		internal static TScalar ArrayGet<TScalar>(MArray<TScalar> array, double rowIndex, double columnIndex)
+		{
+			return ArrayGet(array, ToInt(rowIndex), ToInt(columnIndex));
+		}
+
+		internal static TScalar ArrayGet<TScalar>(MArray<TScalar> array, int rowIndex, int columnIndex)
+		{
+			Contract.Requires(array != null);
+			return ArrayGet(array, LinearizeIndex(array.Shape, rowIndex, columnIndex));
+		}
+
+		internal static TScalar ArrayGet<TScalar>(MArray<TScalar> array, double index)
+		{
+			return ArrayGet(array, PseudoBuiltins.ToInt(index));
+		}
+
+		internal static TScalar ArrayGet<TScalar>(MArray<TScalar> array, int index)
+		{
+			return array[index - 1];
+		}
 		#endregion
 
 		#region ArraySet
@@ -178,6 +206,7 @@ namespace McCli
 		{
 			Contract.Requires(array != null);
 			Contract.Requires(indices != null);
+			Contract.Requires(values != null);
 
 			if (indices.IsEmpty && values.IsEmpty) return;
 
@@ -189,7 +218,34 @@ namespace McCli
 				array[ToInt(indices[i]) - 1] = values[i];
 		}
 
-		public static void ArraySet<TScalar>(MArray<TScalar> array, double rowIndex, double columnIndex, TScalar value)
+		public static void ArraySet<TScalar>(MArray<TScalar> array, MArray<double> rowIndices, MArray<double> columnIndices, MArray<TScalar> values)
+		{
+			Contract.Requires(array != null);
+			Contract.Requires(rowIndices != null);
+			Contract.Requires(columnIndices != null);
+			Contract.Requires(values != null);
+
+			var indexedShape = new MArrayShape(rowIndices.Count, columnIndices.Count);
+			if (values.Shape != indexedShape) throw new MArrayShapeException();
+
+			for (int i = 0; i < rowIndices.Count; ++i)
+			{
+				int rowIndex = ToInt(rowIndices[i]);
+				if (rowIndex < 1 || rowIndex > array.RowCount)
+					throw new IndexOutOfRangeException();
+
+				for (int j = 0; j < columnIndices.Count; ++j)
+				{
+					int columnIndex = ToInt(columnIndices[i]);
+					if (columnIndex < 1 || columnIndex > array.ColumnCount)
+						throw new IndexOutOfRangeException();
+
+					array[(columnIndex - 1) * array.RowCount + (columnIndex - 1)] = values[j * indexedShape.RowCount + i];
+				}
+			}
+		}
+
+		internal static void ArraySet<TScalar>(MArray<TScalar> array, double rowIndex, double columnIndex, TScalar value)
 		{
 			ArraySet(array, ToInt(rowIndex), ToInt(columnIndex), value);
 		}
