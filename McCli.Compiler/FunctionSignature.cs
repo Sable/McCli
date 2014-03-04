@@ -83,9 +83,23 @@ namespace McCli.Compiler
 		{
 			get { return outputs.Count >= 2 ? outputs.Count : 0; }
 		}
+
+		public Type ReturnCliType
+		{
+			get { return outputs.Count == 1 ? outputs[0].CliType : typeof(void); }
+		}
 		#endregion
 
 		#region Methods
+		public Type[] GetParameterCliTypes()
+		{
+			var outParameterCount = OutParameterCount;
+			var types = new Type[inputs.Count + outParameterCount];
+			for (int i = 0; i < inputs.Count; ++i) types[i] = inputs[i].CliType;
+			for (int i = 0; i < outParameterCount; ++i) types[inputs.Count + i] = outputs[i].CliType.MakeByRefType();
+			return types;
+		}
+
 		public override string ToString()
 		{
 			var stringBuilder = new StringBuilder();

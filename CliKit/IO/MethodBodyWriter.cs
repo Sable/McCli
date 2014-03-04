@@ -42,6 +42,17 @@ namespace CliKit.IO
 		public abstract void Switch(Label[] jumpTable);
 
 		/// <summary>
+		/// Writes a method call instruction, providing type information.
+		/// This is needed because <see cref="MethodBuilder"/> and <see cref="ConstructorBuilder"/>
+		/// throw when querying this information.
+		/// </summary>
+		/// <param name="opcode">The call opcode.</param>
+		/// <param name="method">The method to be called.</param>
+		/// <param name="parameterTypes">The type of the method's parameters.</param>
+		/// <param name="returnType">The type of the value returned by this method, or <c>typeof(void)</c>.</param>
+		public abstract void Call(CallOpcode opcode, MethodBase method, Type[] parameterTypes, Type returnType);
+
+		/// <summary>
 		/// Creates a <see cref="Label"/> with a given index value.
 		/// The first label to be created should have index zero,
 		/// and the index should be incremented by one for each subsequent label.
@@ -61,6 +72,17 @@ namespace CliKit.IO
 		protected int GetLabelIndex(Label label)
 		{
 			return label.index;
+		}
+
+		protected void CallWithReflectedTypes(CallOpcode opcode, MethodBase method)
+		{
+			Contract.Requires(opcode != null);
+			Contract.Requires(method != null && !(method is Emit.MethodBuilder) && !(method is Emit.ConstructorBuilder));
+
+			var parameterTypes = Array.ConvertAll(method.GetParameters(), p => p.ParameterType);
+			var methodInfo = method as MethodInfo;
+			var returnType = methodInfo == null ? typeof(void) : methodInfo.ReturnType;
+			Call(opcode, method, parameterTypes, returnType);
 		}
 		#endregion
 
@@ -85,17 +107,18 @@ namespace CliKit.IO
 			return CreateLabel(name: null);
 		}
 
-		public void Call(CallKind kind, MethodInfo method)
+		public void Call(CallKind kind, MethodBase method)
 		{
 			Contract.Requires(method != null);
 			Call(Opcode.GetCall(kind), method);
 		}
 
 		// 'Invoke' rather than 'call' since it might not use the 'call' opcode
-		public void Invoke(MethodInfo method)
+		public void Invoke(MethodBase method)
 		{
 			Contract.Requires(method != null);
-			Call(method.IsStatic ? Opcode.Call : Opcode.Callvirt, method);
+
+			Call(Opcode.GetDefaultCall(method), method);
 		}
 
 		public void FieldReference(LocationReferenceKind referenceKind, FieldInfo field)
@@ -143,8 +166,7 @@ namespace CliKit.IO
 		public void LoadIndirect(Type type)
 		{
 			Contract.Requires(type != null);
-			if (type.IsValueType) Instruction(Opcode.Ldobj, type);
-			else base.LoadIndirect(DataTypeEnum.FromCtsType(type));
+			Instruction(Opcode.Ldobj, type);
 		}
 
 		public void StoreIndirect(Type type)

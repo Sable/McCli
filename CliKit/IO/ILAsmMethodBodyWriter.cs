@@ -158,9 +158,14 @@ namespace CliKit.IO
 			stringBuilder.AppendLine(opcode.Name + ' ' + field.DeclaringType.FullName + '.' + field.Name);
 		}
 
-		public override void Call(CallOpcode opcode, MethodBase method)
+		public override void Call(CallOpcode opcode, MethodBase method, Type[] parameterTypes, Type returnType)
 		{
 			stringBuilder.AppendLine(opcode.Name + ' ' + method.DeclaringType.FullName + '.' + method.Name);
+		}
+
+		public override void Call(CallOpcode opcode, MethodBase method)
+		{
+			CallWithReflectedTypes(opcode, method);
 		}
 
 		public override void Switch(int[] jumpTable)

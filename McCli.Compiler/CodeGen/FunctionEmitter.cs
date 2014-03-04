@@ -178,16 +178,23 @@ namespace McCli.Compiler.CodeGen
 		private void EmitLoad(Variable variable)
 		{
 			cil.Load(GetLocation(variable));
+			if (IsByRef(variable))
+			{
+				// Dereference to get the value
+				cil.LoadIndirect(variable.StaticCliType);
+			}
+		}
+
+		private bool IsByRef(Variable variable)
+		{
+			return declaration.Outputs.Length >= 2
+				&& declaration.Outputs.Contains(variable)
+				&& !declaration.Inputs.Contains(variable);
 		}
 
 		private EmitStoreScope BeginEmitStore(Variable variable)
 		{
-			if (declaration.Outputs.Length >= 2 && !declaration.Inputs.Contains(variable))
-			{
-				// ByRef parameter
-				cil.Load(GetLocation(variable));
-			}
-
+			if (IsByRef(variable)) cil.Load(GetLocation(variable));
 			return new EmitStoreScope(this, variable);
 		}
 
@@ -195,15 +202,8 @@ namespace McCli.Compiler.CodeGen
 		{
 			if (variable == null) return;
 
-			if (declaration.Outputs.Length >= 2 && !declaration.Inputs.Contains(variable))
-			{
-				// ByRef parameter
-				cil.StoreIndirect(variable.StaticCliType);
-			}
-			else
-			{
-				cil.Store(GetLocation(variable));
-			}
+			if (IsByRef(variable)) cil.StoreIndirect(variable.StaticCliType);
+			else cil.Store(GetLocation(variable));
 		}
 
 		private void EmitConversion(MRepr source, MRepr target)

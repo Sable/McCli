@@ -60,6 +60,12 @@ namespace CliKit.IO
 			generator.Emit(OpCodes.Ldstr, str);
 		}
 
+		public override void Call(CallOpcode opcode, MethodBase method, Type[] parameterTypes, Type returnType)
+		{
+			// We don't need the parameter/return types
+			Call(opcode, method);
+		}
+
 		public override void Call(CallOpcode opcode, MethodBase method)
 		{
 			OpCode emitOpCode;

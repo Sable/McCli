@@ -186,7 +186,7 @@ namespace CliKit.IO
 			if (sink != null) sink.Branch(opcode, target);
 		}
 
-		public override void Call(CallOpcode opcode, MethodBase method)
+		public override void Call(CallOpcode opcode, MethodBase method, Type[] parameterTypes, Type returnType)
 		{
 			// Sanity checks
 			if (method.DeclaringType.IsGenericTypeDefinition)
@@ -197,31 +197,30 @@ namespace CliKit.IO
 				throw Error("New object by calling a non-constructor: {0}.", GetFullName(method));
 
 			// Pop arguments
-			var parameters = method.GetParameters();
-			
-			int requiredStackSize = parameters.Length;
+			int requiredStackSize = parameterTypes.Length;
 			if (!method.IsStatic) ++requiredStackSize;
 
 			if (StackSize < requiredStackSize)
 				throw Error("Calling {0} requires {1} stack operands, but the stack has size {2}.", GetFullName(method), requiredStackSize, stack.Size);
 
-			for (int i = parameters.Length - 1; i >= 0; --i)
-				stack.PopAssignableTo(opcode, parameters[i].ParameterType);
+			for (int i = parameterTypes.Length - 1; i >= 0; --i)
+				stack.PopAssignableTo(opcode, parameterTypes[i]);
 
 			if (!method.IsStatic) stack.PopAssignableTo(opcode, method.DeclaringType);
 
 			// Push return value
 			if (opcode.Kind == CallKind.Constructor)
 				stack.Push(method.DeclaringType);
-			else
-			{
-				var methodInfo = (MethodInfo)method;
-				if (methodInfo.ReturnType != typeof(void))
-					stack.Push(methodInfo.ReturnType);
-			}
+			else if (returnType != typeof(void))
+				stack.Push(returnType);
 
 			// Forward to sink
 			if (sink != null) sink.Call(opcode, method);
+		}
+
+		public override void Call(CallOpcode opcode, MethodBase method)
+		{
+			CallWithReflectedTypes(opcode, method);
 		}
 
 		public override void LoadString(string str)

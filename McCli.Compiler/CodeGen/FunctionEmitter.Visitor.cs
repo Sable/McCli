@@ -109,7 +109,18 @@ namespace McCli.Compiler.CodeGen
 			}
 
 			// Call the function
-			cil.Invoke(function.Method);
+			var method = function.Method;
+			if (method is System.Reflection.Emit.MethodBuilder)
+			{
+				// We have to supply the parameter types ourselves since MethodBodyWriter
+				// can't call MethodBuilder.GetParameters() without receiving an exception.
+				cil.Call(Opcode.GetDefaultCall(method), method,
+					function.Signature.GetParameterCliTypes(), function.Signature.ReturnCliType);
+			}
+			else
+			{
+				cil.Invoke(method);
+			}
 
 			// Handle the return value, if any
 			if (signature.HasReturnValue)

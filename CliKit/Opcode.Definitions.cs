@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Reflection.Emit;
 using System.Diagnostics.Contracts;
+using Reflection = System.Reflection;
 
 namespace CliKit
 {
@@ -236,6 +237,14 @@ namespace CliKit
 				case LocationReferenceKind.Store: return @static ? Opcode.Stsfld : Opcode.Stfld;
 				default: throw new ArgumentException("referenceKind");
 			}
+		}
+
+		public static CallOpcode GetDefaultCall(Reflection.MethodBase method)
+		{
+			Contract.Requires(method != null);
+
+			if (method is Reflection.ConstructorInfo) return Newobj;
+			return method.IsStatic ? Call : Callvirt;
 		}
 
 		public static CallOpcode GetCall(CallKind kind)
