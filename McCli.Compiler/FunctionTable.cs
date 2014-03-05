@@ -11,7 +11,7 @@ namespace McCli.Compiler
 {
 	public sealed class FunctionTable
 	{
-		#region GroupKey
+		#region Nested Types
 		private struct GroupKey : IEquatable<GroupKey>
 		{
 			public readonly string Name;
@@ -37,6 +37,16 @@ namespace McCli.Compiler
 			{
 				return Name.GetHashCode() ^ InputArity;
 			}
+		}
+
+		private enum Admissibility
+		{
+			Incompatible,
+			ToAny,
+			RealToComplexAndStructuralClassChange,
+			RealToComplex,
+			StructuralClassChange,
+			PerfectMatch,
 		}
 		#endregion
 
@@ -104,22 +114,27 @@ namespace McCli.Compiler
 
 			var key = new GroupKey(name, inputs.Length);
 
-			FunctionMethod admissibleOverload = null;
+			FunctionMethod bestOverload = null;
 
 			List<FunctionMethod> overloads;
 			if (functions.TryGetValue(key, out overloads))
 			{
+				var bestAdmissibility = Admissibility.PerfectMatch;
 				foreach (var overload in overloads)
 				{
-					if (IsAdmissible(overload, inputs))
+					var admissibility = GetAdmissibility(overload, inputs);
+					if (admissibility == Admissibility.Incompatible) continue;
+
+					if (bestOverload == null || bestAdmissibility < admissibility)
 					{
-						Contract.Assert(admissibleOverload == null, "Call to " + name + " has multiple admissible overloads.");
-						admissibleOverload = overload;
+						// TODO: assert we don't have multiple overloads with the same admissibility
+						bestOverload = overload;
+						bestAdmissibility = admissibility;
 					}
 				}
 			}
 
-			if (admissibleOverload == null)
+			if (bestOverload == null)
 			{
 				var message = new StringBuilder();
 				message.Append("No admissible overload for function ")
@@ -136,19 +151,31 @@ namespace McCli.Compiler
 				throw new KeyNotFoundException(message.ToString());
 			}
 
-			return admissibleOverload;
+			return bestOverload;
 		}
 
-		private static bool IsAdmissible(FunctionMethod overload, ImmutableArray<MRepr> inputs)
+		private static Admissibility GetAdmissibility(FunctionMethod overload, ImmutableArray<MRepr> inputs)
 		{
+			var admissibility = Admissibility.PerfectMatch;
 			for (int i = 0; i < inputs.Length; ++i)
 			{
 				MRepr provided = inputs[i];
 				MRepr expected = overload.Signature.Inputs[i];
-				if (provided.Type != expected.Type && !expected.IsAny) return false;
+
+				if (provided != expected)
+				{
+					var inputAdmissibility = Admissibility.PerfectMatch;
+					if (expected.IsAny)
+						inputAdmissibility = Admissibility.ToAny;
+					else if (provided.Type == expected.Type)
+						inputAdmissibility = Admissibility.StructuralClassChange;
+					else
+						return Admissibility.Incompatible;
+					if (inputAdmissibility < admissibility) admissibility = inputAdmissibility;
+				}
 			}
 
-			return true;
+			return admissibility;
 		}
 
 		/// <summary>

@@ -56,7 +56,10 @@ namespace McCli
 			out2 = in1;
 		}
 
-		public static double OverloadedIdentity(double value) { return value; }
-		public static char OverloadedIdentity(char value) { return value; }
+		public static double InputTypeOverloadedIdentity(double value) { return value; }
+		public static char InputTypeOverloadedIdentity(char value) { return value; }
+
+		public static double StructuralClassOverloadedDoubleIdentity(double value) { return value; }
+		public static MArray<double> StructuralClassOverloadedDoubleIdentity(MArray<double> value) { return value; }
 	}
 }

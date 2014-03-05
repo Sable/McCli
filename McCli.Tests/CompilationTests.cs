@@ -433,7 +433,7 @@ namespace McCli
 		}
 
 		[TestMethod]
-		public void TestOverloading()
+		public void TestOverloadingOnInputType()
 		{
 			var doubleInput = Declare<double>("doubleInput");
 			var doubleOutput = Declare<double>("doubleOutput");
@@ -441,12 +441,29 @@ namespace McCli
 			var charOutput = Declare<char>("charOutput");
 
 			var doubleFunction = CompileFunction<Func<double, double>>(
-				doubleInput, doubleOutput, new StaticCall(doubleOutput, "OverloadedIdentity", doubleInput));
+				doubleInput, doubleOutput, new StaticCall(doubleOutput, "InputTypeOverloadedIdentity", doubleInput));
 			var charFunction = CompileFunction<Func<char, char>>(
-				charInput, charOutput, new StaticCall(charOutput, "OverloadedIdentity", charInput));
+				charInput, charOutput, new StaticCall(charOutput, "InputTypeOverloadedIdentity", charInput));
 
 			Assert.AreEqual(42.0, doubleFunction(42));
 			Assert.AreEqual('k', charFunction('k'));
+		}
+
+		[TestMethod]
+		public void TestOverloadingOnStructuralClass()
+		{
+			var scalarInput = Declare<double>("ScalarInput");
+			var scalarOutput = Declare<double>("ScalarOutput");
+			var arrayInput = Declare<MArray<double>>("arrayInput");
+			var arrayOutput = Declare<MArray<double>>("arrayOutput");
+
+			var scalarFunction = CompileFunction<Func<double, double>>(
+				scalarInput, scalarOutput, new StaticCall(scalarOutput, "StructuralClassOverloadedDoubleIdentity", scalarInput));
+			var arrayFunction = CompileFunction<Func<MArray<double>, MArray<double>>>(
+				arrayInput, arrayOutput, new StaticCall(arrayOutput, "StructuralClassOverloadedDoubleIdentity", arrayInput));
+
+			Assert.AreEqual(42.0, scalarFunction(42));
+			Assert.AreEqual(666.0, arrayFunction(666).ToScalar());
 		}
 	}
 }

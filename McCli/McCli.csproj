@@ -108,6 +108,7 @@
     <Compile Include="MFunctional.cs" />
     <Compile Include="MFunctionHandleClass.cs" />
     <Compile Include="MPrimitiveClass.cs" />
+    <Compile Include="MPrimitives.cs" />
     <Compile Include="MStructuralClass.cs" />
     <Compile Include="MStructuralClass.Classes.cs" />
     <Compile Include="MRepr.cs" />
