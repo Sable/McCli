@@ -431,5 +431,22 @@ namespace McCli
 			Assert.AreEqual(666.0, result1);
 			Assert.AreEqual(42.0, result2);
 		}
+
+		[TestMethod]
+		public void TestOverloading()
+		{
+			var doubleInput = Declare<double>("doubleInput");
+			var doubleOutput = Declare<double>("doubleOutput");
+			var charInput = Declare<char>("charInput");
+			var charOutput = Declare<char>("charOutput");
+
+			var doubleFunction = CompileFunction<Func<double, double>>(
+				doubleInput, doubleOutput, new StaticCall(doubleOutput, "OverloadedIdentity", doubleInput));
+			var charFunction = CompileFunction<Func<char, char>>(
+				charInput, charOutput, new StaticCall(charOutput, "OverloadedIdentity", charInput));
+
+			Assert.AreEqual(42.0, doubleFunction(42));
+			Assert.AreEqual('k', charFunction('k'));
+		}
 	}
 }

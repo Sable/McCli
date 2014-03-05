@@ -11,7 +11,7 @@ using OperandType = System.Reflection.Emit.OperandType;
 namespace CliKit.IO
 {
 	/// <summary>
-	/// Performs CIL verification of an method bodies.
+	/// Performs CIL verification of method bodies.
 	/// </summary>
 	public sealed partial class MethodBodyVerifier : MethodBodyWriter
 	{

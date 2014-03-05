@@ -41,7 +41,8 @@ namespace McCli.Compiler
 		#endregion
 
 		#region Fields
-		private readonly Dictionary<GroupKey, FunctionMethod> functions = new Dictionary<GroupKey, FunctionMethod>();
+		private readonly Dictionary<GroupKey, List<FunctionMethod>> functions
+			= new Dictionary<GroupKey, List<FunctionMethod>>();
 		#endregion
 
 		#region Methods
@@ -69,8 +70,8 @@ namespace McCli.Compiler
 
 			if (method.IsGenericMethodDefinition)
 			{
-				// TODO: Change this once overloading is implemented
-				AddMethod(method.MakeGenericMethod(typeof(double)));
+				foreach (var instantiation in InstantiateGenericMethod(method))
+					AddMethod(method);
 				return;
 			}
 
@@ -86,23 +87,68 @@ namespace McCli.Compiler
 			Contract.Requires(function != null);
 
 			var key = new GroupKey(function.Name, function.Signature.Inputs.Count);
-			functions.Add(key, function);
+			
+			List<FunctionMethod> overloads;
+			if (!functions.TryGetValue(key, out overloads))
+			{
+				overloads = new List<FunctionMethod>();
+				functions.Add(key, overloads);
+			}
+
+			overloads.Add(function);
 		}
 
-		public FunctionMethod Lookup(string name, ImmutableArray<MRepr> argumentTypes)
+		public FunctionMethod Lookup(string name, ImmutableArray<MRepr> inputs)
 		{
 			Contract.Requires(name != null);
 
-			var key = new GroupKey(name, argumentTypes.Length);
-			FunctionMethod function;
-			if (!functions.TryGetValue(key, out function))
+			var key = new GroupKey(name, inputs.Length);
+
+			FunctionMethod admissibleOverload = null;
+
+			List<FunctionMethod> overloads;
+			if (functions.TryGetValue(key, out overloads))
 			{
-				string message = string.Format(CultureInfo.InvariantCulture,
-					"No function '{0}' taking {1} arguments.", name, argumentTypes.Length);
-				throw new KeyNotFoundException(message);
+				foreach (var overload in overloads)
+				{
+					bool isAdmissible = true;
+					for (int i = 0; i < inputs.Length; ++i)
+					{
+						MRepr provided = inputs[i];
+						MRepr expected = overload.Signature.Inputs[i];
+						if (expected.Type != provided.Type)
+						{
+							isAdmissible = false;
+							break;
+						}
+					}
+
+					if (isAdmissible)
+					{
+						Contract.Assert(admissibleOverload == null, "Call to " + name + " has multiple admissible overloads.");
+						admissibleOverload = overload;
+					}
+				}
 			}
 
-			return function;
+			if (admissibleOverload == null)
+			{
+				var message = new StringBuilder();
+				message.Append("No admissible overload for function ")
+					.Append(name)
+					.Append(" with input types (");
+				for (int i = 0; i < inputs.Length; ++i)
+				{
+					if (i >= 1) message.Append(", ");
+					message.Append(inputs[i].ToString());
+				}
+
+				message.Append(')');
+
+				throw new KeyNotFoundException(message.ToString());
+			}
+
+			return admissibleOverload;
 		}
 
 		/// <summary>

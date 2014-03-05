@@ -25,6 +25,9 @@ namespace CliKit.IO
 			}
 		}
 
+		/// <summary>
+		/// Tracks the types on the evaluation stack during verification.
+		/// </summary>
 		[DebuggerDisplay("Size = {Size}")]
 		private struct Stack
 		{
