@@ -14,6 +14,7 @@ namespace McCli.Builtins
 	public static class RelationalOperations
 	{
 		#region Comparison
+		#region Double
 		public static MArray<bool> eq(MArray<double> a, MArray<double> b)
 		{
 			ElementaryOperations.MatchShapes(ref a, ref b);
@@ -87,6 +88,33 @@ namespace McCli.Builtins
 
 			return true;
 		}
+		#endregion
+
+		#region Char
+		public static MArray<bool> eq(MArray<char> a, MArray<char> b)
+		{
+			return MFunctional.Zip(a, b, (x, y) => x == y, allowScalarArgument: true);
+		}
+
+		public static MArray<bool> ne(MArray<char> a, MArray<char> b)
+		{
+			return MFunctional.Zip(a, b, (x, y) => x != y, allowScalarArgument: true);
+		}
+
+		public static bool isequal(MArray<char> a, MArray<char> b)
+		{
+			Contract.Requires(a != null);
+			Contract.Requires(b != null);
+
+			if (a.Shape != b.Shape) return false;
+
+			for (int i = 0; i < a.Count; ++i)
+				if (a[i] != b[i])
+					return false;
+
+			return true;
+		}
+		#endregion
 
 		// TODO: isequaln
 		#endregion

@@ -105,6 +105,7 @@
     <Compile Include="MComplex.cs" />
     <Compile Include="MComplexType.cs" />
     <Compile Include="MFullArray.cs" />
+    <Compile Include="MFunctional.cs" />
     <Compile Include="MFunctionHandleClass.cs" />
     <Compile Include="MPrimitiveClass.cs" />
     <Compile Include="MStructuralClass.cs" />

@@ -71,7 +71,7 @@ namespace McCli.Compiler
 			if (method.IsGenericMethodDefinition)
 			{
 				foreach (var instantiation in InstantiateGenericMethod(method))
-					AddMethod(method);
+					AddMethod(instantiation);
 				return;
 			}
 
@@ -111,19 +111,7 @@ namespace McCli.Compiler
 			{
 				foreach (var overload in overloads)
 				{
-					bool isAdmissible = true;
-					for (int i = 0; i < inputs.Length; ++i)
-					{
-						MRepr provided = inputs[i];
-						MRepr expected = overload.Signature.Inputs[i];
-						if (expected.Type != provided.Type)
-						{
-							isAdmissible = false;
-							break;
-						}
-					}
-
-					if (isAdmissible)
+					if (IsAdmissible(overload, inputs))
 					{
 						Contract.Assert(admissibleOverload == null, "Call to " + name + " has multiple admissible overloads.");
 						admissibleOverload = overload;
@@ -151,6 +139,18 @@ namespace McCli.Compiler
 			return admissibleOverload;
 		}
 
+		private static bool IsAdmissible(FunctionMethod overload, ImmutableArray<MRepr> inputs)
+		{
+			for (int i = 0; i < inputs.Length; ++i)
+			{
+				MRepr provided = inputs[i];
+				MRepr expected = overload.Signature.Inputs[i];
+				if (provided.Type != expected.Type && !expected.IsAny) return false;
+			}
+
+			return true;
+		}
+
 		/// <summary>
 		/// Fixes the type arguments of a generic method implementing a MatLab function.
 		/// </summary>
@@ -164,7 +164,13 @@ namespace McCli.Compiler
 			Contract.Assert(genericArguments.Length == 1);
 
 			var genericMType = genericArguments[0].GetCustomAttribute<GenericMTypeAttribute>();
-			Contract.Assert(genericMType != null);
+			if (genericMType == null)
+			{
+				var message = string.Format(CultureInfo.InvariantCulture,
+					"Generic method {0} must have generic parameter attribute {1} for instantiation as MatLab functions.",
+					method.Name, typeof(GenericMTypeAttribute).Name);
+				throw new ArgumentException(message, "method");
+			}
 
 			for (int i = 1; i < 0x40000000; i <<= 1)
 			{

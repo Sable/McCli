@@ -34,7 +34,7 @@ namespace McCli.Builtins
 		#region Degrees/Radians
 		public static MArray<double> degtorad(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(degtorad, array);
+			return MFunctional.Map(array, degtorad);
 		}
 
 		internal static double degtorad(double value)
@@ -44,7 +44,7 @@ namespace McCli.Builtins
 
 		public static MArray<double> radtodeg(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(radtodeg, array);
+			return MFunctional.Map(array, radtodeg);
 		}
 
 		internal static double radtodeg(double value)
@@ -56,7 +56,7 @@ namespace McCli.Builtins
 		#region cos, sin, ...
 		public static MArray<double> cos(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(cos, array);
+			return MFunctional.Map(array, cos);
 		}
 
 		internal static double cos(double value)
@@ -66,7 +66,7 @@ namespace McCli.Builtins
 
 		public static MArray<double> cot(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(cot, array);
+			return MFunctional.Map(array, cot);
 		}
 
 		internal static double cot(double value)
@@ -76,7 +76,7 @@ namespace McCli.Builtins
 
 		public static MArray<double> csc(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(csc, array);
+			return MFunctional.Map(array, csc);
 		}
 
 		internal static double csc(double value)
@@ -86,7 +86,7 @@ namespace McCli.Builtins
 
 		public static MArray<double> sec(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(sec, array);
+			return MFunctional.Map(array, sec);
 		}
 
 		internal static double sec(double value)
@@ -96,7 +96,7 @@ namespace McCli.Builtins
 
 		public static MArray<double> sin(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(sin, array);
+			return MFunctional.Map(array, sin);
 		}
 
 		internal static double sin(double value)
@@ -106,7 +106,7 @@ namespace McCli.Builtins
 
 		public static MArray<double> tan(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(tan, array);
+			return MFunctional.Map(array, tan);
 		}
 
 		internal static double tan(double value)
@@ -118,7 +118,7 @@ namespace McCli.Builtins
 		#region cosd, sind, ...
 		public static MArray<double> cosd(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(cosd, array);
+			return MFunctional.Map(array, cosd);
 		}
 
 		internal static double cosd(double value)
@@ -128,7 +128,7 @@ namespace McCli.Builtins
 
 		public static MArray<double> cotd(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(cotd, array);
+			return MFunctional.Map(array, cotd);
 		}
 
 		internal static double cotd(double value)
@@ -138,7 +138,7 @@ namespace McCli.Builtins
 
 		public static MArray<double> cscd(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(cscd, array);
+			return MFunctional.Map(array, cscd);
 		}
 
 		internal static double cscd(double value)
@@ -148,7 +148,7 @@ namespace McCli.Builtins
 
 		public static MArray<double> secd(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(secd, array);
+			return MFunctional.Map(array, secd);
 		}
 
 		internal static double secd(double value)
@@ -158,7 +158,7 @@ namespace McCli.Builtins
 
 		public static MArray<double> sind(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(sind, array);
+			return MFunctional.Map(array, sind);
 		}
 
 		internal static double sind(double value)
@@ -168,7 +168,7 @@ namespace McCli.Builtins
 
 		public static MArray<double> tand(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(tand, array);
+			return MFunctional.Map(array, tand);
 		}
 
 		internal static double tand(double value)
@@ -180,7 +180,7 @@ namespace McCli.Builtins
 		#region acos, asin, ...
 		public static MArray<double> acos(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(acos, array);
+			return MFunctional.Map(array, acos);
 		}
 
 		internal static double acos(double value)
@@ -190,7 +190,7 @@ namespace McCli.Builtins
 
 		public static MArray<double> acot(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(acot, array);
+			return MFunctional.Map(array, acot);
 		}
 
 		internal static double acot(double value)
@@ -200,7 +200,7 @@ namespace McCli.Builtins
 
 		public static MArray<double> acsc(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(acsc, array);
+			return MFunctional.Map(array, acsc);
 		}
 
 		internal static double acsc(double value)
@@ -210,7 +210,7 @@ namespace McCli.Builtins
 
 		public static MArray<double> asec(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(asec, array);
+			return MFunctional.Map(array, asec);
 		}
 
 		internal static double asec(double value)
@@ -220,7 +220,7 @@ namespace McCli.Builtins
 
 		public static MArray<double> asin(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(asin, array);
+			return MFunctional.Map(array, asin);
 		}
 
 		internal static double asin(double value)
@@ -230,7 +230,7 @@ namespace McCli.Builtins
 
 		public static MArray<double> atan(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(atan, array);
+			return MFunctional.Map(array, atan);
 		}
 
 		internal static double atan(double value)
@@ -242,7 +242,7 @@ namespace McCli.Builtins
 		#region acosd, asind, ...
 		public static MArray<double> acosd(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(acosd, array);
+			return MFunctional.Map(array, acosd);
 		}
 
 		internal static double acosd(double value)
@@ -252,7 +252,7 @@ namespace McCli.Builtins
 
 		public static MArray<double> acotd(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(acotd, array);
+			return MFunctional.Map(array, acotd);
 		}
 
 		internal static double acotd(double value)
@@ -262,7 +262,7 @@ namespace McCli.Builtins
 
 		public static MArray<double> acscd(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(acscd, array);
+			return MFunctional.Map(array, acscd);
 		}
 
 		internal static double acscd(double value)
@@ -272,7 +272,7 @@ namespace McCli.Builtins
 
 		public static MArray<double> asecd(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(asecd, array);
+			return MFunctional.Map(array, asecd);
 		}
 
 		internal static double asecd(double value)
@@ -282,7 +282,7 @@ namespace McCli.Builtins
 
 		public static MArray<double> asind(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(asind, array);
+			return MFunctional.Map(array, asind);
 		}
 
 		internal static double asind(double value)
@@ -292,7 +292,7 @@ namespace McCli.Builtins
 
 		public static MArray<double> atand(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(atand, array);
+			return MFunctional.Map(array, atand);
 		}
 
 		internal static double atand(double value)
@@ -304,7 +304,7 @@ namespace McCli.Builtins
 		#region cosh, sinh, ...
 		public static MArray<double> cosh(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(cosh, array);
+			return MFunctional.Map(array, cosh);
 		}
 
 		internal static double cosh(double value)
@@ -314,7 +314,7 @@ namespace McCli.Builtins
 
 		public static MArray<double> coth(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(coth, array);
+			return MFunctional.Map(array, coth);
 		}
 
 		internal static double coth(double value)
@@ -324,7 +324,7 @@ namespace McCli.Builtins
 
 		public static MArray<double> csch(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(csch, array);
+			return MFunctional.Map(array, csch);
 		}
 
 		internal static double csch(double value)
@@ -334,7 +334,7 @@ namespace McCli.Builtins
 
 		public static MArray<double> sech(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(sech, array);
+			return MFunctional.Map(array, sech);
 		}
 
 		internal static double sech(double value)
@@ -344,7 +344,7 @@ namespace McCli.Builtins
 
 		public static MArray<double> sinh(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(sinh, array);
+			return MFunctional.Map(array, sinh);
 		}
 
 		internal static double sinh(double value)
@@ -354,7 +354,7 @@ namespace McCli.Builtins
 
 		public static MArray<double> tanh(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(tanh, array);
+			return MFunctional.Map(array, tanh);
 		}
 
 		internal static double tanh(double value)

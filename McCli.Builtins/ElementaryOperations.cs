@@ -233,7 +233,7 @@ namespace McCli.Builtins
 			Contract.Requires(rhs != null);
 
 			MatchShapes(ref lhs, ref rhs);
-			return ArrayCreation.arrayfun(mod, lhs, rhs);
+			return MFunctional.Map(lhs, rhs, mod);
 		}
 
 		internal static double mod(double lhs, double rhs)
@@ -247,7 +247,7 @@ namespace McCli.Builtins
 			Contract.Requires(rhs != null);
 
 			MatchShapes(ref lhs, ref rhs);
-			return ArrayCreation.arrayfun(rem, lhs, rhs);
+			return MFunctional.Map(lhs, rhs, rem);
 		}
 
 		internal static double rem(double lhs, double rhs)

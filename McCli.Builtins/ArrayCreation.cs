@@ -198,32 +198,6 @@ namespace McCli.Builtins
 		}
 		#endregion
 
-		public static MArray<TScalar> arrayfun<TScalar>(Func<TScalar, TScalar> map, MArray<TScalar> array)
-		{
-			Contract.Requires(map != null);
-			Contract.Requires(array != null);
-
-			var result = new MFullArray<TScalar>(array.Shape);
-			for (int i = 0; i < array.Count; ++i)
-				result[i] = map(array[i]);
-			return result;
-		}
-
-		public static MArray<TScalar> arrayfun<TScalar>(Func<TScalar, TScalar, TScalar> map, MArray<TScalar> array1, MArray<TScalar> array2)
-		{
-			Contract.Requires(map != null);
-			Contract.Requires(array1 != null);
-			Contract.Requires(array2 != null);
-
-			var shape = array1.Shape;
-			if (array2.Shape != array1.Shape) throw new MArrayShapeException();
-
-			var result = new MFullArray<TScalar>(shape);
-			for (int i = 0; i < shape.Count; ++i)
-				result[i] = map(array1[i], array2[i]);
-			return result;
-		}
-
 		// TODO: diag, pascal, magic
 	}
 }

@@ -15,7 +15,7 @@ namespace McCli.Builtins
 		#region Roots
 		public static MArray<double> sqrt(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(sqrt, array);
+			return MFunctional.Map(array, sqrt);
 		}
 
 		internal static double sqrt(double value)
@@ -25,7 +25,7 @@ namespace McCli.Builtins
 
 		public static MArray<double> realsqrt(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(realsqrt, array);
+			return MFunctional.Map(array, realsqrt);
 		}
 
 		internal static double realsqrt(double value)
@@ -42,7 +42,7 @@ namespace McCli.Builtins
 		#region Exponentials
 		public static MArray<double> exp(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(exp, array);
+			return MFunctional.Map(array, exp);
 		}
 
 		internal static double exp(double value)
@@ -54,7 +54,7 @@ namespace McCli.Builtins
 		#region Powers
 		public static MArray<double> pow2(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(pow2, array);
+			return MFunctional.Map(array, pow2);
 		}
 
 		internal static double pow2(double value)
@@ -64,7 +64,7 @@ namespace McCli.Builtins
 
 		public static MArray<double> realpow(MArray<double> @base, MArray<double> exponent)
 		{
-			return ArrayCreation.arrayfun(realpow, @base, exponent);
+			return MFunctional.Map(@base, exponent, realpow);
 		}
 
 		internal static double realpow(double @base, double exponent)
@@ -76,7 +76,7 @@ namespace McCli.Builtins
 		#region Logarithms
 		public static MArray<double> log(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(log, array);
+			return MFunctional.Map(array, log);
 		}
 
 		internal static double log(double value)
@@ -86,7 +86,7 @@ namespace McCli.Builtins
 
 		public static MArray<double> log2(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(log2, array);
+			return MFunctional.Map(array, log2);
 		}
 
 		internal static double log2(double value)
@@ -96,7 +96,7 @@ namespace McCli.Builtins
 
 		public static MArray<double> log10(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(log10, array);
+			return MFunctional.Map(array, log10);
 		}
 
 		internal static double log10(double value)
@@ -106,7 +106,7 @@ namespace McCli.Builtins
 
 		public static MArray<double> reallog(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(reallog, array);
+			return MFunctional.Map(array, reallog);
 		}
 
 		internal static double reallog(double value)

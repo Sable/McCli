@@ -17,17 +17,17 @@ namespace McCli.Builtins
 		#region abs
 		public static MArray<double> abs(MArray<double> array)
 		{
-			return ArrayCreation.arrayfun(abs, array);
+			return MFunctional.Map(array, abs);
+		}
+
+		public static MArray<double> abs(MArray<MComplex<double>> array)
+		{
+			return MFunctional.Map(array, abs);
 		}
 
 		internal static double abs(double value)
 		{
 			return Math.Abs(value);
-		}
-
-		internal static MArray<double> abs(MArray<MComplex<double>> array)
-		{
-			throw new NotImplementedException();
 		}
 
 		internal static double abs(MComplex<double> value)

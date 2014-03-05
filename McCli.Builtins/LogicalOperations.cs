@@ -23,7 +23,7 @@ namespace McCli.Builtins
 			if (b.IsScalar) return and(a, b[0]);
 			if (a.Shape != b.Shape) throw new MArrayShapeException();
 
-			return ArrayCreation.arrayfun(and, a, b);
+			return MFunctional.Map(a, b, and);
 		}
 
 		internal static MArray<bool> and(MArray<bool> a, bool b)
@@ -47,7 +47,7 @@ namespace McCli.Builtins
 			if (b.IsScalar) return or(a, b[0]);
 			if (a.Shape != b.Shape) throw new MArrayShapeException();
 
-			return ArrayCreation.arrayfun(or, a, b);
+			return MFunctional.Map(a, b, or);
 		}
 
 		internal static MArray<bool> or(MArray<bool> a, bool b)
@@ -71,7 +71,7 @@ namespace McCli.Builtins
 			if (b.IsScalar) return xor(a, b[0]);
 			if (a.Shape != b.Shape) throw new MArrayShapeException();
 
-			return ArrayCreation.arrayfun(xor, a, b);
+			return MFunctional.Map(a, b, xor);
 		}
 
 		internal static MArray<bool> xor(MArray<bool> a, bool b)
@@ -91,7 +91,7 @@ namespace McCli.Builtins
 			Contract.Requires(array != null);
 
 			if (array.IsScalar) return not(array[0]);
-			return ArrayCreation.arrayfun(not, array);
+			return MFunctional.Map(array, not);
 		}
 
 		internal static bool not(bool value)
@@ -123,6 +123,13 @@ namespace McCli.Builtins
 			}
 
 			return result;
+		}
+
+		public static MArray<bool> any(MArray<double> array)
+		{
+			Contract.Requires(array != null);
+			if (array.IsEmpty) return false;
+			return MFunctional.CollapseDimension(array, d => d != 0, (b1, b2) => b1 | b2);
 		}
 		#endregion
 

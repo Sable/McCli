@@ -111,6 +111,12 @@ namespace McCli
 			return new MRepr(type, structuralClass);
 		}
 
+		public bool IsSubtypeOf(MRepr other)
+		{
+			return other.IsAny || (type == other.type
+				&& (structuralClass == other.structuralClass || other.IsArray));
+		}
+
 		public bool Equals(MRepr other)
 		{
 			return type == other.type && structuralClass == other.structuralClass;
