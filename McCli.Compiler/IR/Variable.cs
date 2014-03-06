@@ -50,7 +50,7 @@ namespace McCli.Compiler.IR
 		{
 			Contract.Requires(constantValue is double || constantValue is char);
 
-			this.StaticRepr = MClass.FromCliType(constantValue.GetType());
+			this.StaticRepr = MRepr.FromCliType(constantValue.GetType());
 			this.ConstantValue = constantValue;
 		}
 		#endregion

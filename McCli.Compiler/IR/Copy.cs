@@ -13,8 +13,11 @@ namespace McCli.Compiler.IR
 	/// </summary>
 	public sealed class Copy : Expression
 	{
+		#region Fields
 		public readonly Variable Target, Value;
+		#endregion
 
+		#region Constructors
 		public Copy(Variable target, Variable value)
 		{
 			Contract.Requires(target != null);
@@ -22,6 +25,20 @@ namespace McCli.Compiler.IR
 
 			this.Target = target;
 			this.Value = value;
+		}
+		#endregion
+
+		#region Properties
+		public override int TargetCount
+		{
+			get { return 1; }
+		}
+		#endregion
+
+		#region Methods
+		public override Variable GetTarget(int index)
+		{
+			return Target;
 		}
 
 		public override void Accept(Visitor visitor)
@@ -33,5 +50,6 @@ namespace McCli.Compiler.IR
 		{
 			return string.Format("{0} = {1}", Target.Name, Value.Name);
 		}
+		#endregion
 	}
 }

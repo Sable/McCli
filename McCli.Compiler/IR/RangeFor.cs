@@ -37,7 +37,7 @@ namespace McCli.Compiler.IR
 
 		public override void Accept(Visitor visitor)
 		{
-			visitor.VisitFor(this);
+			visitor.VisitRangeFor(this);
 		}
 
 		public override string ToDebugString()

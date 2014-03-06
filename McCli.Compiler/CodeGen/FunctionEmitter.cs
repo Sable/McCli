@@ -172,11 +172,44 @@ namespace McCli.Compiler.CodeGen
 		private void EmitStatements(ImmutableArray<Statement> statements)
 		{
 			foreach (var statement in statements)
+			{
+				// Do not generate expressions producing constant primitive values
+				var expression = statement as Expression;
+				if (expression != null)
+				{
+					bool onlyProducesConstants = true;
+					for (int targetIndex = 0; targetIndex < expression.TargetCount; ++targetIndex)
+					{
+						if (!IsLiteral(expression.GetTarget(targetIndex)))
+						{
+							onlyProducesConstants = false;
+							break;
+						}
+					}
+
+					if (onlyProducesConstants) continue;
+				}
+
 				statement.Accept(this);
+			}
+		}
+
+		private bool IsLiteral(Variable variable)
+		{
+			return variable.ConstantValue != null && variable.StaticRepr.IsPrimitiveScalar;
 		}
 		
 		private void EmitLoad(Variable variable)
 		{
+			if (IsLiteral(variable))
+			{
+				if (variable.ConstantValue is double)
+					cil.LoadFloat((double)variable.ConstantValue);
+				else
+					throw new NotImplementedException("Loading constants of type " + variable.StaticRepr);
+				return;
+			}
+
 			cil.Load(GetLocation(variable));
 			if (IsByRef(variable))
 			{
@@ -214,7 +247,7 @@ namespace McCli.Compiler.CodeGen
 			{
 				if (source.IsMValue) return;
 
-				if (source.IsPrimitive && source.StructuralClass == MStructuralClass.Scalar)
+				if (source.IsPrimitiveScalar)
 				{
 					EmitBoxScalar(source.Type);
 					return;

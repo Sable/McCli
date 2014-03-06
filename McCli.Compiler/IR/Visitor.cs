@@ -13,7 +13,7 @@ namespace McCli.Compiler.IR
 	{
 		// Concrete classes
 		public virtual void VisitCopy(Copy node) { VisitExpression(node); }
-		public virtual void VisitFor(RangeFor node) { VisitControlFlow(node); }
+		public virtual void VisitRangeFor(RangeFor node) { VisitControlFlow(node); }
 		public virtual void VisitFunction(Function node) { VisitNode(node); }
 		public virtual void VisitIf(If node) { VisitControlFlow(node); }
 		public virtual void VisitJump(Jump node) { VisitControlFlow(node); }

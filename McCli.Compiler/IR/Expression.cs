@@ -11,5 +11,8 @@ namespace McCli.Compiler.IR
 	/// </summary>
 	public abstract class Expression : Statement
 	{
+		public abstract int TargetCount { get; }
+
+		public abstract Variable GetTarget(int index);
 	}
 }

@@ -25,6 +25,16 @@ namespace McCli.Compiler.IR
 			this.Arguments = arguments;
 		}
 
+		public override int TargetCount
+		{
+			get { return Targets.Length; }
+		}
+
+		public override Variable GetTarget(int index)
+		{
+			return Targets[index];
+		}
+
 		public override void Accept(Visitor visitor)
 		{
 			visitor.VisitStaticCall(this);

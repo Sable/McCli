@@ -47,9 +47,19 @@ namespace McCli.Compiler.IR
 				throw new InvalidOperationException("Unexpected literal type.");
 			}
 		}
+
+		public override int TargetCount
+		{
+			get { return 1; }
+		}
 		#endregion
 
 		#region Methods
+		public override Variable GetTarget(int index)
+		{
+			return Target;
+		}
+
 		public override void Accept(Visitor visitor)
 		{
 			visitor.VisitLiteral(this);

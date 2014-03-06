@@ -56,6 +56,7 @@ namespace McCli.Compiler.CodeGen
 		public override void VisitCopy(Copy node)
 		{
 			Contract.Assert(node.Value.StaticRepr.Type == node.Target.StaticRepr.Type);
+			if (IsLiteral(node.Target)) return;
 
 			using (BeginEmitStore(node.Target))
 			{
@@ -271,7 +272,7 @@ namespace McCli.Compiler.CodeGen
 			breakTargetLabel = previousBreakTargetLabel;
 		}
 
-		public override void VisitFor(RangeFor node)
+		public override void VisitRangeFor(RangeFor node)
 		{
 			// Declare loop labels, preserving parent ones
 			var previousContinueTargetLabel = continueTargetLabel;
@@ -284,38 +285,48 @@ namespace McCli.Compiler.CodeGen
 			Contract.Assert(repr.Class.IsNumeric && !repr.IsComplex);
 
 			// Allocate the required temporaries
-			using (var currentLocal = temporaryPool.Alloc(repr.CliType))
-			using (var incrementLocal = temporaryPool.Alloc(repr.CliType))
-			using (var upperBoundLocal = temporaryPool.Alloc(repr.CliType))
+			var currentLocal = temporaryPool.Alloc(repr.CliType);
+			TemporaryLocalPool.AllocationScope? stepLocal = null, toLocal = null;
+
+			try
 			{
-				// Save the lower bound to a "current" variable
+				// Setup the iterator variable, "current"
 				EmitLoad(node.From);
 				EmitConversion(node.From.StaticRepr, repr);
 				cil.Store(currentLocal.Location);
 
-				// Save the increment to a local variable
-				if (node.Step == null)
+				// Save the increment to a local variable if it's not a literal
+				if (node.Step != null && !IsLiteral(node.Step))
 				{
-					Contract.Assert(repr.Type == MClass.Double);
-					cil.LoadFloat64(1);
-				}
-				else
-				{
+					stepLocal = temporaryPool.Alloc(repr.CliType);
 					EmitLoad(node.Step);
 					EmitConversion(node.Step.StaticRepr, repr);
+					EmitCloneIfNeeded(repr);
+					cil.Store(stepLocal.Value.Location);
 				}
-				cil.Store(incrementLocal.Location);
 
-				// Save the upper bound to a local variable
-				EmitLoad(node.To);
-				EmitConversion(node.To.StaticRepr, repr);
-				cil.Store(upperBoundLocal.Location);
+				// Save the "to" variable to a local variable if it's not a literal
+				if (!IsLiteral(node.To))
+				{
+					toLocal = temporaryPool.Alloc(repr.CliType);
+					EmitLoad(node.To);
+					EmitConversion(node.To.StaticRepr, repr);
+					EmitCloneIfNeeded(repr);
+					cil.Store(toLocal.Value.Location);
+				}
 
 				// Test the loop condition
-				// condition: if (current > upper) goto break;
+				// TODO: support down-going loops
+				// condition: if (current > to) goto break;
 				cil.MarkLabel(conditionLabel);
 				cil.Load(currentLocal.Location);
-				cil.Load(upperBoundLocal.Location);
+				
+				// Load from our local variable if we created one, otherwise it's a literal
+				if (toLocal.HasValue)
+					cil.Load(toLocal.Value.Location);
+				else
+					EmitLoad(node.To);
+				
 				cil.Branch(Comparison.GreaterThan, breakTargetLabel);
 
 				// Setup the iterator variable (which can be modified inside the loop)
@@ -330,10 +341,21 @@ namespace McCli.Compiler.CodeGen
 				// continue: current += increment; goto condition;
 				cil.MarkLabel(continueTargetLabel);
 				cil.Load(currentLocal.Location);
-				cil.Load(incrementLocal.Location);
+
+				// Load from our local variable if we created one, otherwise it's a literal or the default value
+				if (stepLocal.HasValue) cil.Load(stepLocal.Value.Location);
+				else if (node.Step == null) cil.LoadFloat(1.0);
+				else EmitLoad(node.Step);
+
 				cil.Instruction(Opcode.Add);
 				cil.Store(currentLocal.Location);
 				cil.Branch(conditionLabel);
+			}
+			finally
+			{
+				currentLocal.Dispose();
+				if (stepLocal.HasValue) stepLocal.Value.Dispose();
+				if (toLocal.HasValue) toLocal.Value.Dispose();
 			}
 
 			// break:

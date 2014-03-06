@@ -61,7 +61,7 @@ namespace McCli
 				if (doubleArray != null)
 				{
 					for (int i = 0; i < count; ++i)
-						if (doubleArray[i] == 0)
+						if (!(doubleArray[i] != 0))
 							return false;
 					return true;
 				}
@@ -78,6 +78,9 @@ namespace McCli
 
 			throw new NotImplementedException();
 		}
+
+		internal static bool IsTrue(bool value) { return value; }
+		internal static bool IsTrue(double value) { return value != 0; }
 
 		public static string CharArrayToString(MArray<char> array)
 		{
@@ -179,7 +182,7 @@ namespace McCli
 			return result;
 		}
 
-		internal static TScalar ArrayGet<TScalar>(MArray<TScalar> array, double rowIndex, double columnIndex)
+		public static TScalar ArrayGet<TScalar>(MArray<TScalar> array, double rowIndex, double columnIndex)
 		{
 			return ArrayGet(array, ToInt(rowIndex), ToInt(columnIndex));
 		}
@@ -190,7 +193,7 @@ namespace McCli
 			return ArrayGet(array, LinearizeIndex(array.Shape, rowIndex, columnIndex));
 		}
 
-		internal static TScalar ArrayGet<TScalar>(MArray<TScalar> array, double index)
+		public static TScalar ArrayGet<TScalar>(MArray<TScalar> array, double index)
 		{
 			return ArrayGet(array, PseudoBuiltins.ToInt(index));
 		}

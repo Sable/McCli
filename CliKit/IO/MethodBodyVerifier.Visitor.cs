@@ -98,6 +98,19 @@ namespace CliKit.IO
 				}
 			}
 
+			public override void VisitConversion(ConversionOpcode opcode, VisitorParam param)
+			{
+				var value = param.This.stack.Pop(opcode);
+
+				bool verifiable;
+				var conversion = Conversions.Get(value.DataType, opcode.TargetDataType, out verifiable);
+				if (!conversion.HasValue)
+					throw Error("{0} cannot convert {1} to {2}.", opcode.Name, value.DataType, opcode.TargetDataType);
+
+				// TODO: Assert verifiable?
+				param.This.stack.Push(opcode.TargetDataType);
+			}
+
 			public override void VisitDup(VisitorParam param)
 			{
 				var top = param.This.stack.Pop(Opcode.Dup);

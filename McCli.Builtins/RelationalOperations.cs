@@ -14,7 +14,7 @@ namespace McCli.Builtins
 	public static class RelationalOperations
 	{
 		#region Comparison
-		#region Double
+		#region Double Arrays
 		public static MArray<bool> eq(MArray<double> a, MArray<double> b)
 		{
 			ElementaryOperations.MatchShapes(ref a, ref b);
@@ -88,6 +88,16 @@ namespace McCli.Builtins
 
 			return true;
 		}
+		#endregion
+
+		#region Double Scalars
+		public static bool eq(double a, double b) { return a == b; }
+		public static bool ne(double a, double b) { return a != b; }
+		public static bool ge(double a, double b) { return a >= b; }
+		public static bool gt(double a, double b) { return a > b; }
+		public static bool le(double a, double b) { return a <= b; }
+		public static bool lt(double a, double b) { return a < b; }
+		public static bool isequal(double a, double b) { return a == b; }
 		#endregion
 
 		#region Char

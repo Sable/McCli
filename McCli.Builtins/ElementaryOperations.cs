@@ -19,7 +19,7 @@ namespace McCli.Builtins
 			Contract.Requires(lhs != null);
 			Contract.Requires(rhs != null);
 
-			if (lhs.IsScalar) return plus(rhs, lhs[0]);
+			if (lhs.IsScalar) return plus(lhs[0], rhs);
 			if (rhs.IsScalar) return plus(lhs, rhs[0]);
 			if (lhs.Shape != rhs.Shape) throw new MArrayShapeException();
 
@@ -29,7 +29,7 @@ namespace McCli.Builtins
 			return c;
 		}
 
-		internal static MArray<double> plus(MArray<double> lhs, double rhs)
+		public static MArray<double> plus(MArray<double> lhs, double rhs)
 		{
 			Contract.Requires(lhs != null);
 
@@ -39,13 +39,23 @@ namespace McCli.Builtins
 			return c;
 		}
 
+		public static MArray<double> plus(double lhs, MArray<double> rhs)
+		{
+			return plus(rhs, lhs);
+		}
+
+		public static double plus(double lhs, double rhs)
+		{
+			return lhs + rhs;
+		}
+
 		public static MArray<TScalar> uplus<[AnyNumeric]TScalar>(MArray<TScalar> array)
 		{
 			Contract.Requires(array != null);
 			return array.DeepClone();
 		}
 
-		internal static TScalar uplus<[AnyNumeric]TScalar>(TScalar value)
+		public static TScalar uplus<[AnyNumeric]TScalar>(TScalar value)
 		{
 			return value;
 		}
@@ -91,7 +101,7 @@ namespace McCli.Builtins
 			return c;
 		}
 
-		internal static MArray<double> minus(MArray<double> lhs, double rhs)
+		public static MArray<double> minus(MArray<double> lhs, double rhs)
 		{
 			Contract.Requires(lhs != null);
 
@@ -101,7 +111,7 @@ namespace McCli.Builtins
 			return c;
 		}
 
-		internal static MArray<double> minus(double lhs, MArray<double> rhs)
+		public static MArray<double> minus(double lhs, MArray<double> rhs)
 		{
 			Contract.Requires(rhs != null);
 
@@ -109,6 +119,11 @@ namespace McCli.Builtins
 			for (int i = 0; i < rhs.Count; ++i)
 				c[i] = lhs - rhs[i];
 			return c;
+		}
+
+		public static double minus(double lhs, double rhs)
+		{
+			return lhs - rhs;
 		}
 
 		public static MArray<double> uminus(MArray<double> array)
@@ -120,6 +135,11 @@ namespace McCli.Builtins
 				result[i] = -array[i];
 			return result;
 		}
+
+		public static double uminus(double value)
+		{
+			return -value;
+		}
 		#endregion
 
 		#region Scalar Multiplicative
@@ -128,7 +148,7 @@ namespace McCli.Builtins
 			Contract.Requires(lhs != null);
 			Contract.Requires(rhs != null);
 
-			if (lhs.IsScalar) return times(rhs, lhs[0]);
+			if (lhs.IsScalar) return times(lhs[0], rhs);
 			if (rhs.IsScalar) return times(lhs, rhs[0]);
 			if (lhs.Shape != rhs.Shape) throw new MArrayShapeException();
 
@@ -138,7 +158,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		internal static MArray<double> times(MArray<double> lhs, double rhs)
+		public static MArray<double> times(MArray<double> lhs, double rhs)
 		{
 			Contract.Requires(lhs != null);
 
@@ -148,7 +168,12 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		internal static double times(double lhs, double rhs)
+		public static MArray<double> times(double lhs, MArray<double> rhs)
+		{
+			return times(rhs, lhs);
+		}
+
+		public static double times(double lhs, double rhs)
 		{
 			return lhs * rhs;
 		}
@@ -194,7 +219,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		internal static MArray<double> rdivide(MArray<double> lhs, double rhs)
+		public static MArray<double> rdivide(MArray<double> lhs, double rhs)
 		{
 			Contract.Requires(lhs != null);
 
@@ -204,7 +229,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		internal static MArray<double> rdivide(double lhs, MArray<double> rhs)
+		public static MArray<double> rdivide(double lhs, MArray<double> rhs)
 		{
 			Contract.Requires(rhs != null);
 
@@ -214,7 +239,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		internal static double rdivide(double lhs, double rhs)
+		public static double rdivide(double lhs, double rhs)
 		{
 			return lhs / rhs;
 		}
@@ -236,7 +261,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(lhs, rhs, mod);
 		}
 
-		internal static double mod(double lhs, double rhs)
+		public static double mod(double lhs, double rhs)
 		{
 			return lhs - times(floor(rdivide(lhs, rhs)), rhs);
 		}
@@ -250,7 +275,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(lhs, rhs, rem);
 		}
 
-		internal static double rem(double lhs, double rhs)
+		public static double rem(double lhs, double rhs)
 		{
 			return lhs - times(fix(rdivide(lhs, rhs)), rhs);
 		}
@@ -289,7 +314,17 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		internal static double mtimes(double lhs, double rhs)
+		public static MArray<double> mtimes(MArray<double> lhs, double rhs)
+		{
+			return times(lhs, rhs);
+		}
+
+		public static MArray<double> mtimes(double lhs, MArray<double> rhs)
+		{
+			return times(lhs, rhs);
+		}
+
+		public static double mtimes(double lhs, double rhs)
 		{
 			return lhs * rhs;
 		}
@@ -304,7 +339,7 @@ namespace McCli.Builtins
 			throw new NotImplementedException("Non-scalar mpower.");
 		}
 
-		internal static double mpower(double @base, double exponent)
+		public static double mpower(double @base, double exponent)
 		{
 			return power(@base, exponent);
 		}
@@ -322,7 +357,7 @@ namespace McCli.Builtins
 			throw new NotImplementedException("Non-scalar mrdivide.");
 		}
 		
-		internal static double mrdivide(double b, double a)
+		public static double mrdivide(double b, double a)
 		{
 			return b / a;
 		}
@@ -340,7 +375,7 @@ namespace McCli.Builtins
 			throw new NotImplementedException("Non-scalar mldivide.");
 		}
 
-		internal static double mldivide(double a, double b)
+		public static double mldivide(double a, double b)
 		{
 			return b / a;
 		}
@@ -361,7 +396,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		internal static MArray<double> power(MArray<double> @base, double exponent)
+		public static MArray<double> power(MArray<double> @base, double exponent)
 		{
 			Contract.Requires(@base != null);
 
@@ -371,7 +406,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		internal static MArray<double> power(double @base, MArray<double> exponent)
+		public static MArray<double> power(double @base, MArray<double> exponent)
 		{
 			Contract.Requires(exponent != null);
 
@@ -381,7 +416,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		internal static double power(double @base, double exponent)
+		public static double power(double @base, double exponent)
 		{
 			return Math.Pow(@base, exponent);
 		}
@@ -398,7 +433,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		internal static double floor(double value)
+		public static double floor(double value)
 		{
 			return Math.Floor(value);
 		}
@@ -413,7 +448,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		internal static double ceil(double value)
+		public static double ceil(double value)
 		{
 			return Math.Ceiling(value);
 		}
@@ -428,7 +463,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		internal static double round(double value)
+		public static double round(double value)
 		{
 			// Unfortunately, portable class libraries do not have
 			// Math.Round(..., MidpointRounding, AwayFromZero).
@@ -449,7 +484,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		internal static double fix(double value)
+		public static double fix(double value)
 		{
 			// Unfortunately, portable class libraries do not have Math.Truncate
 			return double.IsInfinity(value) ? value : (value - (value % 1));

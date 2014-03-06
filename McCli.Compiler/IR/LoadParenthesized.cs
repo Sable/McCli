@@ -12,10 +12,13 @@ namespace McCli.Compiler.IR
 	/// </summary>
 	public sealed class LoadParenthesized : Expression
 	{
+		#region Fields
 		public readonly ImmutableArray<Variable> Targets;
 		public readonly Variable Subject;
 		public readonly ImmutableArray<Variable> Arguments;
+		#endregion
 
+		#region Constructors
 		public LoadParenthesized(ImmutableArray<Variable> targets, Variable subject, ImmutableArray<Variable> arguments)
 		{
 			Contract.Requires(subject != null);
@@ -23,6 +26,20 @@ namespace McCli.Compiler.IR
 			this.Targets = targets;
 			this.Subject = subject;
 			this.Arguments = arguments;
+		}
+		#endregion
+
+		#region Properties
+		public override int TargetCount
+		{
+			get { return Targets.Length; }
+		}
+		#endregion
+
+		#region Methods
+		public override Variable GetTarget(int index)
+		{
+			return Targets[index];
 		}
 
 		public override void Accept(Visitor visitor)
@@ -38,5 +55,6 @@ namespace McCli.Compiler.IR
 			format += "{1}({2})";
 			return string.Format(format, CommaSeparate(Targets), Subject.Name, CommaSeparate(Arguments));
 		}
+		#endregion
 	}
 }

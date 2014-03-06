@@ -62,11 +62,11 @@ namespace McCli
 		}
 
 		/// <summary>
-		/// Gets a value indicating if this is a representation of a primitive type.
+		/// Gets a value indicating if this is a representation of a scalar primitive type.
 		/// </summary>
-		public bool IsPrimitive
+		public bool IsPrimitiveScalar
 		{
-			get { return structuralClass != null; }
+			get { return structuralClass == MStructuralClass.Scalar && type.Class.IsPrimitive; }
 		}
 
 		/// <summary>
@@ -105,7 +105,7 @@ namespace McCli
 		#region Methods
 		public MRepr WithStructuralClass(MStructuralClass structuralClass)
 		{
-			Contract.Requires(IsPrimitive);
+			Contract.Requires(!IsAny);
 			Contract.Requires(structuralClass != null);
 
 			return new MRepr(type, structuralClass);
