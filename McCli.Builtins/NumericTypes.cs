@@ -86,10 +86,9 @@ namespace McCli.Builtins
 			return NaN(n, n);
 		}
 
-		public static MArray<double> NaN(double n, double m)
+		public static MArray<double> NaN(double rowCount, double columnCount)
 		{
-			var shape = PseudoBuiltins.ToShape(n, m);
-			return MFullArray<double>.ExpandScalar(double.NaN, shape);
+			return PseudoBuiltins.Expand(double.NaN, rowCount, columnCount);
 		}
 		#endregion
 	}

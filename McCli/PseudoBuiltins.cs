@@ -30,17 +30,6 @@ namespace McCli
 			if (!value.IsScalar) throw new MArrayShapeException();
 			return ToInt(value[0]);
 		}
-		
-		public static MArrayShape ToShape(double rowCount, double columnCount)
-		{
-			int rowCountInt = ToInt(rowCount);
-			int columnCountInt = ToInt(columnCount);
-
-			// Ensure neither are negative
-			if ((rowCountInt | columnCountInt) < 0) throw new MArrayShapeException();
-			
-			return new MArrayShape(rowCountInt, columnCountInt);
-		}
 
 		public static bool IsTrue(MValue value)
 		{
@@ -79,24 +68,14 @@ namespace McCli
 			throw new NotImplementedException();
 		}
 
-		internal static bool IsTrue(bool value) { return value; }
-		internal static bool IsTrue(double value) { return value != 0; }
+		[BuiltinCilOpcode(0x00 /* nop */)]
+		public static bool IsTrue(bool value) { return value; }
+		public static bool IsTrue(double value) { return value != 0; }
 
-		public static string CharArrayToString(MArray<char> array)
+		public static MFullArray<TScalar> Expand<[AnyPrimitive] TScalar>(TScalar value, double rowCount, double columnCount)
 		{
-			Contract.Requires(array != null);
-
-			var shape = array.Shape;
-			if (!shape.IsRowVector) throw new MArrayShapeException();
-
-			// TODO: Don't assume a full array
-			return new string(((MFullArray<char>)array).BackingArray, 0, shape.ColumnCount);
-		}
-
-		public static MFullArray<char> StringToCharArray(string str)
-		{
-			Contract.Requires(str != null);
-			return MFullArray<char>.CreateRowVector(str.ToCharArray());
+			var shape = MArrayShape.FromDoubles(rowCount, columnCount);
+			return MFullArray<TScalar>.ExpandScalar(value, shape);
 		}
 
 		#region For Loops
@@ -108,7 +87,7 @@ namespace McCli
 			return count == 0 ? 0 : (count / shape.RowCount);
 		}
 
-		public static MArray<TScalar> GetForSlice<[AnyArrayable] TScalar>(MArray<TScalar> array, int index)
+		public static MArray<TScalar> GetForSlice<[AnyPrimitive] TScalar>(MArray<TScalar> array, int index)
 		{
 			Contract.Requires(array != null);
 
@@ -124,7 +103,7 @@ namespace McCli
 		#endregion
 
 		#region ArrayGet
-		public static MArray<TScalar> ArrayGet<TScalar>(MArray<TScalar> array, MArray<double> indices)
+		public static MArray<TScalar> ArrayGet<[AnyPrimitive] TScalar>(MArray<TScalar> array, MArray<double> indices)
 		{
 			Contract.Requires(array != null);
 			Contract.Requires(indices != null);
@@ -139,7 +118,7 @@ namespace McCli
 			return result;
 		}
 
-		public static MArray<TScalar> ArrayGet<TScalar>(MArray<TScalar> array, MArray<bool> mask)
+		public static MArray<TScalar> ArrayGet<[AnyPrimitive] TScalar>(MArray<TScalar> array, MArray<bool> mask)
 		{
 			Contract.Requires(array != null);
 			Contract.Requires(mask != null);
@@ -154,7 +133,8 @@ namespace McCli
 			return MFullArray<TScalar>.CreateColumnVector(values.ToArray());
 		}
 
-		public static MArray<TScalar> ArrayGet<TScalar>(MArray<TScalar> array, MArray<double> rowIndices, MArray<double> columnIndices)
+		public static MArray<TScalar> ArrayGet<[AnyPrimitive] TScalar>(
+			MArray<TScalar> array, MArray<double> rowIndices, MArray<double> columnIndices)
 		{
 			Contract.Requires(array != null);
 			Contract.Requires(rowIndices != null);
@@ -182,30 +162,33 @@ namespace McCli
 			return result;
 		}
 
-		public static TScalar ArrayGet<TScalar>(MArray<TScalar> array, double rowIndex, double columnIndex)
+		public static TScalar ArrayGet<[AnyPrimitive] TScalar>(
+			MArray<TScalar> array, double rowIndex, double columnIndex)
 		{
 			return ArrayGet(array, ToInt(rowIndex), ToInt(columnIndex));
 		}
 
-		internal static TScalar ArrayGet<TScalar>(MArray<TScalar> array, int rowIndex, int columnIndex)
+		internal static TScalar ArrayGet<[AnyPrimitive] TScalar>(
+			MArray<TScalar> array, int rowIndex, int columnIndex)
 		{
 			Contract.Requires(array != null);
 			return ArrayGet(array, LinearizeIndex(array.Shape, rowIndex, columnIndex));
 		}
 
-		public static TScalar ArrayGet<TScalar>(MArray<TScalar> array, double index)
+		public static TScalar ArrayGet<[AnyPrimitive] TScalar>(MArray<TScalar> array, double index)
 		{
 			return ArrayGet(array, PseudoBuiltins.ToInt(index));
 		}
 
-		internal static TScalar ArrayGet<TScalar>(MArray<TScalar> array, int index)
+		internal static TScalar ArrayGet<[AnyPrimitive] TScalar>(MArray<TScalar> array, int index)
 		{
 			return array[index - 1];
 		}
 		#endregion
 
 		#region ArraySet
-		public static void ArraySet<TScalar>(MArray<TScalar> array, MArray<double> indices, MArray<TScalar> values)
+		public static void ArraySet<[AnyPrimitive] TScalar>(
+			MArray<TScalar> array, MArray<double> indices, MArray<TScalar> values)
 		{
 			Contract.Requires(array != null);
 			Contract.Requires(indices != null);
@@ -221,7 +204,15 @@ namespace McCli
 				array[ToInt(indices[i]) - 1] = values[i];
 		}
 
-		public static void ArraySet<TScalar>(MArray<TScalar> array, MArray<double> rowIndices, MArray<double> columnIndices, MArray<TScalar> values)
+		public static void ArraySet<[AnyPrimitive] TScalar>(
+			MArray<TScalar> array, double index, TScalar value)
+		{
+			Contract.Requires(array != null);
+			array[ToInt(index)] = value;
+		}
+
+		public static void ArraySet<[AnyPrimitive] TScalar>(
+			MArray<TScalar> array, MArray<double> rowIndices, MArray<double> columnIndices, MArray<TScalar> values)
 		{
 			Contract.Requires(array != null);
 			Contract.Requires(rowIndices != null);
@@ -248,12 +239,14 @@ namespace McCli
 			}
 		}
 
-		internal static void ArraySet<TScalar>(MArray<TScalar> array, double rowIndex, double columnIndex, TScalar value)
+		public static void ArraySet<[AnyPrimitive] TScalar>(
+			MArray<TScalar> array, double rowIndex, double columnIndex, TScalar value)
 		{
 			ArraySet(array, ToInt(rowIndex), ToInt(columnIndex), value);
 		}
 
-		internal static void ArraySet<TScalar>(MArray<TScalar> array, int rowIndex, int columnIndex, TScalar value)
+		internal static void ArraySet<[AnyPrimitive] TScalar>(
+			MArray<TScalar> array, int rowIndex, int columnIndex, TScalar value)
 		{
 			Contract.Requires(array != null);
 

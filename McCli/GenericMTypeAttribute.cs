@@ -7,6 +7,10 @@ using System.Threading.Tasks;
 
 namespace McCli
 {
+	/// <summary>
+	/// Identifies a generic parameter of a MatLab builtin function
+	/// as being instantiatable with a set of types.
+	/// </summary>
 	[AttributeUsage(AttributeTargets.GenericParameter, AllowMultiple = false)]
 	public class GenericMTypeAttribute : Attribute
 	{
@@ -49,10 +53,5 @@ namespace McCli
 	public sealed class AnyRealAttribute : GenericMTypeAttribute
 	{
 		public AnyRealAttribute() : base(MClassKinds.NumericMask, allowComplex: false) { }
-	}
-
-	public sealed class AnyArrayableAttribute : GenericMTypeAttribute
-	{
-		public AnyArrayableAttribute() : base(MClassKinds.NumericMask | MClassKinds.Struct | MClassKinds.Cell, allowComplex: true) { }
 	}
 }

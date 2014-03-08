@@ -95,6 +95,7 @@
   <ItemGroup>
     <Compile Include="BuiltinCilOpcodeAttribute.cs" />
     <Compile Include="EmptyArray.cs" />
+    <Compile Include="MStrings.cs" />
     <Compile Include="MArrayShape.cs" />
     <Compile Include="MArrayShapeException.cs" />
     <Compile Include="MatlabLibraryAttribute.cs" />

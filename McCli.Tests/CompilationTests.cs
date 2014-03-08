@@ -111,7 +111,7 @@ namespace McCli
 				none, output,
 				new Literal(output, "foobar"));
 
-			Assert.AreEqual("foobar", PseudoBuiltins.CharArrayToString(function()));
+			Assert.AreEqual("foobar", MStrings.ToString(function()));
 		}
 
 		[TestMethod]

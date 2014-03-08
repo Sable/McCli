@@ -94,13 +94,6 @@ namespace McCli
 			this[index] = value;
 		}
 
-		public static MFullArray<TScalar> ExpandScalar(TScalar value, MArrayShape shape)
-		{
-			var array = new TScalar[shape.Count];
-			for (int i = 0; i < array.Length; ++i) array[i] = value;
-			return new MFullArray<TScalar>(array, shape);
-		}
-
 		public static MFullArray<TScalar> CreateEmpty()
 		{
 			return new MFullArray<TScalar>(EmptyArray<TScalar>.Rank1, MArrayShape.Empty);
@@ -120,6 +113,44 @@ namespace McCli
 		{
 			return new MFullArray<TScalar>(values, MArrayShape.ColumnVector(values.Length));
 		}
+
+		#region CreateWithShape
+		public static MFullArray<TScalar> CreateWithShape(MArrayShape shape)
+		{
+			return new MFullArray<TScalar>(shape);
+		}
+
+		public static MFullArray<TScalar> CreateWithShape(int rowCount, int columnCount)
+		{
+			return CreateWithShape(new MArrayShape(rowCount, columnCount));
+		}
+
+		public static MFullArray<TScalar> CreateWithShape(double rowCount, double columnCount)
+		{
+			var shape = MArrayShape.FromDoubles(rowCount, columnCount);
+			return CreateWithShape(shape);
+		}
+		#endregion
+
+		#region ExpandScalar
+		public static MFullArray<TScalar> ExpandScalar(TScalar value, MArrayShape shape)
+		{
+			var array = new TScalar[shape.Count];
+			for (int i = 0; i < array.Length; ++i) array[i] = value;
+			return new MFullArray<TScalar>(array, shape);
+		}
+		
+		public static MFullArray<TScalar> ExpandScalar(TScalar value, int rowCount, int columnCount)
+		{
+			return ExpandScalar(value, new MArrayShape(rowCount, columnCount));
+		}
+
+		public static MFullArray<TScalar> ExpandScalar(TScalar value, double rowCount, double columnCount)
+		{
+			var shape = MArrayShape.FromDoubles(rowCount, columnCount);
+			return ExpandScalar(value, shape);
+		}
+		#endregion
 		#endregion
 
 		#region Explicit Members

@@ -25,15 +25,14 @@ namespace McCli.Builtins
 			Contract.Requires(className != null);
 
 			var @class = value.Class;
-			var classNameString = PseudoBuiltins.CharArrayToString(className);
+			var classNameString = MStrings.ToString(className);
 			if (@class.Name == classNameString) return true;
 
 			// "categories"
 			var classKind = @class.Kind;
-			if (classNameString == "numeric" && (classKind & MClassKinds.NumericMask) != 0) return true;
-			if (classNameString == "float" && (classKind & MClassKinds.FloatMask) != 0) return true;
-			if (classNameString == "integer" && (classKind & MClassKinds.IntegerMask) != 0) return true;
-			return false;
+			return (classNameString == "numeric" && (classKind & MClassKinds.NumericMask) != 0)
+				|| (classNameString == "float" && (classKind & MClassKinds.FloatMask) != 0)
+				|| (classNameString == "integer" && (classKind & MClassKinds.IntegerMask) != 0);
 		}
 
 		public static bool iscell(MValue value)

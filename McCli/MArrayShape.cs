@@ -307,6 +307,15 @@ namespace McCli
 			Contract.Requires(count >= 0);
 			return new MArrayShape(count, 1, Unchecked.Instance);
 		}
+
+		public static MArrayShape FromDoubles(double rowCount, double columnCount)
+		{
+			var n = PseudoBuiltins.ToInt(rowCount);
+			var m = PseudoBuiltins.ToInt(columnCount);
+			if (n < 0 || m < 0) throw new MArrayShapeException();
+
+			return new MArrayShape(n, m);
+		}
 		#endregion
 
 		#region Operators

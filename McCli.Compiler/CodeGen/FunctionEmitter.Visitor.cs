@@ -14,8 +14,18 @@ namespace McCli.Compiler.CodeGen
 	partial class FunctionEmitter : Visitor
 	{
 		#region Fields
+		private static readonly FunctionTable pseudoBuiltins;
+
 		private Label continueTargetLabel;
 		private Label breakTargetLabel;
+		#endregion
+
+		#region Constructors
+		static FunctionEmitter()
+		{
+			pseudoBuiltins = new FunctionTable();
+			pseudoBuiltins.AddMethodsFromType(typeof(PseudoBuiltins));
+		}
 		#endregion
 
 		#region Methods
@@ -72,18 +82,23 @@ namespace McCli.Compiler.CodeGen
 			// Resolve the function
 			var argumentTypes = node.Arguments.Select(a => a.StaticRepr);
 			var function = functionLookup(node.FunctionName, argumentTypes);
+			EmitCall(node.Targets, function, node.Arguments);
+		}
+
+		private void EmitCall(ImmutableArray<Variable> targets, FunctionMethod function, ImmutableArray<Variable> arguments)
+		{
 			var signature = function.Signature;
-			Contract.Assert(node.Arguments.Length == signature.Inputs.Count);
-			Contract.Assert(node.Targets.Length <= signature.Outputs.Count);
+			Contract.Assert(arguments.Length == signature.Inputs.Count);
+			Contract.Assert(targets.Length <= signature.Outputs.Count);
 
 			// Prepare the eventual return value store
-			if (signature.HasReturnValue && node.Targets.Length == 1)
-				BeginEmitStore(node.Targets[0]);
-			
+			if (signature.HasReturnValue && targets.Length == 1)
+				BeginEmitStore(targets[0]);
+
 			// Push the input arguments
-			for (int i = 0; i < node.Arguments.Length; ++i)
+			for (int i = 0; i < arguments.Length; ++i)
 			{
-				var argument = node.Arguments[i];
+				var argument = arguments[i];
 				EmitLoad(argument);
 				EmitConversion(argument.StaticRepr, signature.Inputs[i]);
 			}
@@ -93,9 +108,9 @@ namespace McCli.Compiler.CodeGen
 				// Push the pointers to the output arguments
 				for (int i = 0; i < signature.Outputs.Count; ++i)
 				{
-					if (i < node.Targets.Length)
+					if (i < targets.Length)
 					{
-						var target = node.Targets[i];
+						var target = targets[i];
 						var location = GetLocation(target);
 						if (declaration.Outputs.Contains(target) && declaration.Outputs.Length >= 2)
 							cil.Load(location); // Target is a ByRef parameter, so already a (managed) pointer
@@ -138,15 +153,15 @@ namespace McCli.Compiler.CodeGen
 			// Handle the return value, if any
 			if (signature.HasReturnValue)
 			{
-				if (node.Targets.Length == 1)
+				if (targets.Length == 1)
 				{
-					EmitConversion(signature.Outputs[0], node.Targets[0].StaticRepr);
-					EndEmitStore(node.Targets[0]);
+					EmitConversion(signature.Outputs[0], targets[0].StaticRepr);
+					EndEmitStore(targets[0]);
 				}
 				else
 				{
 					// Return value ignored.
-					Contract.Assert(node.Targets.Length == 0);
+					Contract.Assert(targets.Length == 0);
 					cil.Pop();
 				}
 			}
@@ -156,66 +171,28 @@ namespace McCli.Compiler.CodeGen
 		{
 			Contract.Assert(node.Targets.Length == 1);
 
-			var target = node.Targets[0];
-			var subjectRepr = node.Subject.StaticRepr;
-			Contract.Assert(subjectRepr.IsArray);
+			// TODO: Handle the zero-argument case specially
+			var argumentsBuilder = new ImmutableArray<Variable>.Builder(node.Arguments.Length + 1);
+			argumentsBuilder[0] = node.Subject;
+			for (int i = 0; i < node.Arguments.Length; ++i)
+				argumentsBuilder[1 + i] = node.Arguments[i];
+			var arguments = argumentsBuilder.Complete();
 
-			using (BeginEmitStore(target))
-			{
-				if (node.Arguments.Length == 0)
-				{
-					// "foo = array()", same as "foo = array"
-					EmitLoad(node.Subject);
-					EmitCloneIfNeeded(node.Subject.StaticRepr);
-					EmitConversion(node.Subject.StaticRepr, target.StaticRepr);
-				}
-				else
-				{
-					var method = typeof(PseudoBuiltins).GetMethods(BindingFlags.Public | BindingFlags.Static)
-						.FirstOrDefault(m => m.Name == "ArrayGet" && m.GetParameters().Length == node.Arguments.Length + 1);
-					if (method.IsGenericMethodDefinition)
-						method = method.MakeGenericMethod(subjectRepr.Type.CliType);
-
-					EmitLoad(node.Subject);
-					EmitConversion(subjectRepr, MStructuralClass.Array);
-
-					foreach (var argument in node.Arguments)
-					{
-						EmitLoad(argument);
-						EmitConversion(argument.StaticRepr, MStructuralClass.Array);
-					}
-
-					cil.Invoke(method);
-					EmitConversion(MRepr.FromCliType(method.ReturnType), target.StaticRepr);
-				}
-			}
+			var function = pseudoBuiltins.Lookup("ArrayGet", arguments.Select(v => v.StaticRepr));
+			EmitCall(node.Targets, function, arguments);
 		}
 
 		public override void VisitStoreParenthesized(StoreParenthesized node)
 		{
-			var arrayRepr = node.Array.StaticRepr;
-			if (arrayRepr.IsArray)
-			{
-				EmitLoad(node.Array);
-				
-				for (int i = 0; i < node.Indices.Length; ++i)
-				{
-					EmitLoad(node.Indices[i]);
-					EmitConversion(node.Indices[i].StaticRepr, MClass.Double.ArrayRepr);
-				}
-					
-				EmitLoad(node.Value);
-				EmitConversion(node.Value.StaticRepr, arrayRepr);
+			var argumentsBuilder = new ImmutableArray<Variable>.Builder(node.Indices.Length + 2);
+			argumentsBuilder[0] = node.Array;
+			for (int i = 0; i < node.Indices.Length; ++i)
+				argumentsBuilder[1 + i] = node.Indices[i];
+			argumentsBuilder[argumentsBuilder.Length - 1] = node.Value;
+			var arguments = argumentsBuilder.Complete();
 
-				var method = typeof(PseudoBuiltins).GetMethods()
-					.Single(m => m.Name == "ArraySet" && m.GetParameters().Length == node.Indices.Length + 2)
-					.MakeGenericMethod(arrayRepr.Type.CliType);
-				cil.Invoke(method);
-			}
-			else
-			{
-				throw new NotImplementedException();
-			}
+			var function = pseudoBuiltins.Lookup("ArraySet", arguments.Select(v => v.StaticRepr));
+			EmitCall(ImmutableArray.Empty, function, arguments);
 		}
 
 		public override void VisitIf(If node)
@@ -223,8 +200,7 @@ namespace McCli.Compiler.CodeGen
 			if (node.Then.Length == 0 && node.Else.Length == 0) return;
 
 			EmitLoad(node.Condition);
-			EmitConversion(node.Condition.StaticRepr, MRepr.Any);
-			cil.Invoke(typeof(PseudoBuiltins).GetMethod("IsTrue"));
+			EmitIsTrue(node.Condition.StaticRepr);
 
 			var endLabel = cil.CreateLabel("if_end");
 			if (node.Then.Length == 0)
@@ -250,6 +226,13 @@ namespace McCli.Compiler.CodeGen
 			cil.MarkLabel(endLabel);
 		}
 
+		private void EmitIsTrue(MRepr conditionRepr)
+		{
+			var isTrueFunction = pseudoBuiltins.Lookup("IsTrue", conditionRepr);
+			EmitConversion(conditionRepr, isTrueFunction.Signature.Inputs[0]);
+			cil.Invoke(isTrueFunction.Method);
+		}
+
 		public override void VisitWhile(While node)
 		{
 			// Declare loop labels, preserving parent ones
@@ -261,8 +244,7 @@ namespace McCli.Compiler.CodeGen
 			// Condition
 			cil.MarkLabel(continueTargetLabel);
 			EmitLoad(node.Condition);
-			EmitConversion(node.Condition.StaticRepr, MRepr.Any);
-			cil.Invoke(typeof(PseudoBuiltins).GetMethod("IsTrue"));
+			EmitIsTrue(node.Condition.StaticRepr);
 			cil.Branch(false, breakTargetLabel);
 
 			// Body
@@ -289,7 +271,7 @@ namespace McCli.Compiler.CodeGen
 			var repr = new MRepr(node.Iterator.StaticRepr.Type, MStructuralClass.Scalar);
 			Contract.Assert(repr.Class.IsNumeric && !repr.IsComplex);
 
-			// Allocate the required temporaries
+			// Allocate the the temporaries we need
 			var currentLocal = temporaryPool.Alloc(repr.CliType);
 			TemporaryLocalPool.AllocationScope? stepLocal = null, toLocal = null;
 

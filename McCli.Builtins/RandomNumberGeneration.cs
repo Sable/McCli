@@ -29,11 +29,10 @@ namespace McCli.Builtins
 
 		public static MFullArray<double> rand(double rowCount, double columnCount)
 		{
-			var shape = PseudoBuiltins.ToShape(rowCount, columnCount);
-			var result = new MFullArray<double>(shape);
+			var result = ArrayCreation.zeros(rowCount, columnCount);
 			lock (threadSharedRandom)
 			{
-				for (int i = 0; i < shape.Count; ++i)
+				for (int i = 0; i < result.Count; ++i)
 					result[i] = threadSharedRandom.NextDouble();
 			}
 			
@@ -57,9 +56,8 @@ namespace McCli.Builtins
 			int rowCountInt = PseudoBuiltins.ToInt(rowCount);
 			int columnCountInt = PseudoBuiltins.ToInt(columnCount);
 
-			var shape = PseudoBuiltins.ToShape(rowCount, columnCount);
-			var result = new MFullArray<double>(shape);
-			int count = shape.Count;
+			var result = ArrayCreation.zeros(rowCount, columnCount);
+			int count = result.Count;
 			lock (threadSharedRandom)
 			{
 				// The Box-Muller algorithm generates two values at a time,

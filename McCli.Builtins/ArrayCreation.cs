@@ -29,7 +29,7 @@ namespace McCli.Builtins
 
 		public static MFullArray<double> zeros(double rowCount, double columnCount)
 		{
-			return new MFullArray<double>(PseudoBuiltins.ToShape(rowCount, columnCount));
+			return MFullArray<double>.CreateWithShape(rowCount, columnCount);
 		}
 
 		public static MFullArray<double> zeros(double sz1, double sz2, double sz3)
@@ -49,9 +49,9 @@ namespace McCli.Builtins
 			return ones(n, n);
 		}
 
-		public static MFullArray<double> ones(double sz1, double sz2)
+		public static MFullArray<double> ones(double rowCount, double columnCount)
 		{
-			return MFullArray<double>.ExpandScalar(1, PseudoBuiltins.ToShape(sz1, sz2));
+			return MFullArray<double>.ExpandScalar(1, rowCount, columnCount);
 		}
 		#endregion
 
@@ -68,16 +68,16 @@ namespace McCli.Builtins
 
 		public static MFullArray<double> eye(double sz1, double sz2)
 		{
-			var shape = PseudoBuiltins.ToShape(sz1, sz2);
-			var result = new MFullArray<double>(shape);
+			var result = zeros(sz1, sz2);
 			var array = result.BackingArray;
 			for (int i = 0; i < array.Length; ++i)
-				array[i] = (i / shape.RowCount) == (i % shape.RowCount) ? 1 : 0;
+				array[i] = (i / result.RowCount) == (i % result.RowCount) ? 1 : 0;
 			return result;
 		}
 		#endregion
 
 		#region true
+		[BuiltinCilOpcode(0x17 /* ldc.i4.1 */)]
 		public static bool @true() { return true; }
 
 		public static MFullArray<bool> @true(double n)
@@ -85,13 +85,14 @@ namespace McCli.Builtins
 			return @true(n, n);
 		}
 
-		public static MFullArray<bool> @true(double sz1, double sz2)
+		public static MFullArray<bool> @true(double rowCount, double columnCount)
 		{
-			return MFullArray<bool>.ExpandScalar(true, PseudoBuiltins.ToShape(sz1, sz2));
+			return PseudoBuiltins.Expand(true, rowCount, columnCount);
 		}
 		#endregion
 
 		#region false
+		[BuiltinCilOpcode(0x16 /* ldc.i4.0 */)]
 		public static bool @false() { return false; }
 
 		public static MFullArray<bool> @false(double n)
@@ -99,9 +100,9 @@ namespace McCli.Builtins
 			return @false(n, n);
 		}
 
-		public static MFullArray<bool> @false(double sz1, double sz2)
+		public static MFullArray<bool> @false(double rowCount, double columnCount)
 		{
-			return new MFullArray<bool>(PseudoBuiltins.ToShape(sz1, sz2));
+			return MFullArray<bool>.CreateWithShape(rowCount, columnCount);
 		}
 		#endregion
 
@@ -133,6 +134,30 @@ namespace McCli.Builtins
 		}
 		
 		// TODO: remove when variadic inputs are implemented
+		public static MFullArray<TScalar> horzcat<[AnyPrimitive] TScalar>(
+			TScalar value1, TScalar value2)
+		{
+			return MFullArray<TScalar>.CreateRowVector(value1, value2);
+		}
+
+		public static MFullArray<TScalar> horzcat<[AnyPrimitive] TScalar>(
+			TScalar value1, TScalar value2, TScalar value3)
+		{
+			return MFullArray<TScalar>.CreateRowVector(value1, value2, value3);
+		}
+
+		public static MFullArray<TScalar> horzcat<[AnyPrimitive] TScalar>(
+			TScalar value1, TScalar value2, TScalar value3, TScalar value4)
+		{
+			return MFullArray<TScalar>.CreateRowVector(value1, value2, value3, value4);
+		}
+
+		public static MFullArray<TScalar> horzcat<[AnyPrimitive] TScalar>(
+			TScalar value1, TScalar value2, TScalar value3, TScalar value4, TScalar value5)
+		{
+			return MFullArray<TScalar>.CreateRowVector(value1, value2, value3, value4, value5);
+		}
+		
 		public static MArray<TScalar> horzcat<[AnyPrimitive]TScalar>(
 			MArray<TScalar> array1, MArray<TScalar> array2, MArray<TScalar> array3)
 		{
@@ -195,6 +220,32 @@ namespace McCli.Builtins
 			}
 
 			return result;
+		}
+		#endregion
+
+		#region vertcat
+		public static MFullArray<TScalar> vertcat<[AnyPrimitive] TScalar>(
+			TScalar value1, TScalar value2)
+		{
+			return MFullArray<TScalar>.CreateColumnVector(value1, value2);
+		}
+
+		public static MFullArray<TScalar> vertcat<[AnyPrimitive] TScalar>(
+			TScalar value1, TScalar value2, TScalar value3)
+		{
+			return MFullArray<TScalar>.CreateColumnVector(value1, value2, value3);
+		}
+
+		public static MFullArray<TScalar> vertcat<[AnyPrimitive] TScalar>(
+			TScalar value1, TScalar value2, TScalar value3, TScalar value4)
+		{
+			return MFullArray<TScalar>.CreateColumnVector(value1, value2, value3, value4);
+		}
+
+		public static MFullArray<TScalar> vertcat<[AnyPrimitive] TScalar>(
+			TScalar value1, TScalar value2, TScalar value3, TScalar value4, TScalar value5)
+		{
+			return MFullArray<TScalar>.CreateColumnVector(value1, value2, value3, value4, value5);
 		}
 		#endregion
 
