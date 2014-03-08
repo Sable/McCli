@@ -28,11 +28,11 @@ namespace McCli
 			return (TDelegate)(object)functionMethod.Method.CreateDelegate(typeof(TDelegate));
 		}
 
-		private static Variable Declare<T>(string name)
+		private static Variable Declare<T>(string name, bool initOnly = false)
 		{
 			var repr = MRepr.FromCliType(typeof(T));
 			name += "_" + repr.ToString().Replace(" ", "");
-			return new Variable(name, repr);
+			return new Variable(name, repr, initOnly);
 		}
 
 		[TestMethod]

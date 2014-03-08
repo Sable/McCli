@@ -91,11 +91,14 @@ namespace McCli.Builtins
 		#endregion
 
 		#region Double Scalars
+		[BuiltinCilOpcode(0xFE01 /* ceq */)]
 		public static bool eq(double a, double b) { return a == b; }
 		public static bool ne(double a, double b) { return a != b; }
 		public static bool ge(double a, double b) { return a >= b; }
+		[BuiltinCilOpcode(0xFE02 /* cgt */)]
 		public static bool gt(double a, double b) { return a > b; }
 		public static bool le(double a, double b) { return a <= b; }
+		[BuiltinCilOpcode(0xFE04 /* clt */)]
 		public static bool lt(double a, double b) { return a < b; }
 		public static bool isequal(double a, double b) { return a == b; }
 		#endregion

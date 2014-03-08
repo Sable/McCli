@@ -44,6 +44,7 @@ namespace McCli.Builtins
 			return plus(rhs, lhs);
 		}
 
+		[BuiltinCilOpcode(0x58 /* add */)]
 		public static double plus(double lhs, double rhs)
 		{
 			return lhs + rhs;
@@ -121,6 +122,7 @@ namespace McCli.Builtins
 			return c;
 		}
 
+		[BuiltinCilOpcode(0x59 /* sub */)]
 		public static double minus(double lhs, double rhs)
 		{
 			return lhs - rhs;
@@ -136,6 +138,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
+		[BuiltinCilOpcode(0x65 /* neg */)]
 		public static double uminus(double value)
 		{
 			return -value;
@@ -173,6 +176,7 @@ namespace McCli.Builtins
 			return times(rhs, lhs);
 		}
 
+		[BuiltinCilOpcode(0x5A /* mul */)]
 		public static double times(double lhs, double rhs)
 		{
 			return lhs * rhs;
@@ -239,6 +243,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
+		[BuiltinCilOpcode(0x5B /* div */)]
 		public static double rdivide(double lhs, double rhs)
 		{
 			return lhs / rhs;
@@ -250,6 +255,12 @@ namespace McCli.Builtins
 			Contract.Requires(rhs != null);
 
 			return rdivide(rhs, lhs);
+		}
+
+		// NOT equivalent to 'div' opcode
+		public static double ldivide(double lhs, double rhs)
+		{
+			return rhs / lhs;
 		}
 
 		public static MArray<double> mod(MArray<double> lhs, MArray<double> rhs)
@@ -324,6 +335,7 @@ namespace McCli.Builtins
 			return times(lhs, rhs);
 		}
 
+		[BuiltinCilOpcode(0x5A /* mul */)]
 		public static double mtimes(double lhs, double rhs)
 		{
 			return lhs * rhs;
@@ -356,7 +368,8 @@ namespace McCli.Builtins
 
 			throw new NotImplementedException("Non-scalar mrdivide.");
 		}
-		
+
+		[BuiltinCilOpcode(0x5B /* div */)]
 		public static double mrdivide(double b, double a)
 		{
 			return b / a;
@@ -375,6 +388,7 @@ namespace McCli.Builtins
 			throw new NotImplementedException("Non-scalar mldivide.");
 		}
 
+		[BuiltinCilOpcode(0x5B /* div */)]
 		public static double mldivide(double a, double b)
 		{
 			return b / a;

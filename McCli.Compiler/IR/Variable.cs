@@ -21,7 +21,7 @@ namespace McCli.Compiler.IR
 		public readonly string Name;
 
 		/// <summary>
-		/// The static representation of this variable, if available.
+		/// The static representation of this variable.
 		/// </summary>
 		public readonly MRepr StaticRepr;
 
@@ -29,29 +29,32 @@ namespace McCli.Compiler.IR
 		/// The constant value of this variable, if available.
 		/// </summary>
 		public readonly object ConstantValue;
+
+		/// <summary>
+		/// A value indicating if this variable is only initialized, and not modified afterwards.
+		/// </summary>
+		public readonly bool IsInitOnly;
 		#endregion
 
 		#region Constructors
-		public Variable(string name)
+		public Variable(string name, MRepr staticRepr, bool initOnly)
 		{
 			Contract.Requires(name != null);
 
 			this.Name = name;
-		}
-
-		public Variable(string name, MRepr staticRepr)
-			: this(name)
-		{
 			this.StaticRepr = staticRepr;
+			this.IsInitOnly = initOnly;
 		}
 
-		public Variable(string name, object constantValue)
-			: this(name)
+		public Variable(string name, object constantValue, bool initOnly)
 		{
+			Contract.Requires(name != null);
 			Contract.Requires(constantValue is double || constantValue is char);
 
+			this.Name = name;
 			this.StaticRepr = MRepr.FromCliType(constantValue.GetType());
 			this.ConstantValue = constantValue;
+			this.IsInitOnly = initOnly;
 		}
 		#endregion
 

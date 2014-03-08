@@ -93,6 +93,7 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="BuiltinCilOpcodeAttribute.cs" />
     <Compile Include="EmptyArray.cs" />
     <Compile Include="MArrayShape.cs" />
     <Compile Include="MArrayShapeException.cs" />

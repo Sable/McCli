@@ -143,6 +143,7 @@ namespace McCli.Compiler.CodeGen
 		{
 			returnTargetLabel = cil.CreateLabel("return");
 
+			EmitCloneInputs();
 			EmitStatements(declaration.Body);
 
 			cil.MarkLabel(returnTargetLabel);
@@ -167,6 +168,21 @@ namespace McCli.Compiler.CodeGen
 				}
 			}
 			cil.Ret();
+		}
+
+		private void EmitCloneInputs()
+		{
+			foreach (var input in declaration.Inputs)
+			{
+				// Don't clone if we never modify the variable or if it's a scalar
+				if (input.IsInitOnly || IsLiteral(input) || !input.StaticRepr.IsMValue) continue;
+
+				using (BeginEmitStore(input))
+				{
+					EmitLoad(input);
+					EmitCloneIfNeeded(input.StaticRepr);
+				}
+			}
 		}
 
 		private void EmitStatements(ImmutableArray<Statement> statements)
@@ -204,7 +220,7 @@ namespace McCli.Compiler.CodeGen
 			if (IsLiteral(variable))
 			{
 				if (variable.ConstantValue is double)
-					cil.LoadFloat((double)variable.ConstantValue);
+					cil.LoadFloat64((double)variable.ConstantValue);
 				else
 					throw new NotImplementedException("Loading constants of type " + variable.StaticRepr);
 				return;

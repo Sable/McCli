@@ -266,20 +266,20 @@ namespace CliKit
 		[Pure]
 		public static byte GetFirstByte(this OpcodeValue value)
 		{
-			return unchecked((byte)value);
+			return unchecked(HasTwoBytes(value) ? (byte)((ushort)value >> 8) : (byte)value);
 		}
 
 		[Pure]
 		public static byte GetSecondByte(this OpcodeValue value)
 		{
 			Contract.Requires(HasTwoBytes(value));
-			return unchecked((byte)((ushort)value >> 8));
+			return unchecked((byte)value);
 		}
 
 		[Pure]
 		public static bool HasTwoBytes(this OpcodeValue value)
 		{
-			return IsFirstOfTwoBytes(GetFirstByte(value));
+			return (int)value >= 0x100;
 		}
 
 		[Pure]

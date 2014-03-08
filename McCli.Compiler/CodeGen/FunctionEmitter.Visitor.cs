@@ -120,7 +120,19 @@ namespace McCli.Compiler.CodeGen
 			}
 			else
 			{
-				cil.Invoke(method);
+				// We're calling a builtin
+				var builtinCilOpcodeAttribute = method.GetCustomAttribute<BuiltinCilOpcodeAttribute>();
+				if (builtinCilOpcodeAttribute == null)
+				{
+					cil.Invoke(method);
+				}
+				else
+				{
+					// Calling the builtin is equivalent to emitting a single CIL opcode so do that instead
+					var opcode = Opcode.FromValue((OpcodeValue)builtinCilOpcodeAttribute.Opcode);
+					Contract.Assert(opcode != null);
+					cil.Instruction(opcode);
+				}
 			}
 
 			// Handle the return value, if any
@@ -184,13 +196,6 @@ namespace McCli.Compiler.CodeGen
 			var arrayRepr = node.Array.StaticRepr;
 			if (arrayRepr.IsArray)
 			{
-				// TODO: should not clone the array for each subsasgn!
-				using (BeginEmitStore(node.Array))
-				{
-					EmitLoad(node.Array);
-					EmitCloneIfNeeded(arrayRepr);
-				}
-
 				EmitLoad(node.Array);
 				
 				for (int i = 0; i < node.Indices.Length; ++i)
@@ -295,8 +300,8 @@ namespace McCli.Compiler.CodeGen
 				EmitConversion(node.From.StaticRepr, repr);
 				cil.Store(currentLocal.Location);
 
-				// Save the increment to a local variable if it's not a literal
-				if (node.Step != null && !IsLiteral(node.Step))
+				// Save the increment to a local variable if it's not a literal or initonly
+				if (node.Step != null && !IsLiteral(node.Step) && !node.Step.IsInitOnly)
 				{
 					stepLocal = temporaryPool.Alloc(repr.CliType);
 					EmitLoad(node.Step);
@@ -305,8 +310,8 @@ namespace McCli.Compiler.CodeGen
 					cil.Store(stepLocal.Value.Location);
 				}
 
-				// Save the "to" variable to a local variable if it's not a literal
-				if (!IsLiteral(node.To))
+				// Save the "to" variable to a local variable if it's not a literal or initonly
+				if (!IsLiteral(node.To) && !node.To.IsInitOnly)
 				{
 					toLocal = temporaryPool.Alloc(repr.CliType);
 					EmitLoad(node.To);
@@ -321,7 +326,7 @@ namespace McCli.Compiler.CodeGen
 				cil.MarkLabel(conditionLabel);
 				cil.Load(currentLocal.Location);
 				
-				// Load from our local variable if we created one, otherwise it's a literal
+				// Load the "to" loop bound variable (or our copy of it)
 				if (toLocal.HasValue)
 					cil.Load(toLocal.Value.Location);
 				else
@@ -342,9 +347,9 @@ namespace McCli.Compiler.CodeGen
 				cil.MarkLabel(continueTargetLabel);
 				cil.Load(currentLocal.Location);
 
-				// Load from our local variable if we created one, otherwise it's a literal or the default value
+				// Load the "step" loop increment variable, our copy of it or the default value of 1
 				if (stepLocal.HasValue) cil.Load(stepLocal.Value.Location);
-				else if (node.Step == null) cil.LoadFloat(1.0);
+				else if (node.Step == null) cil.LoadFloat64(1.0);
 				else EmitLoad(node.Step);
 
 				cil.Instruction(Opcode.Add);

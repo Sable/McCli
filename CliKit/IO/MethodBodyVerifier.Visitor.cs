@@ -98,6 +98,17 @@ namespace CliKit.IO
 				}
 			}
 
+			public override void VisitComparison(ComparisonOpcode opcode, VisitorParam param)
+			{
+				param.This.stack.RequireSize(opcode, 2);
+				var rhs = param.This.stack.Pop(opcode);
+				var lhs = param.This.stack.Pop(opcode);
+
+				// TODO: Implement type verification!
+
+				param.This.stack.Push(DataType.Int32);
+			}
+
 			public override void VisitConversion(ConversionOpcode opcode, VisitorParam param)
 			{
 				var value = param.This.stack.Pop(opcode);

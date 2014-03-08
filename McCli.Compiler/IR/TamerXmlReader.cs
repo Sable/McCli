@@ -85,6 +85,7 @@ namespace McCli.Compiler.IR
 			}
 
 			bool scalar = ((bool?)variableElement.Attribute("scalar")).GetValueOrDefault();
+			bool initOnly = ((bool?)variableElement.Attribute("final")).GetValueOrDefault();
 
 			string constantString = (string)variableElement.Attribute("constant");
 			object constantValue = null;
@@ -95,8 +96,8 @@ namespace McCli.Compiler.IR
 			}
 
 			return constantValue == null
-				? new Variable(name, new MRepr(type, scalar ? MStructuralClass.Scalar : MStructuralClass.Array))
-				: new Variable(name, constantValue);
+				? new Variable(name, new MRepr(type, scalar ? MStructuralClass.Scalar : MStructuralClass.Array), initOnly)
+				: new Variable(name, constantValue, initOnly);
 		}
 
 		private static IEnumerable<Statement> ReadStatements(XElement parentElement, IReadOnlyDictionary<string, Variable> variables)

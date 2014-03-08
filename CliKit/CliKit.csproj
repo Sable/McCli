@@ -99,6 +99,7 @@
     <Compile Include="MetadataTokenKind.cs" />
     <Compile Include="Conversion.cs" />
     <Compile Include="Opcode.Definitions.cs" />
+    <Compile Include="Opcode.Lookup.cs" />
     <Compile Include="Opcodes\ConversionOpcode.cs" />
     <Compile Include="NumericalOperand.cs" />
     <Compile Include="Opcodes\OpcodeVisitor.cs" />
