@@ -49,7 +49,7 @@ namespace McCli.Compiler.IR
 		public Variable(string name, object constantValue, bool initOnly)
 		{
 			Contract.Requires(name != null);
-			Contract.Requires(constantValue is double || constantValue is char);
+			Contract.Requires(constantValue is double || constantValue is char || constantValue is string);
 
 			this.Name = name;
 			this.StaticRepr = MRepr.FromCliType(constantValue.GetType());

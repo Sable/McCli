@@ -50,7 +50,7 @@ namespace McCli.Compiler.CodeGen
 					else
 					{
 						cil.LoadString(str);
-						cil.Invoke(typeof(PseudoBuiltins).GetMethod("StringToCharArray"));
+						cil.Invoke(typeof(MStrings).GetMethod("FromString"));
 						sourceRepr = MClass.Char.FullArrayRepr;
 					}
 				}

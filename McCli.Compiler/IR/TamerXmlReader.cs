@@ -93,6 +93,7 @@ namespace McCli.Compiler.IR
 			{
 				if (type == MClass.Double)
 					constantValue = double.Parse(constantString, CultureInfo.InvariantCulture);
+				// TODO: Implement strings
 			}
 
 			return constantValue == null
@@ -180,7 +181,7 @@ namespace McCli.Compiler.IR
 			switch ((string)element.Attribute("type"))
 			{
 				case "double": return new Literal(target, double.Parse(valueString, CultureInfo.InvariantCulture));
-				case "char": return new Literal(target, valueString[0]);
+				case "char": return new Literal(target, valueString);
 				default: throw new InvalidDataException("Unexpected literal type.");
 			}
 		}
