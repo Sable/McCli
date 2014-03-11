@@ -103,28 +103,35 @@ namespace CliKit.IO
 			else throw new ArgumentException("member");
 		}
 
-		public override void Instruction(Opcode opcode, NumericalOperand operand)
+		public override void Instruction(RawInstruction instruction)
 		{
+			var opcode = instruction.Opcode;
+
 			OpCode emitOpCode;
 			opcode.GetReflectionEmitOpCode(out emitOpCode);
 
 			switch (emitOpCode.OperandType)
 			{
 				case OperandType.InlineNone: generator.Emit(emitOpCode); break;
-				case OperandType.InlineI8: generator.Emit(emitOpCode, operand.Int64); break;
-				case OperandType.InlineR: generator.Emit(emitOpCode, operand.Float64); break;
-				case OperandType.InlineVar: generator.Emit(emitOpCode, (ushort)operand.Int); break;
-				case OperandType.ShortInlineR: generator.Emit(emitOpCode, operand.Float32); break;
-				case OperandType.ShortInlineVar: generator.Emit(emitOpCode, (byte)operand.Int); break;
-				case OperandType.ShortInlineI: generator.Emit(emitOpCode, (sbyte)operand.Int); break;
-				case OperandType.InlineI: generator.Emit(emitOpCode, operand.Int); break;
-				default: throw new NotSupportedException(); // Phi, tokens, branches and switch
-			}
-		}
+				case OperandType.InlineI8: generator.Emit(emitOpCode, instruction.Int64Operand); break;
+				case OperandType.InlineR: generator.Emit(emitOpCode, instruction.Float64Operand); break;
+				case OperandType.InlineVar: generator.Emit(emitOpCode, (ushort)instruction.UIntOperand); break;
+				case OperandType.ShortInlineR: generator.Emit(emitOpCode, instruction.Float32Operand); break;
+				case OperandType.ShortInlineVar: generator.Emit(emitOpCode, (byte)instruction.UIntOperand); break;
 
-		public override void Switch(int[] jumpTable)
-		{
-			throw new NotSupportedException("ILGenerator does not support raw switch instructions, use labels.");
+				case OperandType.ShortInlineBrTarget:
+				case OperandType.ShortInlineI:
+					generator.Emit(emitOpCode, (sbyte)instruction.IntOperand);
+					break;
+
+				case OperandType.InlineBrTarget:
+				case OperandType.InlineI:
+					generator.Emit(emitOpCode, instruction.IntOperand);
+					break;
+				
+				default:
+					throw new NotSupportedException(); // Phi, tokens, jump tables
+			}
 		}
 
 		public override void Switch(Label[] jumpTable)

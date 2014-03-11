@@ -18,7 +18,7 @@ namespace CliKit.IO
 		/// </summary>
 		/// <param name="stream">The source data stream.</param>
 		/// <returns>A lazy sequence of resulting CIL instructions, keyed by their byte offsets.</returns>
-		public static IEnumerable<KeyValuePair<int, RawInstruction>> ReadInstructions(Stream stream)
+		public static IEnumerable<RawInstruction> ReadInstructions(Stream stream)
 		{
 			Contract.Requires(stream != null && stream.CanRead);
 			return Read_Unchecked(stream);
@@ -29,8 +29,8 @@ namespace CliKit.IO
 		/// </summary>
 		/// <param name="stream">The source data stream.</param>
 		/// <param name="instruction">The instruction that was read, undefined if the method returns zero.</param>
-		/// <returns>The size of the instructions that was read, zero if the end of the stream was reached.</returns>
-		public static int ReadInstruction(Stream stream, out RawInstruction instruction)
+		/// <returns>A value indicating if an instruction was read, <c>false</c> if the end of the stream was reached.</returns>
+		public static bool ReadInstruction(Stream stream, out RawInstruction instruction)
 		{
 			Contract.Requires(stream != null && stream.CanRead);
 
@@ -38,24 +38,16 @@ namespace CliKit.IO
 			if (unchecked((byte)firstOpcodeByte) != firstOpcodeByte)
 			{
 				instruction = default(RawInstruction);
-				return 0;
+				return false;
 			}
 
-			int opcodeSize;
 			OpcodeValue opcodeValue;
 			if (OpcodeValueEnum.IsFirstOfTwoBytes((byte)firstOpcodeByte))
-			{
 				opcodeValue = (OpcodeValue)((firstOpcodeByte << 8) | stream.ReadUInt8());
-				opcodeSize = 2;
-			}
 			else
-			{
 				opcodeValue = (OpcodeValue)firstOpcodeByte;
-				opcodeSize = 1;
-			}
 
 			var opcode = Opcode.FromValue(opcodeValue);
-			int operandSize;
 			if (opcode == Opcode.Switch)
 			{
 				// Read jump table
@@ -63,13 +55,11 @@ namespace CliKit.IO
 				for (int i = 0; i < jumpTable.Length; ++i)
 					jumpTable[i] = stream.ReadInt32();
 				instruction = RawInstruction.CreateSwitch(jumpTable);
-				operandSize = 4 + jumpTable.Length * 4;
 			}
 			else
 			{
 				NumericalOperand operand;
-				operandSize = (int)opcode.OperandSizeInBytes;
-				switch (operandSize)
+				switch ((int)opcode.OperandKind.GetSizeInBytes())
 				{
 					case 0: operand = default(NumericalOperand); break;
 					case 1: operand = stream.ReadInt8(); break;
@@ -81,21 +71,14 @@ namespace CliKit.IO
 				instruction = new RawInstruction(opcode, operand);
 			}
 
-			return opcodeSize + operandSize;
+			return true;
 		}
 
-		private static IEnumerable<KeyValuePair<int, RawInstruction>> Read_Unchecked(Stream stream)
+		private static IEnumerable<RawInstruction> Read_Unchecked(Stream stream)
 		{
-			int offset = 0;
-			while (true)
-			{
-				RawInstruction instruction;
-				int instructionSize = ReadInstruction(stream, out instruction);
-				if (instructionSize == 0) yield break;
-
-				yield return new KeyValuePair<int, RawInstruction>(offset, instruction);
-				offset += instructionSize;
-			}
+			RawInstruction instruction;
+			while (ReadInstruction(stream, out instruction))
+				yield return instruction;
 		}
 
 		private static byte ReadUInt8(this Stream stream)

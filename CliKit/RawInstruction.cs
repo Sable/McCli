@@ -24,18 +24,18 @@ namespace CliKit
 		#region Constructors
 		public RawInstruction(Opcode opcode)
 		{
-			Contract.Requires(opcode != null && opcode.OperandSizeInBytes == 0);
+			Contract.Requires(opcode != null && opcode.OperandKind == OperandKind.None);
 
 			this.opcodeOrJumpTable = opcode;
 			this.numericalOperand = default(NumericalOperand);
 		}
 
-		public RawInstruction(Opcode opcode, NumericalOperand numericalOperand)
+		public RawInstruction(Opcode opcode, NumericalOperand operand)
 		{
 			Contract.Requires(opcode != null && opcode != Opcode.Switch);
 
 			this.opcodeOrJumpTable = opcode;
-			this.numericalOperand = numericalOperand;
+			this.numericalOperand = operand;
 		}
 
 		private RawInstruction(int[] switchJumpTable)
@@ -82,6 +82,11 @@ namespace CliKit
 			get { return numericalOperand.UInt; }
 		}
 
+		public long Int64Operand
+		{
+			get { return numericalOperand.Int64; }
+		}
+
 		public float Float32Operand
 		{
 			get { return numericalOperand.Float32; }
@@ -97,6 +102,9 @@ namespace CliKit
 			get { return numericalOperand.MetadataToken; }
 		}
 
+		/// <summary>
+		/// For switch instructions, gets the associated jump table.
+		/// </summary>
 		public int[] JumpTable
 		{
 			get

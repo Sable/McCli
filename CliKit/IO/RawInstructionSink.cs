@@ -13,22 +13,34 @@ namespace CliKit.IO
 	public abstract class RawInstructionSink : IDisposable
 	{
 		/// <summary>
-		/// Writes any CIL instruction to this sink except <c>switch</c>.
+		/// Writes a given CIL instruction to this sink.
 		/// </summary>
-		/// <param name="opcode">The instruction opcode.</param>
-		/// <param name="operand">The instruction inline operand (ignored if not needed).</param>
-		public abstract void Instruction(Opcode opcode, NumericalOperand operand);
-
-		/// <summary>
-		/// Writes a <c>switch</c> CIL instruction to this sink.
-		/// </summary>
-		/// <param name="jumpTable">The switch's jump table.</param>
-		public abstract void Switch(int[] jumpTable);
+		/// <param name="instruction">The instruction to be written.</param>
+		public abstract void Instruction(RawInstruction instruction);
 
 		/// <summary>
 		/// Closes this instruction sink and releases all associated resources.
 		/// </summary>
 		public virtual void Dispose() { }
+
+		/// <summary>
+		/// Writes any CIL instruction to this sink, except <c>switch</c>.
+		/// </summary>
+		/// <param name="opcode">The instruction opcode.</param>
+		/// <param name="operand">The instruction inline operand (ignored if not needed).</param>
+		public void Instruction(Opcode opcode, NumericalOperand operand)
+		{
+			Instruction(new RawInstruction(opcode, operand));
+		}
+
+		/// <summary>
+		/// Writes a <c>switch</c> CIL instruction to this sink.
+		/// </summary>
+		/// <param name="jumpTable">The switch's jump table.</param>
+		public void Switch(int[] jumpTable)
+		{
+			Instruction(RawInstruction.CreateSwitch(jumpTable));
+		}
 
 		public void Instruction(Opcode opcode)
 		{

@@ -40,15 +40,15 @@ namespace CliKit
 		{
 			get
 			{
-				switch (opcode.OperandType)
+				switch (OperandKind)
 				{
-					case Emit.OperandType.ShortInlineI: return DataType.Int8;
-					case Emit.OperandType.InlineI: return DataType.Int32;
-					case Emit.OperandType.InlineI8: return DataType.Int64;
-					case Emit.OperandType.InlineR: return DataType.Float64;
-					case Emit.OperandType.ShortInlineR: return DataType.Float32;
-					case Emit.OperandType.InlineString: return DataType.ObjectReference;
-					case Emit.OperandType.InlineNone: break;
+					case OperandKind.Int8: return DataType.Int8;
+					case OperandKind.Int32: return DataType.Int32;
+					case OperandKind.Int64: return DataType.Int64;
+					case OperandKind.Float64: return DataType.Float64;
+					case OperandKind.Float32: return DataType.Float32;
+					case OperandKind.StringToken: return DataType.ObjectReference;
+					case OperandKind.None: break;
 					default: throw new NotSupportedException();
 				}
 

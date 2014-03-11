@@ -38,7 +38,7 @@ namespace CliKit
 
 		public bool HasTypeOperand
 		{
-			get { return opcode.OperandType == Emit.OperandType.InlineType; }
+			get { return OperandKind == OperandKind.TypeToken; }
 		}
 
 		public DataType? DataType

@@ -73,53 +73,12 @@ namespace CliKit
 			}
 		}
 
-		internal OperandType OperandType
-		{
-			get { return opcode.OperandType; }
-		}
-
 		/// <summary>
-		/// Gets the size in bytes of any inline operand this opcode may have.
-		/// Returns <c>null</c> if the opcode has a variable-sized inline operand.
+		/// Gets the kind of inline operand that accompanies this opcode.
 		/// </summary>
-		public int? OperandSizeInBytes
+		public OperandKind OperandKind
 		{
-			get
-			{
-				switch (opcode.OperandType)
-				{
-					case OperandType.InlineNone:
-						return 0;
-
-					case OperandType.ShortInlineBrTarget:
-					case OperandType.ShortInlineI:
-					case OperandType.ShortInlineVar:
-						return 1;
-
-					case OperandType.InlineVar:
-						return 2;
-
-					case OperandType.InlineI:
-					case OperandType.ShortInlineR:
-					case OperandType.InlineTok:
-					case OperandType.InlineSig:
-					case OperandType.InlineString:
-					case OperandType.InlineType:
-					case OperandType.InlineField:
-					case OperandType.InlineMethod:
-					case OperandType.InlineBrTarget:
-						return 4;
-
-					case OperandType.InlineI8:
-					case OperandType.InlineR:
-						return 8;
-
-					case OperandType.InlineSwitch:
-						return null; // Variable-length jump table
-
-					default: throw new NotSupportedException();
-				}
-			}
+			get { return (OperandKind)opcode.OperandType; }
 		}
 
 		/// <summary>
@@ -128,7 +87,7 @@ namespace CliKit
 		/// </summary>
 		public int? InstructionSizeInBytes
 		{
-			get { return Value.GetByteCount() + OperandSizeInBytes; }
+			get { return Value.GetByteCount() + OperandKind.GetSizeInBytes(); }
 		}
 		#endregion
 

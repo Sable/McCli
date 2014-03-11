@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using OperandType = System.Reflection.Emit.OperandType;
 
 namespace CliKit.IO
 {
@@ -255,12 +254,15 @@ namespace CliKit.IO
 			if (sink != null) sink.FieldReference(opcode, field);
 		}
 
-		public override void Instruction(Opcode opcode, NumericalOperand operand)
+		public override void Instruction(RawInstruction instruction)
 		{
-			var param = new VisitorParam(this, operand);
-			opcode.Accept(Visitor.Instance, param);
+			if (instruction.IsSwitch)
+				throw RequiresSymbolicOverload(Opcode.Switch);
 
-			if (sink != null) sink.Instruction(opcode, operand);
+			var param = new VisitorParam(this, instruction.NumericalOperand);
+			instruction.Opcode.Accept(Visitor.Instance, param);
+
+			if (sink != null) sink.Instruction(instruction);
 		}
 
 		public override void Instruction(Opcode opcode, Type type)
@@ -300,11 +302,6 @@ namespace CliKit.IO
 				SetLabelStackState(GetLabelInfo(label));
 
 			if (sink != null) sink.Switch(jumpTable);
-		}
-
-		public override void Switch(int[] jumpTable)
-		{
-			throw RequiresSymbolicOverload(Opcode.Switch);
 		}
 
 		private LabelInfo GetLabelInfo(Label label)

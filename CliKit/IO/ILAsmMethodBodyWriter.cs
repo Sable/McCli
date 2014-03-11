@@ -90,46 +90,60 @@ namespace CliKit.IO
 			return locals.Count - 1;
 		}
 
-		public override void Instruction(Opcode opcode, NumericalOperand operand)
+		public override void Instruction(RawInstruction instruction)
 		{
+			var opcode = instruction.Opcode;
 			stringBuilder.Append(opcode.Name);
-			if (opcode.OperandType == OperandType.InlineNone)
+			if (opcode.OperandKind == OperandKind.None)
 			{
 				stringBuilder.AppendLine();
 				return;
 			}
 
 			stringBuilder.Append(' ');
-			switch (opcode.OperandType)
+			switch (opcode.OperandKind)
 			{
-				case OperandType.InlineVar:
-				case OperandType.ShortInlineVar:
+				case OperandKind.VariableIndex8:
+				case OperandKind.VariableIndex16:
 				{
 					// TODO: Use index if variable has no name
-					int variableIndex = operand.Int;
+					int variableIndex = instruction.IntOperand;
 					bool isLocal = ((VariableReferenceOpcode)opcode).VariableKind == VariableKind.Local;
 					stringBuilder.Append(isLocal ? locals[variableIndex].Name : argumentNames[variableIndex]);
 					break;
 				}
 
-				case OperandType.InlineI:
-				case OperandType.ShortInlineI:
-				case OperandType.InlineBrTarget:
-				case OperandType.ShortInlineBrTarget:
-					stringBuilder.Append(operand.Int);
+				case OperandKind.Int8:
+				case OperandKind.Int32:
+				case OperandKind.BranchTarget8:
+				case OperandKind.BranchTarget32:
+					stringBuilder.Append(instruction.IntOperand);
 					break;
 
-				case OperandType.InlineI8:
-					stringBuilder.Append(operand.Int64);
+				case OperandKind.Int64:
+					stringBuilder.Append(instruction.Int64Operand);
 					break;
 
-				case OperandType.InlineR:
-					stringBuilder.Append(operand.Float64);
+				case OperandKind.Float64:
+					stringBuilder.Append(instruction.Float64Operand);
 					break;
 
-				case OperandType.ShortInlineR:
-					stringBuilder.Append(operand.Float32);
+				case OperandKind.Float32:
+					stringBuilder.Append(instruction.Float32Operand);
 					break;
+
+				case OperandKind.JumpTable:
+				{
+					var jumpTable = instruction.JumpTable;
+					stringBuilder.Append("(");
+					for (int i = 0; i < jumpTable.Length; ++i)
+					{
+						if (i > 0) stringBuilder.Append(", ");
+						stringBuilder.Append(jumpTable[i].ToString(CultureInfo.InvariantCulture));
+					}
+					stringBuilder.AppendLine(")");
+					break;
+				}
 
 				default:
 					throw new NotSupportedException();
@@ -166,17 +180,6 @@ namespace CliKit.IO
 		public override void Call(CallOpcode opcode, MethodBase method)
 		{
 			CallWithReflectedTypes(opcode, method);
-		}
-
-		public override void Switch(int[] jumpTable)
-		{
-			stringBuilder.Append("switch (");
-			for (int i = 0; i < jumpTable.Length; ++i)
-			{
-				if (i > 0) stringBuilder.Append(", ");
-				stringBuilder.Append(jumpTable[i].ToString(CultureInfo.InvariantCulture));
-			}
-			stringBuilder.AppendLine(")");
 		}
 
 		public override void Switch(Label[] jumpTable)

@@ -60,17 +60,17 @@ namespace CliKit
 
 		public bool IsLongForm
 		{
-			get { return OperandType == Emit.OperandType.InlineVar; }
+			get { return OperandKind == OperandKind.VariableIndex16; }
 		}
 
 		public bool IsShortForm
 		{
-			get { return OperandType == Emit.OperandType.ShortInlineVar; }
+			get { return OperandKind == OperandKind.VariableIndex8; }
 		}
 
 		public bool IsConstantForm
 		{
-			get { return OperandType == Emit.OperandType.InlineNone; }
+			get { return OperandKind == OperandKind.None; }
 		}
 
 		public int? ConstantIndex

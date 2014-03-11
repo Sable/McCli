@@ -51,7 +51,7 @@ namespace CliKit
 		{
 			get
 			{
-				Contract.Requires(BranchKind == CliKit.BranchKind.Boolean);
+				Contract.Requires(BranchKind == BranchKind.Boolean);
 				return opcode.Name[2] == 't' ? true : false;
 			}
 		}
@@ -60,14 +60,14 @@ namespace CliKit
 		{
 			get
 			{
-				Contract.Requires(BranchKind == CliKit.BranchKind.Comparison);
+				Contract.Requires(BranchKind == BranchKind.Comparison);
 				return comparison;
 			}
 		}
 
 		public bool IsShortForm
 		{
-			get { return opcode.OperandType == Emit.OperandType.ShortInlineBrTarget; }
+			get { return OperandKind == OperandKind.BranchTarget8; }
 		}
 		#endregion
 
