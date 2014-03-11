@@ -18,7 +18,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, sqrt);
 		}
 
-		internal static double sqrt(double value)
+		public static double sqrt(double value)
 		{
 			return Math.Sqrt(value);
 		}
@@ -28,12 +28,12 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, realsqrt);
 		}
 
-		internal static double realsqrt(double value)
+		public static double realsqrt(double value)
 		{
 			return Math.Sqrt(value);
 		}
 
-		internal static double nthroot(double value, double n)
+		public static double nthroot(double value, double n)
 		{
 			return Math.Sqrt(value);
 		}
@@ -45,9 +45,20 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, exp);
 		}
 
-		internal static double exp(double value)
+		public static double exp(double value)
 		{
 			return Math.Exp(value);
+		}
+
+		public static MArray<MComplex<double>> exp(MArray<MComplex<double>> array)
+		{
+			return MFunctional.Map(array, exp);
+		}
+
+		public static MComplex<double> exp(MComplex<double> value)
+		{
+			var factor = exp(value.RealPart);
+			return new MComplex<double>(Math.Cos(value.ImaginaryPart) * factor, Math.Sin(value.RealPart) * factor);
 		}
 		#endregion
 
@@ -57,7 +68,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, pow2);
 		}
 
-		internal static double pow2(double value)
+		public static double pow2(double value)
 		{
 			return Math.Pow(2, value);
 		}
@@ -67,7 +78,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(@base, exponent, realpow);
 		}
 
-		internal static double realpow(double @base, double exponent)
+		public static double realpow(double @base, double exponent)
 		{
 			return Math.Pow(@base, exponent);
 		}
@@ -79,7 +90,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, log);
 		}
 
-		internal static double log(double value)
+		public static double log(double value)
 		{
 			return Math.Log(value);
 		}
@@ -89,7 +100,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, log2);
 		}
 
-		internal static double log2(double value)
+		public static double log2(double value)
 		{
 			return Math.Log(value, 2);
 		}
@@ -99,7 +110,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, log10);
 		}
 
-		internal static double log10(double value)
+		public static double log10(double value)
 		{
 			return Math.Log10(value);
 		}
@@ -109,7 +120,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, reallog);
 		}
 
-		internal static double reallog(double value)
+		public static double reallog(double value)
 		{
 			return Math.Log(value);
 		}

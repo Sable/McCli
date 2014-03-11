@@ -25,12 +25,12 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, abs);
 		}
 
-		internal static double abs(double value)
+		public static double abs(double value)
 		{
 			return Math.Abs(value);
 		}
 
-		internal static double abs(MComplex<double> value)
+		public static double abs(MComplex<double> value)
 		{
 			return Math.Sqrt(value.RealPart * value.RealPart + value.ImaginaryPart * value.ImaginaryPart);
 		}
@@ -68,6 +68,7 @@ namespace McCli.Builtins
 			return new MComplex<double>(0, 1);
 		}
 
+		#region real/imag
 		public static MArray<TReal> real<[AnyReal] TReal>(MArray<MComplex<TReal>> array) where TReal : struct
 		{
 			Contract.Requires(array != null);
@@ -76,6 +77,11 @@ namespace McCli.Builtins
 			for (int i = 0; i < array.Count; ++i)
 				result[i] = array[i].RealPart;
 			return result;
+		}
+
+		public static TReal real<[AnyReal] TReal>(MComplex<TReal> value) where TReal : struct
+		{
+			return value.RealPart;
 		}
 
 		public static MArray<TReal> imag<[AnyReal] TReal>(MArray<MComplex<TReal>> array) where TReal : struct
@@ -87,5 +93,11 @@ namespace McCli.Builtins
 				result[i] = array[i].ImaginaryPart;
 			return result;
 		}
+
+		public static TReal imag<[AnyReal] TReal>(MComplex<TReal> value) where TReal : struct
+		{
+			return value.ImaginaryPart;
+		}
+		#endregion
 	}
 }

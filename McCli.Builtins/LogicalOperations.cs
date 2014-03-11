@@ -14,74 +14,90 @@ namespace McCli.Builtins
 	public sealed class LogicalOperations
 	{
 		#region and
-		public static MArray<bool> and(MArray<bool> a, MArray<bool> b)
+		public static MArray<bool> and(MArray<bool> lhs, MArray<bool> rhs)
 		{
-			Contract.Requires(a != null);
-			Contract.Requires(b != null);
+			Contract.Requires(lhs != null);
+			Contract.Requires(rhs != null);
 
-			if (a.IsScalar) return and(b, a[0]);
-			if (b.IsScalar) return and(a, b[0]);
-			if (a.Shape != b.Shape) throw new MArrayShapeException();
+			if (lhs.IsScalar) return and(rhs, lhs[0]);
+			if (rhs.IsScalar) return and(lhs, rhs[0]);
+			if (lhs.Shape != rhs.Shape) throw new MArrayShapeException();
 
-			return MFunctional.Map(a, b, and);
+			return MFunctional.Map(lhs, rhs, and);
 		}
 
-		internal static MArray<bool> and(MArray<bool> a, bool b)
+		public static MArray<bool> and(MArray<bool> lhs, bool rhs)
 		{
-			return b ? a.DeepClone() : new MFullArray<bool>(a.Shape);
+			return rhs ? lhs.DeepClone() : new MFullArray<bool>(lhs.Shape);
 		}
 
-		internal static bool and(bool a, bool b)
+		public static MArray<bool> and(bool lhs, MArray<bool> rhs)
 		{
-			return a && b;
+			return and(rhs, lhs);
+		}
+
+		public static bool and(bool lhs, bool rhs)
+		{
+			return lhs && rhs;
 		}
 		#endregion
 
 		#region or
-		public static MArray<bool> or(MArray<bool> a, MArray<bool> b)
+		public static MArray<bool> or(MArray<bool> lhs, MArray<bool> rhs)
 		{
-			Contract.Requires(a != null);
-			Contract.Requires(b != null);
+			Contract.Requires(lhs != null);
+			Contract.Requires(rhs != null);
 
-			if (a.IsScalar) return or(b, a[0]);
-			if (b.IsScalar) return or(a, b[0]);
-			if (a.Shape != b.Shape) throw new MArrayShapeException();
+			if (lhs.IsScalar) return or(rhs, lhs[0]);
+			if (rhs.IsScalar) return or(lhs, rhs[0]);
+			if (lhs.Shape != rhs.Shape) throw new MArrayShapeException();
 
-			return MFunctional.Map(a, b, or);
+			return MFunctional.Map(lhs, rhs, or);
 		}
 
-		internal static MArray<bool> or(MArray<bool> a, bool b)
+		public static MArray<bool> or(MArray<bool> lhs, bool rhs)
 		{
-			return b ? MFullArray<bool>.ExpandScalar(true, a.Shape) : a.DeepClone();
+			return rhs ? MFullArray<bool>.ExpandScalar(true, lhs.Shape) : lhs.DeepClone();
 		}
 
-		internal static bool or(bool a, bool b)
+		public static MArray<bool> or(bool lhs, MArray<bool> rhs)
 		{
-			return a || b;
+			return or(rhs, lhs);
+		}
+
+		[BuiltinCilOpcode(0x60 /* or */)]
+		public static bool or(bool lhs, bool rhs)
+		{
+			return lhs | rhs;
 		}
 		#endregion
 
 		#region xor
-		public static MArray<bool> xor(MArray<bool> a, MArray<bool> b)
+		public static MArray<bool> xor(MArray<bool> lhs, MArray<bool> rhs)
 		{
-			Contract.Requires(a != null);
-			Contract.Requires(b != null);
+			Contract.Requires(lhs != null);
+			Contract.Requires(rhs != null);
 
-			if (a.IsScalar) return xor(b, a[0]);
-			if (b.IsScalar) return xor(a, b[0]);
-			if (a.Shape != b.Shape) throw new MArrayShapeException();
+			if (lhs.IsScalar) return xor(rhs, lhs[0]);
+			if (rhs.IsScalar) return xor(lhs, rhs[0]);
+			if (lhs.Shape != rhs.Shape) throw new MArrayShapeException();
 
-			return MFunctional.Map(a, b, xor);
+			return MFunctional.Map(lhs, rhs, xor);
 		}
 
-		internal static MArray<bool> xor(MArray<bool> a, bool b)
+		public static MArray<bool> xor(MArray<bool> lhs, bool rhs)
 		{
-			return b ? not(a) : a.DeepClone();
+			return rhs ? not(lhs) : lhs.DeepClone();
 		}
 
-		internal static bool xor(bool a, bool b)
+		public static MArray<bool> xor(bool lhs, MArray<bool> rhs)
 		{
-			return !a ^ !b;
+			return xor(rhs, lhs);
+		}
+
+		public static bool xor(bool lhs, bool rhs)
+		{
+			return !lhs ^ !rhs;
 		}
 		#endregion
 
@@ -94,7 +110,8 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, not);
 		}
 
-		internal static bool not(bool value)
+		[BuiltinCilOpcode(0x66 /* not */)]
+		public static bool not(bool value)
 		{
 			return !value;
 		}

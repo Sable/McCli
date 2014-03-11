@@ -26,7 +26,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		internal static double hypot(double x, double y)
+		public static double hypot(double x, double y)
 		{
 			return Math.Sqrt(x * x + y * y);
 		}
@@ -37,7 +37,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, degtorad);
 		}
 
-		internal static double degtorad(double value)
+		public static double degtorad(double value)
 		{
 			return value * (Math.PI / 180);
 		}
@@ -47,7 +47,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, radtodeg);
 		}
 
-		internal static double radtodeg(double value)
+		public static double radtodeg(double value)
 		{
 			return value * (180 / Math.PI);
 		}
@@ -59,7 +59,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, cos);
 		}
 
-		internal static double cos(double value)
+		public static double cos(double value)
 		{
 			return Math.Cos(value);
 		}
@@ -69,7 +69,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, cot);
 		}
 
-		internal static double cot(double value)
+		public static double cot(double value)
 		{
 			return 1 / tan(value);
 		}
@@ -79,7 +79,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, csc);
 		}
 
-		internal static double csc(double value)
+		public static double csc(double value)
 		{
 			return 1 / sin(value);
 		}
@@ -89,7 +89,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, sec);
 		}
 
-		internal static double sec(double value)
+		public static double sec(double value)
 		{
 			return 1 / cos(value);
 		}
@@ -99,7 +99,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, sin);
 		}
 
-		internal static double sin(double value)
+		public static double sin(double value)
 		{
 			return Math.Sin(value);
 		}
@@ -109,7 +109,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, tan);
 		}
 
-		internal static double tan(double value)
+		public static double tan(double value)
 		{
 			return Math.Tan(value);
 		}
@@ -121,7 +121,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, cosd);
 		}
 
-		internal static double cosd(double value)
+		public static double cosd(double value)
 		{
 			return cos(degtorad(value));
 		}
@@ -131,7 +131,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, cotd);
 		}
 
-		internal static double cotd(double value)
+		public static double cotd(double value)
 		{
 			return cot(degtorad(value));
 		}
@@ -141,7 +141,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, cscd);
 		}
 
-		internal static double cscd(double value)
+		public static double cscd(double value)
 		{
 			return csc(degtorad(value));
 		}
@@ -151,7 +151,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, secd);
 		}
 
-		internal static double secd(double value)
+		public static double secd(double value)
 		{
 			return sec(degtorad(value));
 		}
@@ -161,7 +161,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, sind);
 		}
 
-		internal static double sind(double value)
+		public static double sind(double value)
 		{
 			return sin(degtorad(value));
 		}
@@ -171,7 +171,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, tand);
 		}
 
-		internal static double tand(double value)
+		public static double tand(double value)
 		{
 			return tan(degtorad(value));
 		}
@@ -183,7 +183,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, acos);
 		}
 
-		internal static double acos(double value)
+		public static double acos(double value)
 		{
 			return Math.Acos(value);
 		}
@@ -193,7 +193,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, acot);
 		}
 
-		internal static double acot(double value)
+		public static double acot(double value)
 		{
 			return (Math.PI * 0.5) - atan(value);
 		}
@@ -203,7 +203,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, acsc);
 		}
 
-		internal static double acsc(double value)
+		public static double acsc(double value)
 		{
 			return (Math.PI * 0.5) - asec(value);
 		}
@@ -213,7 +213,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, asec);
 		}
 
-		internal static double asec(double value)
+		public static double asec(double value)
 		{
 			return acos(1 / value);
 		}
@@ -223,7 +223,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, asin);
 		}
 
-		internal static double asin(double value)
+		public static double asin(double value)
 		{
 			return Math.Asin(value);
 		}
@@ -233,7 +233,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, atan);
 		}
 
-		internal static double atan(double value)
+		public static double atan(double value)
 		{
 			return Math.Atan(value);
 		}
@@ -245,7 +245,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, acosd);
 		}
 
-		internal static double acosd(double value)
+		public static double acosd(double value)
 		{
 			return radtodeg(acos(value));
 		}
@@ -255,7 +255,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, acotd);
 		}
 
-		internal static double acotd(double value)
+		public static double acotd(double value)
 		{
 			return radtodeg(acotd(value));
 		}
@@ -265,7 +265,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, acscd);
 		}
 
-		internal static double acscd(double value)
+		public static double acscd(double value)
 		{
 			return radtodeg(acsc(value));
 		}
@@ -275,7 +275,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, asecd);
 		}
 
-		internal static double asecd(double value)
+		public static double asecd(double value)
 		{
 			return radtodeg(asec(value));
 		}
@@ -285,7 +285,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, asind);
 		}
 
-		internal static double asind(double value)
+		public static double asind(double value)
 		{
 			return radtodeg(asin(value));
 		}
@@ -295,7 +295,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, atand);
 		}
 
-		internal static double atand(double value)
+		public static double atand(double value)
 		{
 			return radtodeg(atan(value));
 		}
@@ -307,7 +307,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, cosh);
 		}
 
-		internal static double cosh(double value)
+		public static double cosh(double value)
 		{
 			return Math.Cosh(value);
 		}
@@ -317,7 +317,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, coth);
 		}
 
-		internal static double coth(double value)
+		public static double coth(double value)
 		{
 			return cosh(value) / sinh(value);
 		}
@@ -327,7 +327,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, csch);
 		}
 
-		internal static double csch(double value)
+		public static double csch(double value)
 		{
 			return 1 / sinh(value);
 		}
@@ -337,7 +337,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, sech);
 		}
 
-		internal static double sech(double value)
+		public static double sech(double value)
 		{
 			return 1 / cosh(value);
 		}
@@ -347,7 +347,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, sinh);
 		}
 
-		internal static double sinh(double value)
+		public static double sinh(double value)
 		{
 			return Math.Sinh(value);
 		}
@@ -357,11 +357,10 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, tanh);
 		}
 
-		internal static double tanh(double value)
+		public static double tanh(double value)
 		{
 			return Math.Tanh(value);
 		}
 		#endregion
-		// TODO: All other trig' functions
 	}
 }

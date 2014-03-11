@@ -65,14 +65,12 @@ namespace McCli.Compiler.CodeGen
 
 		public override void VisitCopy(Copy node)
 		{
-			Contract.Assert(node.Value.StaticRepr.Type == node.Target.StaticRepr.Type);
 			if (IsLiteral(node.Target)) return;
 
 			using (BeginEmitStore(node.Target))
 			{
 				EmitLoad(node.Value);
 				EmitCloneIfNeeded(node.Value.StaticRepr);
-
 				EmitConversion(node.Value.StaticRepr, node.Target.StaticRepr);
 			}
 		}

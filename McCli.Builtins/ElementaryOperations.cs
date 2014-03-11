@@ -13,7 +13,7 @@ namespace McCli.Builtins
 	[MatlabLibrary]
 	public static class ElementaryOperations
 	{
-		#region Additive
+		#region Real Additive
 		public static MArray<double> plus(MArray<double> lhs, MArray<double> rhs)
 		{
 			Contract.Requires(lhs != null);
@@ -86,7 +86,20 @@ namespace McCli.Builtins
 		}
 		#endregion
 
-		#region Subtractive
+		#region Complex Additive
+		public static MArray<MComplex<double>> plus(MArray<MComplex<double>> lhs, MArray<MComplex<double>> rhs)
+		{
+			MatchShapes(ref lhs, ref rhs);
+			return MFunctional.Map(lhs, rhs, plus);
+		}
+
+		public static MComplex<double> plus(MComplex<double> lhs, MComplex<double> rhs)
+		{
+			return new MComplex<double>(lhs.RealPart + rhs.RealPart, lhs.ImaginaryPart + rhs.ImaginaryPart);
+		}
+		#endregion
+
+		#region Real Subtractive
 		public static MArray<double> minus(MArray<double> lhs, MArray<double> rhs)
 		{
 			Contract.Requires(lhs != null);
@@ -145,7 +158,30 @@ namespace McCli.Builtins
 		}
 		#endregion
 
-		#region Scalar Multiplicative
+		#region Complex Subtractive
+		public static MArray<MComplex<double>> minus(MArray<MComplex<double>> lhs, MArray<MComplex<double>> rhs)
+		{
+			MatchShapes(ref lhs, ref rhs);
+			return MFunctional.Map(lhs, rhs, minus);
+		}
+
+		public static MComplex<double> minus(MComplex<double> lhs, MComplex<double> rhs)
+		{
+			return new MComplex<double>(lhs.RealPart - rhs.RealPart, lhs.ImaginaryPart - rhs.ImaginaryPart);
+		}
+
+		public static MArray<MComplex<double>> uminus(MArray<MComplex<double>> array)
+		{
+			return MFunctional.Map(array, uminus);
+		}
+
+		public static MComplex<double> uminus(MComplex<double> value)
+		{
+			return new MComplex<double>(-value.RealPart, -value.ImaginaryPart);
+		}
+		#endregion
+
+		#region Real Scalar Multiplicative
 		public static MArray<double> times(MArray<double> lhs, MArray<double> rhs)
 		{
 			Contract.Requires(lhs != null);
@@ -204,6 +240,31 @@ namespace McCli.Builtins
 			}
 
 			return result;
+		}
+		#endregion
+
+		#region Complex Scalar Multiplicative
+		public static MArray<MComplex<double>> times(MArray<MComplex<double>> lhs, MArray<MComplex<double>> rhs)
+		{
+			MatchShapes(ref lhs, ref rhs);
+			return MFunctional.Map(lhs, rhs, times);
+		}
+
+		public static MComplex<double> times(MComplex<double> lhs, double rhs)
+		{
+			return new MComplex<double>(lhs.RealPart * rhs, lhs.ImaginaryPart * rhs);
+		}
+
+		public static MComplex<double> times(double lhs, MComplex<double> rhs)
+		{
+			return times(rhs, lhs);
+		}
+
+		public static MComplex<double> times(MComplex<double> lhs, MComplex<double> rhs)
+		{
+			return new MComplex<double>(
+				lhs.RealPart * rhs.RealPart - lhs.ImaginaryPart * rhs.ImaginaryPart,
+				lhs.RealPart * rhs.ImaginaryPart + lhs.ImaginaryPart * rhs.RealPart);
 		}
 		#endregion
 
@@ -292,7 +353,7 @@ namespace McCli.Builtins
 		}
 		#endregion
 
-		#region Matrix Operations
+		#region Real Matrix Operations
 		public static MArray<double> mtimes(MArray<double> lhs, MArray<double> rhs)
 		{
 			Contract.Requires(lhs != null);
@@ -392,6 +453,23 @@ namespace McCli.Builtins
 		public static double mldivide(double a, double b)
 		{
 			return b / a;
+		}
+		#endregion
+
+		#region Complex Matrix Operations
+		public static MComplex<double> mtimes(MComplex<double> lhs, double rhs)
+		{
+			return times(lhs, rhs);
+		}
+
+		public static MComplex<double> mtimes(double lhs, MComplex<double> rhs)
+		{
+			return times(lhs, rhs);
+		}
+
+		public static MComplex<double> mtimes(MComplex<double> lhs, MComplex<double> rhs)
+		{
+			return times(lhs, rhs);
 		}
 		#endregion
 
