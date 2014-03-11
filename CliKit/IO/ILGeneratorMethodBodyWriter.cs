@@ -111,13 +111,13 @@ namespace CliKit.IO
 			switch (emitOpCode.OperandType)
 			{
 				case OperandType.InlineNone: generator.Emit(emitOpCode); break;
-				case OperandType.InlineI8: generator.Emit(emitOpCode, operand.Int64Constant); break;
-				case OperandType.InlineR: generator.Emit(emitOpCode, operand.Float64Constant); break;
-				case OperandType.InlineVar: generator.Emit(emitOpCode, (ushort)operand.IntValue); break;
-				case OperandType.ShortInlineR: generator.Emit(emitOpCode, operand.Float32Constant); break;
-				case OperandType.ShortInlineVar: generator.Emit(emitOpCode, (byte)operand.IntValue); break;
-				case OperandType.ShortInlineI: generator.Emit(emitOpCode, (sbyte)operand.IntValue); break;
-				case OperandType.InlineI: generator.Emit(emitOpCode, operand.IntValue); break;
+				case OperandType.InlineI8: generator.Emit(emitOpCode, operand.Int64); break;
+				case OperandType.InlineR: generator.Emit(emitOpCode, operand.Float64); break;
+				case OperandType.InlineVar: generator.Emit(emitOpCode, (ushort)operand.Int); break;
+				case OperandType.ShortInlineR: generator.Emit(emitOpCode, operand.Float32); break;
+				case OperandType.ShortInlineVar: generator.Emit(emitOpCode, (byte)operand.Int); break;
+				case OperandType.ShortInlineI: generator.Emit(emitOpCode, (sbyte)operand.Int); break;
+				case OperandType.InlineI: generator.Emit(emitOpCode, operand.Int); break;
 				default: throw new NotSupportedException(); // Phi, tokens, branches and switch
 			}
 		}

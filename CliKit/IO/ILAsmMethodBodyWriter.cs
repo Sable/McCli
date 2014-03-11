@@ -106,7 +106,7 @@ namespace CliKit.IO
 				case OperandType.ShortInlineVar:
 				{
 					// TODO: Use index if variable has no name
-					int variableIndex = operand.IntValue;
+					int variableIndex = operand.Int;
 					bool isLocal = ((VariableReferenceOpcode)opcode).VariableKind == VariableKind.Local;
 					stringBuilder.Append(isLocal ? locals[variableIndex].Name : argumentNames[variableIndex]);
 					break;
@@ -116,19 +116,19 @@ namespace CliKit.IO
 				case OperandType.ShortInlineI:
 				case OperandType.InlineBrTarget:
 				case OperandType.ShortInlineBrTarget:
-					stringBuilder.Append(operand.IntValue);
+					stringBuilder.Append(operand.Int);
 					break;
 
 				case OperandType.InlineI8:
-					stringBuilder.Append(operand.Int64Constant);
+					stringBuilder.Append(operand.Int64);
 					break;
 
 				case OperandType.InlineR:
-					stringBuilder.Append(operand.Float64Constant);
+					stringBuilder.Append(operand.Float64);
 					break;
 
 				case OperandType.ShortInlineR:
-					stringBuilder.Append(operand.Float32Constant);
+					stringBuilder.Append(operand.Float32);
 					break;
 
 				default:

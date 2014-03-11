@@ -74,6 +74,7 @@
     <Compile Include="CastKind.cs" />
     <Compile Include="Comparison.cs" />
     <Compile Include="Conversions.cs" />
+    <Compile Include="IO\CilReader.cs" />
     <Compile Include="IO\ILAsmMethodBodyWriter.cs" />
     <Compile Include="IO\ILGeneratorMethodBodyWriter.cs" />
     <Compile Include="IO\MethodBodyVerificationContext.cs" />
@@ -105,6 +106,8 @@
     <Compile Include="Opcodes\OpcodeVisitor.cs" />
     <Compile Include="Opcodes\CastOpcode.cs" />
     <Compile Include="OpcodeValue.cs" />
+    <Compile Include="OperandKind.cs" />
+    <Compile Include="RawInstruction.cs" />
     <Compile Include="ReflectionEmitEnums.cs" />
     <Compile Include="LocationReferenceKind.cs" />
     <Compile Include="IO\ILGeneratorExtensions.cs" />

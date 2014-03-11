@@ -294,6 +294,18 @@ namespace McCli.Compiler.CodeGen
 				// Upcast
 				if (source.StructuralClass.IsArray && (target.IsArray || target.IsAny)) return;
 			}
+			else if (target.Type.IsComplex && source.Type == target.Type.Class)
+			{
+				// Real to complex promotion
+				
+				// Convert to complex
+				var function = pseudoBuiltins.Lookup("ToComplex", source);
+				cil.Invoke(function.Method);
+
+				// Change structural class if needed
+				EmitConversion(function.Signature.Outputs[0], target);
+				return;
+			}
 
 			throw new NotImplementedException(
 				string.Format("Conversion from {0} to {1}.", source, target));

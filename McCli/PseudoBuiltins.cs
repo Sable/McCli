@@ -78,6 +78,16 @@ namespace McCli
 			return MFullArray<TScalar>.ExpandScalar(value, shape);
 		}
 
+		public static MComplex<TReal> ToComplex<[AnyReal] TReal>(TReal value) where TReal : struct
+		{
+			return new MComplex<TReal>(value, default(TReal));
+		}
+
+		public static MArray<MComplex<TReal>> ToComplex<[AnyReal] TReal>(MArray<TReal> value) where TReal : struct
+		{
+			return MFunctional.Map(value, ToComplex);
+		}
+
 		#region For Loops
 		public static int GetForSliceCount(MValue value)
 		{

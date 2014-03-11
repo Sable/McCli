@@ -164,13 +164,19 @@ namespace McCli.Compiler
 
 				if (provided != expected)
 				{
-					var inputAdmissibility = Admissibility.PerfectMatch;
+					Admissibility inputAdmissibility;
 					if (expected.IsAny)
 						inputAdmissibility = Admissibility.ToAny;
 					else if (provided.Type == expected.Type)
 						inputAdmissibility = Admissibility.StructuralClassChange;
+					else if (expected.Type.IsComplex && expected.Type.Class == provided.Type)
+					{
+						inputAdmissibility = expected.StructuralClass == provided.StructuralClass
+							? Admissibility.RealToComplex : Admissibility.RealToComplexAndStructuralClassChange;
+					}
 					else
 						return Admissibility.Incompatible;
+
 					if (inputAdmissibility < admissibility) admissibility = inputAdmissibility;
 				}
 			}

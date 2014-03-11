@@ -175,7 +175,7 @@ namespace CliKit.IO
 			public override void VisitVariableReference(VariableReferenceOpcode opcode, VisitorParam param)
 			{
 				Type variableType;
-				int index = opcode.ConstantIndex ?? param.NumericalOperand.IntValue;
+				int index = opcode.ConstantIndex ?? param.NumericalOperand.Int;
 				if (opcode.IsLocal)
 				{
 					if (index >= param.This.locals.Count)

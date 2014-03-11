@@ -22,7 +22,7 @@ namespace McCli
 			return result;
 		}
 
-		public static MArray<T> Map<T>(MArray<T> array1, MArray<T> array2, Func<T, T, T> map)
+		public static MArray<TOut> Map<TIn1, TIn2, TOut>(MArray<TIn1> array1, MArray<TIn2> array2, Func<TIn1, TIn2, TOut> map)
 		{
 			Contract.Requires(array1 != null);
 			Contract.Requires(array2 != null);
@@ -31,7 +31,7 @@ namespace McCli
 			var shape = array1.Shape;
 			if (array2.Shape != array1.Shape) throw new MArrayShapeException();
 
-			var result = new MFullArray<T>(shape);
+			var result = new MFullArray<TOut>(shape);
 			for (int i = 0; i < shape.Count; ++i)
 				result[i] = map(array1[i], array2[i]);
 			return result;

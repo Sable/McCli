@@ -36,6 +36,7 @@ namespace McCli.Builtins
 		}
 		#endregion
 
+		#region Complex
 		public static MComplex<TReal> complex<[AnyReal] TReal>(TReal a) where TReal : struct
 		{
 			return new MComplex<TReal>(a);
@@ -45,6 +46,17 @@ namespace McCli.Builtins
 		{
 			return new MComplex<TReal>(a, b);
 		}
+
+		public static MArray<MComplex<TReal>> complex<[AnyReal] TReal>(MArray<TReal> a) where TReal : struct
+		{
+			return MFunctional.Map(a, complex);
+		}
+
+		public static MArray<MComplex<TReal>> complex<[AnyReal] TReal>(MArray<TReal> a, MArray<TReal> b) where TReal : struct
+		{
+			return MFunctional.Map(a, b, complex);
+		}
+		#endregion
 
 		public static MComplex<double> i()
 		{

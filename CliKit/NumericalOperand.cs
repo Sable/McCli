@@ -60,32 +60,32 @@ namespace CliKit
 		#endregion
 
 		#region Properties
-		public long Int64Constant
+		public long Int64
 		{
 			get { return value.Int64; }
 		}
 
-		public double Float64Constant
+		public double Float64
 		{
 			get { return value.Float64; }
 		}
 
-		public int IntValue
+		public int Int
 		{
 			get { return value.Int32; }
 		}
 
-		public uint UIntValue
+		public uint UInt
 		{
 			get { return unchecked((uint)value.Int32); }
 		}
 
-		public MetadataToken MetadataTokenValue
+		public MetadataToken MetadataToken
 		{
 			get { return MetadataToken.FromValue(value.Int32); }
 		}
 
-		public float Float32Constant
+		public float Float32
 		{
 			get { return value.Float32; }
 		}
