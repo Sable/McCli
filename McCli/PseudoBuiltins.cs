@@ -175,28 +175,58 @@ namespace McCli
 		public static TScalar ArrayGet<[AnyPrimitive] TScalar>(
 			MArray<TScalar> array, double rowIndex, double columnIndex)
 		{
-			return ArrayGet(array, ToInt(rowIndex), ToInt(columnIndex));
+			Contract.Requires(array != null);
+			var index = LinearizeIndex(array.Shape, ToInt(rowIndex), ToInt(columnIndex));
+			return array[index - 1];
 		}
 
-		internal static TScalar ArrayGet<[AnyPrimitive] TScalar>(
-			MArray<TScalar> array, int rowIndex, int columnIndex)
+		public static TScalar ArrayGet<[AnyPrimitive] TScalar>(
+			MArray<TScalar> array, double rowIndex, double columnIndex, double sliceIndex)
 		{
 			Contract.Requires(array != null);
-			return ArrayGet(array, LinearizeIndex(array.Shape, rowIndex, columnIndex));
+			var index = LinearizeIndex(array.Shape, ToInt(rowIndex), ToInt(columnIndex), ToInt(sliceIndex));
+			return array[index - 1];
 		}
 
 		public static TScalar ArrayGet<[AnyPrimitive] TScalar>(MArray<TScalar> array, double index)
 		{
-			return ArrayGet(array, PseudoBuiltins.ToInt(index));
-		}
-
-		internal static TScalar ArrayGet<[AnyPrimitive] TScalar>(MArray<TScalar> array, int index)
-		{
-			return array[index - 1];
+			Contract.Requires(array != null);
+			int intIndex = ToInt(index);
+			if (index < 1 || index > array.Count) throw new ArgumentOutOfRangeException("index");
+			return array[intIndex - 1];
 		}
 		#endregion
 
 		#region ArraySet
+		public static void ArraySet<[AnyPrimitive] TScalar>(
+			MArray<TScalar> array, MArray<TScalar> values)
+		{
+			Contract.Requires(array != null);
+			Contract.Requires(values != null);
+
+			if (values.IsScalar)
+			{
+				ArraySet(array, values[0]);
+			}
+			else
+			{
+				if (values.Shape != array.Shape) throw new MArrayShapeException();
+
+				int count = array.Count;
+				for (int i = 0; i < count; ++i)
+					array[i] = values[i];
+			}
+		}
+
+		public static void ArraySet<[AnyPrimitive] TScalar>(
+			MArray<TScalar> array, TScalar value)
+		{
+			Contract.Requires(array != null);
+			int count = array.Count;
+			for (int i = 0; i < count; ++i)
+				array[i] = value;
+		}
+
 		public static void ArraySet<[AnyPrimitive] TScalar>(
 			MArray<TScalar> array, MArray<double> indices, MArray<TScalar> values)
 		{
@@ -252,27 +282,37 @@ namespace McCli
 		public static void ArraySet<[AnyPrimitive] TScalar>(
 			MArray<TScalar> array, double rowIndex, double columnIndex, TScalar value)
 		{
-			ArraySet(array, ToInt(rowIndex), ToInt(columnIndex), value);
+			var index = LinearizeIndex(array.Shape, ToInt(rowIndex), ToInt(columnIndex));
+			array[index - 1] = value;
 		}
 
-		internal static void ArraySet<[AnyPrimitive] TScalar>(
-			MArray<TScalar> array, int rowIndex, int columnIndex, TScalar value)
+		public static void ArraySet<[AnyPrimitive] TScalar>(
+			MArray<TScalar> array, double rowIndex, double columnIndex, double sliceIndex, TScalar value)
 		{
-			Contract.Requires(array != null);
-
-			var index = LinearizeIndex(array.Shape, rowIndex, columnIndex);
+			var index = LinearizeIndex(array.Shape, ToInt(rowIndex), ToInt(columnIndex), ToInt(sliceIndex));
 			array[index - 1] = value;
 		}
 		#endregion
 
 		#region LinearizeIndex
-		public static int LinearizeIndex(MArrayShape shape, int rowIndex, int columnIndex)
+		internal static int LinearizeIndex(MArrayShape shape, int rowIndex, int columnIndex)
 		{
 			if (rowIndex < 1 || rowIndex > shape.RowCount
 				|| columnIndex < 1 || columnIndex > shape.ColumnCount)
 				throw new ArgumentOutOfRangeException();
 
 			return rowIndex + (columnIndex - 1) * shape.RowCount;
+		}
+
+		internal static int LinearizeIndex(MArrayShape shape, int rowIndex, int columnIndex, int sliceIndex)
+		{
+			int sliceCount = shape.GetDimensionSize(2);
+			if (rowIndex < 1 || rowIndex > shape.RowCount
+				|| columnIndex < 1 || columnIndex > shape.ColumnCount
+				|| sliceIndex < 1 || sliceIndex > sliceCount)
+				throw new ArgumentOutOfRangeException();
+
+			return rowIndex + ((sliceCount - 1) * shape.ColumnCount + columnIndex - 1) * shape.RowCount;
 		}
 		#endregion
 	}
