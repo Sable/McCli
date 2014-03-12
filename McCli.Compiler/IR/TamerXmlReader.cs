@@ -77,11 +77,17 @@ namespace McCli.Compiler.IR
 
 			MType type = null;
 			var className = (string)variableElement.Attribute("class");
-			var complex = (bool?)variableElement.Attribute("complex");
-			if (className != null && complex.HasValue)
+			if (className != null)
 			{
 				type = MClass.FromName((string)className);
-				if (complex.Value) type = ((MPrimitiveClass)type).Complex;
+				if (type.IsPrimitive)
+				{
+					// If we don't have complex information, then the variable's value
+					// is sometimes real and sometimes complex, which we approximate
+					// by making it always complex, though this can be incorrect.
+					var complex = (bool?)variableElement.Attribute("complex") ?? true;
+					if (complex) type = ((MPrimitiveClass)type).Complex;
+				}
 			}
 
 			bool scalar = ((bool?)variableElement.Attribute("scalar")).GetValueOrDefault();
