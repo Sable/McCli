@@ -56,6 +56,11 @@ namespace McCli
 			return new MCellArray(cloneElements, shape);
 		}
 
+		public override void Resize(MArrayShape newShape)
+		{
+			throw new NotImplementedException("MCellArray.Resize");
+		}
+
 		protected override MValue DoDeepClone()
 		{
 			return DeepClone();

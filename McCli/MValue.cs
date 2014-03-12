@@ -135,6 +135,12 @@ namespace McCli
 			return DoDeepClone();
 		}
 
+		/// <summary>
+		/// Resizes this value to the given shape.
+		/// </summary>
+		/// <param name="newShape">The new shape of the value.</param>
+		public abstract void Resize(MArrayShape newShape);
+
 		protected abstract MValue DoDeepClone();
 		#endregion
 	}

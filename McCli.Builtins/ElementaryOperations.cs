@@ -422,12 +422,18 @@ namespace McCli.Builtins
 			Contract.Requires(b != null);
 			Contract.Requires(a != null);
 
+			if (a.IsScalar) return mrdivide(b, a[0]);
 			if (a.IsHigherDimensional || b.IsHigherDimensional || a.ColumnCount != b.ColumnCount)
 				throw new MArrayShapeException();
 
 			if (a.IsScalar && b.IsScalar) return mrdivide(b[0], a[0]);
 
 			throw new NotImplementedException("Non-scalar mrdivide.");
+		}
+
+		public static MArray<double> mrdivide(MArray<double> b, double a)
+		{
+			return rdivide(b, a);
 		}
 
 		[BuiltinCilOpcode(0x5B /* div */)]

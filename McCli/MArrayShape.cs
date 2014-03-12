@@ -196,10 +196,11 @@ namespace McCli
 		/// <returns>The size along that dimension.</returns>
 		public int GetDimensionSize(int index)
 		{
-			Contract.Requires(index >= 0 && index < DimensionCount);
+			Contract.Requires(index >= 0);
 			if (index == 0) return rowCount;
 			if (index == 1) return columnCount;
-			return dimensions[index];
+			if (dimensions != null && index < dimensions.Length) return dimensions[index];
+			return 1;
 		}
 
 		/// <summary>
@@ -290,6 +291,28 @@ namespace McCli
 			return new MArrayShape(newDimensions, Unchecked.Instance);
 		}
 
+		public static MArrayShape Min(MArrayShape first, MArrayShape second)
+		{
+			if (!first.IsHigherDimensional && !second.IsHigherDimensional)
+				return new MArrayShape(Math.Min(first.rowCount, second.rowCount), Math.Min(first.columnCount, second.columnCount));
+
+			var dimensions = new int[Math.Min(first.DimensionCount, second.DimensionCount)];
+			for (int i = 0; i < dimensions.Length; ++i)
+				dimensions[i] = Math.Min(first.DimensionCount, second.DimensionCount);
+			return new MArrayShape(dimensions, Unchecked.Instance);
+		}
+
+		public static MArrayShape Max(MArrayShape first, MArrayShape second)
+		{
+			if (!first.IsHigherDimensional && !second.IsHigherDimensional)
+				return new MArrayShape(Math.Max(first.rowCount, second.rowCount), Math.Max(first.columnCount, second.columnCount));
+
+			var dimensions = new int[Math.Max(first.DimensionCount, second.DimensionCount)];
+			for (int i = 0; i < dimensions.Length; ++i)
+				dimensions[i] = Math.Max(first.DimensionCount, second.DimensionCount);
+			return new MArrayShape(dimensions, Unchecked.Instance);
+		}
+
 		public static MArrayShape Square(int count)
 		{
 			Contract.Requires(count >= 0);
@@ -310,11 +333,21 @@ namespace McCli
 
 		public static MArrayShape FromDoubles(double rowCount, double columnCount)
 		{
-			var n = PseudoBuiltins.ToInt(rowCount);
-			var m = PseudoBuiltins.ToInt(columnCount);
-			if (n < 0 || m < 0) throw new MArrayShapeException();
+			var m = PseudoBuiltins.ToInt(rowCount);
+			var n = PseudoBuiltins.ToInt(columnCount);
+			if (m < 0 || n < 0) throw new MArrayShapeException();
 
-			return new MArrayShape(n, m);
+			return new MArrayShape(m, n);
+		}
+
+		public static MArrayShape FromDoubles(double rowCount, double columnCount, double sliceCount)
+		{
+			var m = PseudoBuiltins.ToInt(rowCount);
+			var n = PseudoBuiltins.ToInt(columnCount);
+			var o = PseudoBuiltins.ToInt(sliceCount);
+			if (m < 0 || n < 0 || o < 0) throw new MArrayShapeException();
+
+			return new MArrayShape(new int[] { m, n, o }, Unchecked.Instance);
 		}
 		#endregion
 

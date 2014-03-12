@@ -165,7 +165,7 @@ namespace McCli
 					if (columnIndex < 1 || columnIndex > array.ColumnCount)
 						throw new IndexOutOfRangeException();
 
-					result[j * indexedShape.RowCount + i] = array[(columnIndex - 1) * array.RowCount + (columnIndex - 1)];
+					result[j * indexedShape.RowCount + i] = array[(columnIndex - 1) * array.RowCount + (rowIndex - 1)];
 				}
 			}
 
@@ -248,7 +248,28 @@ namespace McCli
 			MArray<TScalar> array, double index, TScalar value)
 		{
 			Contract.Requires(array != null);
-			array[ToInt(index)] = value;
+			ArraySet(array, ToInt(index), value);
+		}
+
+		public static void ArraySet<[AnyPrimitive] TScalar>(
+			MArray<TScalar> array, int index, TScalar value)
+		{
+			Contract.Requires(array != null);
+
+			if (index < 1) throw new ArgumentOutOfRangeException("index");
+			if (index > array.Count)
+			{
+				// Must resize, only works if the array is empty, a scalar or a vector
+				// - Empty, scalar or row vector: grows in columns
+				// - Column vector: grows in rows
+				// - Otherwise: throws
+				if (array.IsHigherDimensional) throw new ArgumentOutOfRangeException("index");
+				else if (array.RowCount <= 1) array.Resize(new MArrayShape(1, index));
+				else if (array.ColumnCount == 1) array.Resize(new MArrayShape(index, 1));
+				else throw new ArgumentOutOfRangeException("index");
+			}
+
+			array[index - 1] = value;
 		}
 
 		public static void ArraySet<[AnyPrimitive] TScalar>(
@@ -274,7 +295,8 @@ namespace McCli
 					if (columnIndex < 1 || columnIndex > array.ColumnCount)
 						throw new IndexOutOfRangeException();
 
-					array[(columnIndex - 1) * array.RowCount + (columnIndex - 1)] = values[j * indexedShape.RowCount + i];
+					var value = values[j * indexedShape.RowCount + i];
+					array[(columnIndex - 1) * array.RowCount + (columnIndex - 1)] = value;
 				}
 			}
 		}
@@ -282,7 +304,26 @@ namespace McCli
 		public static void ArraySet<[AnyPrimitive] TScalar>(
 			MArray<TScalar> array, double rowIndex, double columnIndex, TScalar value)
 		{
-			var index = LinearizeIndex(array.Shape, ToInt(rowIndex), ToInt(columnIndex));
+			ArraySet(array, ToInt(rowIndex), ToInt(columnIndex), value);
+		}
+
+		public static void ArraySet<[AnyPrimitive] TScalar>(
+			MArray<TScalar> array, int rowIndex, int columnIndex, TScalar value)
+		{
+			Contract.Requires(array != null);
+
+			if (rowIndex < 1) throw new ArgumentOutOfRangeException("rowIndex");
+			if (columnIndex < 1) throw new ArgumentOutOfRangeException("columnIndex");
+
+			if (rowIndex > array.RowCount || columnIndex > array.ColumnCount)
+			{
+				// Array needs resizing
+				// TODO: zeros(2, 2, 2) (3, 3) = 5 should work and produce a 3x2x2 matrix
+				if (array.IsHigherDimensional) throw new ArgumentOutOfRangeException();
+				array.Resize(MArrayShape.Max(array.Shape, new MArrayShape(rowIndex, columnIndex)));
+			}
+
+			var index = LinearizeIndex(array.Shape, rowIndex, columnIndex);
 			array[index - 1] = value;
 		}
 

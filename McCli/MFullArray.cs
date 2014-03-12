@@ -79,6 +79,32 @@ namespace McCli
 			return new MFullArray<TScalar>((TScalar[])elements.Clone(), shape);
 		}
 
+		public override void Resize(MArrayShape newShape)
+		{
+			var copyShape = MArrayShape.Min(shape, newShape);
+			int copyCount = copyShape.Count;
+
+			var newArray = new TScalar[newShape.Count];
+			if (copyShape.IsHigherDimensional)
+			{
+				throw new NotImplementedException("Resizing to or from higher-dimensional arrays.");
+			}
+			else
+			{
+				for (int columnIndex = 0; columnIndex < copyShape.ColumnCount; ++columnIndex)
+				{
+					for (int rowIndex = 0; rowIndex < copyShape.RowCount; ++rowIndex)
+					{
+						var value = elements[(columnIndex - 1) * shape.RowCount + rowIndex - 1];
+						elements[(columnIndex - 1) * newShape.RowCount + rowIndex - 1] = value;
+					}
+				}
+			}
+
+			elements = newArray;
+			shape = newShape;
+		}
+
 		protected override MValue DoDeepClone()
 		{
 			return DeepClone();

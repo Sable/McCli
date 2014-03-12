@@ -34,7 +34,8 @@ namespace McCli.Builtins
 
 		public static MFullArray<double> zeros(double sz1, double sz2, double sz3)
 		{
-			throw new NotImplementedException("zeros with 3 arguments.");
+			var shape = MArrayShape.FromDoubles(sz1, sz2, sz3);
+			return new MFullArray<double>(shape);
 		}
 		#endregion
 
