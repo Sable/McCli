@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,6 +29,14 @@ namespace McCli
 		/// Gets the representation of this value.
 		/// </summary>
 		public abstract MRepr Repr { get; }
+
+		/// <summary>
+		/// Gets the type of this value.
+		/// </summary>
+		public MType Type
+		{
+			get { return Repr.Type; }
+		}
 
 		/// <summary>
 		/// Gets the class of this value.
@@ -133,6 +143,11 @@ namespace McCli
 		public MValue DeepClone()
 		{
 			return DoDeepClone();
+		}
+
+		public override string ToString()
+		{
+			return string.Format(CultureInfo.InvariantCulture, "{0} {1}", Shape, Type);
 		}
 
 		/// <summary>

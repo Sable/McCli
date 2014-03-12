@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -34,6 +35,17 @@ namespace McCli
 			this.rowCount = rowCount;
 			this.columnCount = columnCount;
 			this.dimensions = null;
+		}
+
+		public MArrayShape(int rowCount, int columnCount, int sliceCount)
+		{
+			Contract.Requires(rowCount >= 0);
+			Contract.Requires(columnCount >= 0);
+			Contract.Requires(sliceCount >= 0);
+
+			this.rowCount = rowCount;
+			this.columnCount = columnCount;
+			this.dimensions = new int[] { rowCount, columnCount, sliceCount };
 		}
 
 		public MArrayShape(params int[] dimensions)
@@ -187,6 +199,22 @@ namespace McCli
 		public override int GetHashCode()
 		{
 			return rowCount ^ (columnCount << 16);
+		}
+
+		public override string ToString()
+		{
+			const char separator = '×';
+			if (!IsHigherDimensional)
+				return string.Format(CultureInfo.InvariantCulture, "{0}×{1}", rowCount, columnCount);
+
+			var result = new StringBuilder();
+			for (int i = 0; i < dimensions.Length; ++i)
+			{
+				if (i > 0) result.Append(separator);
+				result.AppendFormat(CultureInfo.InvariantCulture, "{0}", dimensions[i]);
+			}
+
+			return result.ToString();
 		}
 
 		/// <summary>
