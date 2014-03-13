@@ -44,7 +44,7 @@ namespace McCli.Builtins
 		#endregion
 
 		#region Float Finiteness Testing
-		public static MArray<bool> isfinite(MArray<double> array)
+		public static MFullArray<bool> isfinite(MFullArray<double> array)
 		{
 			Contract.Requires(array != null);
 
@@ -54,7 +54,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		public static MArray<bool> isinf(MArray<double> array)
+		public static MFullArray<bool> isinf(MFullArray<double> array)
 		{
 			Contract.Requires(array != null);
 
@@ -64,7 +64,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		public static MArray<bool> isnan(MArray<double> array)
+		public static MFullArray<bool> isnan(MFullArray<double> array)
 		{
 			Contract.Requires(array != null);
 
@@ -81,12 +81,12 @@ namespace McCli.Builtins
 			return double.NaN;
 		}
 
-		public static MArray<double> NaN(double n)
+		public static MFullArray<double> NaN(double n)
 		{
 			return NaN(n, n);
 		}
 
-		public static MArray<double> NaN(double rowCount, double columnCount)
+		public static MFullArray<double> NaN(double rowCount, double columnCount)
 		{
 			return PseudoBuiltins.Expand(double.NaN, rowCount, columnCount);
 		}

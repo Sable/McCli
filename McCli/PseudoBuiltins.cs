@@ -20,11 +20,12 @@ namespace McCli
 		public static int ToInt(double value)
 		{
 			var i = (int)value;
+			// Don't do (value % 1) == 0, it's slooow
 			if (i != value) throw new InvalidCastException();
 			return i;
 		}
 
-		public static int ToIntScalar(MArray<double> value)
+		public static int ToIntScalar(MFullArray<double> value)
 		{
 			Contract.Requires(value != null);
 			if (!value.IsScalar) throw new MArrayShapeException();
@@ -83,7 +84,7 @@ namespace McCli
 			return new MComplex<TReal>(value, default(TReal));
 		}
 
-		public static MArray<MComplex<TReal>> ToComplex<[AnyReal] TReal>(MArray<TReal> value) where TReal : struct
+		public static MFullArray<MComplex<TReal>> ToComplex<[AnyReal] TReal>(MFullArray<TReal> value) where TReal : struct
 		{
 			return MFunctional.Map(value, ToComplex);
 		}
@@ -92,16 +93,16 @@ namespace McCli
 		public static int GetForSliceCount(MValue value)
 		{
 			Contract.Requires(value != null);
-			var shape = value.Shape;
+			var shape = value.shape;
 			var count = shape.Count;
 			return count == 0 ? 0 : (count / shape.RowCount);
 		}
 
-		public static MArray<TScalar> GetForSlice<[AnyPrimitive] TScalar>(MArray<TScalar> array, int index)
+		public static MFullArray<TScalar> GetForSlice<[AnyPrimitive] TScalar>(MFullArray<TScalar> array, int index)
 		{
 			Contract.Requires(array != null);
 
-			var arrayShape = array.Shape;
+			var arrayShape = array.shape;
 			Contract.Assert(!arrayShape.IsHigherDimensional);
 
 			int baseArrayIndex = arrayShape.RowCount * index;
@@ -113,12 +114,12 @@ namespace McCli
 		#endregion
 
 		#region ArrayGet
-		public static MArray<TScalar> ArrayGet<[AnyPrimitive] TScalar>(MArray<TScalar> array, MArray<double> indices)
+		public static MFullArray<TScalar> ArrayGet<[AnyPrimitive] TScalar>(MFullArray<TScalar> array, MFullArray<double> indices)
 		{
 			Contract.Requires(array != null);
 			Contract.Requires(indices != null);
 
-			var indicesShape = indices.Shape;
+			var indicesShape = indices.shape;
 			if (indicesShape.IsEmpty) return new MFullArray<TScalar>(MArrayShape.Empty);
 			Contract.Assert(indicesShape.ColumnCount == 1);
 
@@ -128,12 +129,12 @@ namespace McCli
 			return result;
 		}
 
-		public static MArray<TScalar> ArrayGet<[AnyPrimitive] TScalar>(MArray<TScalar> array, MArray<bool> mask)
+		public static MFullArray<TScalar> ArrayGet<[AnyPrimitive] TScalar>(MFullArray<TScalar> array, MFullArray<bool> mask)
 		{
 			Contract.Requires(array != null);
 			Contract.Requires(mask != null);
 
-			if (mask.Shape != array.Shape) throw new MArrayShapeException("The logical indexing mask must have the same shape as the array.");
+			if (mask.shape != array.shape) throw new MArrayShapeException("The logical indexing mask must have the same shape as the array.");
 
 			var values = new List<TScalar>();
 			for (int i = 0; i < mask.Count; ++i)
@@ -143,8 +144,8 @@ namespace McCli
 			return MFullArray<TScalar>.CreateColumnVector(values.ToArray());
 		}
 
-		public static MArray<TScalar> ArrayGet<[AnyPrimitive] TScalar>(
-			MArray<TScalar> array, MArray<double> rowIndices, MArray<double> columnIndices)
+		public static MFullArray<TScalar> ArrayGet<[AnyPrimitive] TScalar>(
+			MFullArray<TScalar> array, MFullArray<double> rowIndices, MFullArray<double> columnIndices)
 		{
 			Contract.Requires(array != null);
 			Contract.Requires(rowIndices != null);
@@ -172,34 +173,47 @@ namespace McCli
 			return result;
 		}
 
-		public static TScalar ArrayGet<[AnyPrimitive] TScalar>(
-			MArray<TScalar> array, double rowIndex, double columnIndex)
+		public static TScalar ArrayGet<[AnyPrimitive] TScalar>(MFullArray<TScalar> array, double index)
 		{
+			// Performance critical method!
 			Contract.Requires(array != null);
-			var index = LinearizeIndex(array.Shape, ToInt(rowIndex), ToInt(columnIndex));
-			return array[index - 1];
+			int indexInt = ToInt(index);
+			if (indexInt > array.shape.Count) // We'll get an IndexOutOfRangeException if it's < 1
+				throw new ArgumentOutOfRangeException("index");
+			return array.elements[indexInt - 1];
 		}
 
 		public static TScalar ArrayGet<[AnyPrimitive] TScalar>(
-			MArray<TScalar> array, double rowIndex, double columnIndex, double sliceIndex)
+			MFullArray<TScalar> array, double rowIndex, double columnIndex)
 		{
+			// Performance critical method!
 			Contract.Requires(array != null);
-			var index = LinearizeIndex(array.Shape, ToInt(rowIndex), ToInt(columnIndex), ToInt(sliceIndex));
-			return array[index - 1];
+
+			int rowCount = array.shape.RowCount;
+
+			int rowIndexInt = ToInt(rowIndex);
+			if (rowIndexInt < 1 || rowIndexInt > rowCount)
+				throw new ArgumentOutOfRangeException("rowIndex");
+
+			int columnIndexInt = ToInt(columnIndex);
+			if (columnIndexInt > array.shape.ColumnCount) // We'll get an IndexOutOfRangeException if it's < 1
+				throw new ArgumentOutOfRangeException("columnIndex");
+
+			return array.elements[(columnIndexInt - 1) * rowCount + (rowIndexInt - 1)];
 		}
 
-		public static TScalar ArrayGet<[AnyPrimitive] TScalar>(MArray<TScalar> array, double index)
+		public static TScalar ArrayGet<[AnyPrimitive] TScalar>(
+			MFullArray<TScalar> array, double rowIndex, double columnIndex, double sliceIndex)
 		{
 			Contract.Requires(array != null);
-			int intIndex = ToInt(index);
-			if (index < 1 || index > array.Count) throw new ArgumentOutOfRangeException("index");
-			return array[intIndex - 1];
+			var index = LinearizeIndex(array.shape, ToInt(rowIndex), ToInt(columnIndex), ToInt(sliceIndex));
+			return array.elements[index - 1];
 		}
 		#endregion
 
 		#region ArraySet
 		public static void ArraySet<[AnyPrimitive] TScalar>(
-			MArray<TScalar> array, MArray<TScalar> values)
+			MFullArray<TScalar> array, MFullArray<TScalar> values)
 		{
 			Contract.Requires(array != null);
 			Contract.Requires(values != null);
@@ -210,7 +224,7 @@ namespace McCli
 			}
 			else
 			{
-				if (values.Shape != array.Shape) throw new MArrayShapeException();
+				if (values.shape != array.shape) throw new MArrayShapeException();
 
 				int count = array.Count;
 				for (int i = 0; i < count; ++i)
@@ -219,7 +233,7 @@ namespace McCli
 		}
 
 		public static void ArraySet<[AnyPrimitive] TScalar>(
-			MArray<TScalar> array, TScalar value)
+			MFullArray<TScalar> array, TScalar value)
 		{
 			Contract.Requires(array != null);
 			int count = array.Count;
@@ -228,7 +242,7 @@ namespace McCli
 		}
 
 		public static void ArraySet<[AnyPrimitive] TScalar>(
-			MArray<TScalar> array, MArray<double> indices, MArray<TScalar> values)
+			MFullArray<TScalar> array, MFullArray<double> indices, MFullArray<TScalar> values)
 		{
 			Contract.Requires(array != null);
 			Contract.Requires(indices != null);
@@ -236,23 +250,23 @@ namespace McCli
 
 			if (indices.IsEmpty && values.IsEmpty) return;
 
-			var indicesShape = indices.Shape;
+			var indicesShape = indices.shape;
 			Contract.Assert(indicesShape.ColumnCount == 1);
-			Contract.Assert(indicesShape == values.Shape);
+			Contract.Assert(indicesShape == values.shape);
 			
 			for (int i = 0; i < indicesShape.RowCount; ++i)
 				array[ToInt(indices[i]) - 1] = values[i];
 		}
 
 		public static void ArraySet<[AnyPrimitive] TScalar>(
-			MArray<TScalar> array, double index, TScalar value)
+			MFullArray<TScalar> array, double index, TScalar value)
 		{
 			Contract.Requires(array != null);
 			ArraySet(array, ToInt(index), value);
 		}
 
 		public static void ArraySet<[AnyPrimitive] TScalar>(
-			MArray<TScalar> array, int index, TScalar value)
+			MFullArray<TScalar> array, int index, TScalar value)
 		{
 			Contract.Requires(array != null);
 
@@ -273,7 +287,7 @@ namespace McCli
 		}
 
 		public static void ArraySet<[AnyPrimitive] TScalar>(
-			MArray<TScalar> array, MArray<double> rowIndices, MArray<double> columnIndices, MArray<TScalar> values)
+			MFullArray<TScalar> array, MFullArray<double> rowIndices, MFullArray<double> columnIndices, MFullArray<TScalar> values)
 		{
 			Contract.Requires(array != null);
 			Contract.Requires(rowIndices != null);
@@ -281,7 +295,7 @@ namespace McCli
 			Contract.Requires(values != null);
 
 			var indexedShape = new MArrayShape(rowIndices.Count, columnIndices.Count);
-			if (values.Shape != indexedShape) throw new MArrayShapeException();
+			if (values.shape != indexedShape) throw new MArrayShapeException();
 
 			for (int i = 0; i < rowIndices.Count; ++i)
 			{
@@ -302,13 +316,31 @@ namespace McCli
 		}
 
 		public static void ArraySet<[AnyPrimitive] TScalar>(
-			MArray<TScalar> array, double rowIndex, double columnIndex, TScalar value)
+			MFullArray<TScalar> array, double rowIndex, double columnIndex, TScalar value)
 		{
-			ArraySet(array, ToInt(rowIndex), ToInt(columnIndex), value);
+			// Performance critical method!
+			Contract.Requires(array != null);
+
+			int rowIndexInt = ToInt(rowIndex);
+			if (rowIndexInt < 1)
+				throw new ArgumentOutOfRangeException("rowIndex");
+
+			int rowCount = array.shape.RowCount;
+
+			int columnIndexInt = ToInt(columnIndex);
+			if (rowIndexInt > rowCount || columnIndexInt > array.shape.ColumnCount)
+			{
+				if (array.shape.IsHigherDimensional) throw new ArgumentOutOfRangeException();
+				if (rowIndexInt > rowCount) rowCount = rowIndexInt;
+				int columnCount = Math.Max(array.shape.ColumnCount, columnIndexInt);
+				array.Resize(new MArrayShape(rowCount, columnCount));
+			}
+
+			array.elements[(columnIndexInt - 1) * rowCount + (rowIndexInt - 1)] = value;
 		}
 
 		public static void ArraySet<[AnyPrimitive] TScalar>(
-			MArray<TScalar> array, int rowIndex, int columnIndex, TScalar value)
+			MFullArray<TScalar> array, int rowIndex, int columnIndex, TScalar value)
 		{
 			Contract.Requires(array != null);
 
@@ -320,17 +352,17 @@ namespace McCli
 				// Array needs resizing
 				// TODO: zeros(2, 2, 2) (3, 3) = 5 should work and produce a 3x2x2 matrix
 				if (array.IsHigherDimensional) throw new ArgumentOutOfRangeException();
-				array.Resize(MArrayShape.Max(array.Shape, new MArrayShape(rowIndex, columnIndex)));
+				array.Resize(MArrayShape.Max(array.shape, new MArrayShape(rowIndex, columnIndex)));
 			}
 
-			var index = LinearizeIndex(array.Shape, rowIndex, columnIndex);
+			var index = LinearizeIndex(array.shape, rowIndex, columnIndex);
 			array[index - 1] = value;
 		}
 
 		public static void ArraySet<[AnyPrimitive] TScalar>(
-			MArray<TScalar> array, double rowIndex, double columnIndex, double sliceIndex, TScalar value)
+			MFullArray<TScalar> array, double rowIndex, double columnIndex, double sliceIndex, TScalar value)
 		{
-			var index = LinearizeIndex(array.Shape, ToInt(rowIndex), ToInt(columnIndex), ToInt(sliceIndex));
+			var index = LinearizeIndex(array.shape, ToInt(rowIndex), ToInt(columnIndex), ToInt(sliceIndex));
 			array[index - 1] = value;
 		}
 		#endregion

@@ -27,7 +27,7 @@ namespace McCli
 		#region Fields
 		private static readonly MRepr repr;
 
-		private TScalar[] elements;
+		internal TScalar[] elements;
 		#endregion
 
 		#region Constructors

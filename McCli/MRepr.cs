@@ -25,6 +25,7 @@ namespace McCli
 		{
 			Contract.Requires(type == null || structuralClass != null);
 
+			Contract.Assert(structuralClass != MStructuralClass.Array);
 			this.type = type;
 			this.structuralClass = structuralClass;
 		}
@@ -32,7 +33,7 @@ namespace McCli
 		public MRepr(MType type)
 		{
 			this.type = type;
-			structuralClass = type == null ? null : MStructuralClass.Array;
+			structuralClass = type == null ? null : MStructuralClass.FullArray;
 		}
 		#endregion
 

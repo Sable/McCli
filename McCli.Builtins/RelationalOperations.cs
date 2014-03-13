@@ -15,7 +15,7 @@ namespace McCli.Builtins
 	{
 		#region Comparison
 		#region Double Arrays
-		public static MArray<bool> eq(MArray<double> a, MArray<double> b)
+		public static MFullArray<bool> eq(MFullArray<double> a, MFullArray<double> b)
 		{
 			ElementaryOperations.MatchShapes(ref a, ref b);
 
@@ -25,7 +25,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		public static MArray<bool> ne(MArray<double> a, MArray<double> b)
+		public static MFullArray<bool> ne(MFullArray<double> a, MFullArray<double> b)
 		{
 			ElementaryOperations.MatchShapes(ref a, ref b);
 
@@ -35,7 +35,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		public static MArray<bool> gt(MArray<double> a, MArray<double> b)
+		public static MFullArray<bool> gt(MFullArray<double> a, MFullArray<double> b)
 		{
 			ElementaryOperations.MatchShapes(ref a, ref b);
 
@@ -45,7 +45,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		public static MArray<bool> lt(MArray<double> a, MArray<double> b)
+		public static MFullArray<bool> lt(MFullArray<double> a, MFullArray<double> b)
 		{
 			ElementaryOperations.MatchShapes(ref a, ref b);
 
@@ -55,7 +55,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		public static MArray<bool> ge(MArray<double> a, MArray<double> b)
+		public static MFullArray<bool> ge(MFullArray<double> a, MFullArray<double> b)
 		{
 			ElementaryOperations.MatchShapes(ref a, ref b);
 
@@ -65,7 +65,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		public static MArray<bool> le(MArray<double> a, MArray<double> b)
+		public static MFullArray<bool> le(MFullArray<double> a, MFullArray<double> b)
 		{
 			ElementaryOperations.MatchShapes(ref a, ref b);
 
@@ -75,7 +75,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		public static bool isequal(MArray<double> a, MArray<double> b)
+		public static bool isequal(MFullArray<double> a, MFullArray<double> b)
 		{
 			Contract.Requires(a != null);
 			Contract.Requires(b != null);
@@ -104,17 +104,17 @@ namespace McCli.Builtins
 		#endregion
 
 		#region Char
-		public static MArray<bool> eq(MArray<char> a, MArray<char> b)
+		public static MFullArray<bool> eq(MFullArray<char> a, MFullArray<char> b)
 		{
 			return MFunctional.Zip(a, b, (x, y) => x == y, allowScalarArgument: true);
 		}
 
-		public static MArray<bool> ne(MArray<char> a, MArray<char> b)
+		public static MFullArray<bool> ne(MFullArray<char> a, MFullArray<char> b)
 		{
 			return MFunctional.Zip(a, b, (x, y) => x != y, allowScalarArgument: true);
 		}
 
-		public static bool isequal(MArray<char> a, MArray<char> b)
+		public static bool isequal(MFullArray<char> a, MFullArray<char> b)
 		{
 			Contract.Requires(a != null);
 			Contract.Requires(b != null);

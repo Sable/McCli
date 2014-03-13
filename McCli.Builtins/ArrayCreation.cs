@@ -108,7 +108,7 @@ namespace McCli.Builtins
 		#endregion
 
 		#region horzcat
-		public static MArray<TScalar> horzcat<[AnyPrimitive]TScalar>(MArray<TScalar> left, MArray<TScalar> right)
+		public static MFullArray<TScalar> horzcat<[AnyPrimitive]TScalar>(MFullArray<TScalar> left, MFullArray<TScalar> right)
 		{
 			Contract.Requires(left != null);
 			Contract.Requires(right != null);
@@ -159,33 +159,33 @@ namespace McCli.Builtins
 			return MFullArray<TScalar>.CreateRowVector(value1, value2, value3, value4, value5);
 		}
 		
-		public static MArray<TScalar> horzcat<[AnyPrimitive]TScalar>(
-			MArray<TScalar> array1, MArray<TScalar> array2, MArray<TScalar> array3)
+		public static MFullArray<TScalar> horzcat<[AnyPrimitive]TScalar>(
+			MFullArray<TScalar> array1, MFullArray<TScalar> array2, MFullArray<TScalar> array3)
 		{
 			return horzcat(new[] { array1, array2, array3 });
 		}
 
-		public static MArray<TScalar> horzcat<[AnyPrimitive]TScalar>(
-			MArray<TScalar> array1, MArray<TScalar> array2, MArray<TScalar> array3, MArray<TScalar> array4)
+		public static MFullArray<TScalar> horzcat<[AnyPrimitive]TScalar>(
+			MFullArray<TScalar> array1, MFullArray<TScalar> array2, MFullArray<TScalar> array3, MFullArray<TScalar> array4)
 		{
 			return horzcat(new[] { array1, array2, array3, array4 });
 		}
 
-		public static MArray<TScalar> horzcat<[AnyPrimitive]TScalar>(
-			MArray<TScalar> array1, MArray<TScalar> array2, MArray<TScalar> array3,
-			MArray<TScalar> array4, MArray<TScalar> array5)
+		public static MFullArray<TScalar> horzcat<[AnyPrimitive]TScalar>(
+			MFullArray<TScalar> array1, MFullArray<TScalar> array2, MFullArray<TScalar> array3,
+			MFullArray<TScalar> array4, MFullArray<TScalar> array5)
 		{
 			return horzcat(new[] { array1, array2, array3, array4, array5 });
 		}
 
-		public static MArray<TScalar> horzcat<[AnyPrimitive]TScalar>(
-			MArray<TScalar> array1, MArray<TScalar> array2, MArray<TScalar> array3,
-			MArray<TScalar> array4, MArray<TScalar> array5, MArray<TScalar> array6)
+		public static MFullArray<TScalar> horzcat<[AnyPrimitive]TScalar>(
+			MFullArray<TScalar> array1, MFullArray<TScalar> array2, MFullArray<TScalar> array3,
+			MFullArray<TScalar> array4, MFullArray<TScalar> array5, MFullArray<TScalar> array6)
 		{
 			return horzcat(new[] { array1, array2, array3, array4, array5, array6 });
 		}
 
-		internal static MArray<TScalar> horzcat<[AnyPrimitive]TScalar>(params MArray<TScalar>[] arrays)
+		internal static MFullArray<TScalar> horzcat<[AnyPrimitive]TScalar>(params MFullArray<TScalar>[] arrays)
 		{
 			Contract.Requires(arrays != null);
 

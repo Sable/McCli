@@ -14,7 +14,7 @@ namespace McCli.Builtins
 	public sealed class LogicalOperations
 	{
 		#region and
-		public static MArray<bool> and(MArray<bool> lhs, MArray<bool> rhs)
+		public static MFullArray<bool> and(MFullArray<bool> lhs, MFullArray<bool> rhs)
 		{
 			Contract.Requires(lhs != null);
 			Contract.Requires(rhs != null);
@@ -26,12 +26,12 @@ namespace McCli.Builtins
 			return MFunctional.Map(lhs, rhs, and);
 		}
 
-		public static MArray<bool> and(MArray<bool> lhs, bool rhs)
+		public static MFullArray<bool> and(MFullArray<bool> lhs, bool rhs)
 		{
 			return rhs ? lhs.DeepClone() : new MFullArray<bool>(lhs.Shape);
 		}
 
-		public static MArray<bool> and(bool lhs, MArray<bool> rhs)
+		public static MFullArray<bool> and(bool lhs, MFullArray<bool> rhs)
 		{
 			return and(rhs, lhs);
 		}
@@ -43,7 +43,7 @@ namespace McCli.Builtins
 		#endregion
 
 		#region or
-		public static MArray<bool> or(MArray<bool> lhs, MArray<bool> rhs)
+		public static MFullArray<bool> or(MFullArray<bool> lhs, MFullArray<bool> rhs)
 		{
 			Contract.Requires(lhs != null);
 			Contract.Requires(rhs != null);
@@ -55,12 +55,12 @@ namespace McCli.Builtins
 			return MFunctional.Map(lhs, rhs, or);
 		}
 
-		public static MArray<bool> or(MArray<bool> lhs, bool rhs)
+		public static MFullArray<bool> or(MFullArray<bool> lhs, bool rhs)
 		{
 			return rhs ? MFullArray<bool>.ExpandScalar(true, lhs.Shape) : lhs.DeepClone();
 		}
 
-		public static MArray<bool> or(bool lhs, MArray<bool> rhs)
+		public static MFullArray<bool> or(bool lhs, MFullArray<bool> rhs)
 		{
 			return or(rhs, lhs);
 		}
@@ -73,7 +73,7 @@ namespace McCli.Builtins
 		#endregion
 
 		#region xor
-		public static MArray<bool> xor(MArray<bool> lhs, MArray<bool> rhs)
+		public static MFullArray<bool> xor(MFullArray<bool> lhs, MFullArray<bool> rhs)
 		{
 			Contract.Requires(lhs != null);
 			Contract.Requires(rhs != null);
@@ -85,12 +85,12 @@ namespace McCli.Builtins
 			return MFunctional.Map(lhs, rhs, xor);
 		}
 
-		public static MArray<bool> xor(MArray<bool> lhs, bool rhs)
+		public static MFullArray<bool> xor(MFullArray<bool> lhs, bool rhs)
 		{
 			return rhs ? not(lhs) : lhs.DeepClone();
 		}
 
-		public static MArray<bool> xor(bool lhs, MArray<bool> rhs)
+		public static MFullArray<bool> xor(bool lhs, MFullArray<bool> rhs)
 		{
 			return xor(rhs, lhs);
 		}
@@ -102,7 +102,7 @@ namespace McCli.Builtins
 		#endregion
 
 		#region not
-		public static MArray<bool> not(MArray<bool> array)
+		public static MFullArray<bool> not(MFullArray<bool> array)
 		{
 			Contract.Requires(array != null);
 
@@ -118,7 +118,7 @@ namespace McCli.Builtins
 		#endregion
 
 		#region any
-		public static MArray<bool> any(MArray<bool> array)
+		public static MFullArray<bool> any(MFullArray<bool> array)
 		{
 			Contract.Requires(array != null);
 
@@ -142,7 +142,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		public static MArray<bool> any(MArray<double> array)
+		public static MFullArray<bool> any(MFullArray<double> array)
 		{
 			Contract.Requires(array != null);
 			if (array.IsEmpty) return false;
@@ -151,7 +151,7 @@ namespace McCli.Builtins
 		#endregion
 
 		#region all
-		public static MArray<bool> all(MArray<bool> array)
+		public static MFullArray<bool> all(MFullArray<bool> array)
 		{
 			Contract.Requires(array != null);
 

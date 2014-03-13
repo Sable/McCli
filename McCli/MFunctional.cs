@@ -11,7 +11,7 @@ namespace McCli
 	/// </summary>
 	public static class MFunctional
 	{
-		public static MArray<TOut> Map<TIn, TOut>(this MArray<TIn> array, Func<TIn, TOut> map)
+		public static MFullArray<TOut> Map<TIn, TOut>(this MFullArray<TIn> array, Func<TIn, TOut> map)
 		{
 			Contract.Requires(array != null);
 			Contract.Requires(map != null);
@@ -22,7 +22,7 @@ namespace McCli
 			return result;
 		}
 
-		public static MArray<TOut> Map<TIn1, TIn2, TOut>(MArray<TIn1> array1, MArray<TIn2> array2, Func<TIn1, TIn2, TOut> map)
+		public static MFullArray<TOut> Map<TIn1, TIn2, TOut>(MFullArray<TIn1> array1, MFullArray<TIn2> array2, Func<TIn1, TIn2, TOut> map)
 		{
 			Contract.Requires(array1 != null);
 			Contract.Requires(array2 != null);
@@ -37,8 +37,8 @@ namespace McCli
 			return result;
 		}
 
-		public static MArray<TOut> Zip<TIn1, TIn2, TOut>(
-			MArray<TIn1> lhs, MArray<TIn2> rhs, Func<TIn1, TIn2, TOut> zipper, bool allowScalarArgument)
+		public static MFullArray<TOut> Zip<TIn1, TIn2, TOut>(
+			MFullArray<TIn1> lhs, MFullArray<TIn2> rhs, Func<TIn1, TIn2, TOut> zipper, bool allowScalarArgument)
 		{
 			Contract.Requires(lhs != null);
 			Contract.Requires(rhs != null);
@@ -72,15 +72,15 @@ namespace McCli
 			}
 		}
 
-		public static MArray<TResult> CollapseDimension<TSource, TResult>(
-			this MArray<TSource> array, Func<TSource, TResult> map, Func<TResult, TResult, TResult> reduce)
+		public static MFullArray<TResult> CollapseDimension<TSource, TResult>(
+			this MFullArray<TSource> array, Func<TSource, TResult> map, Func<TResult, TResult, TResult> reduce)
 		{
 			Contract.Requires(array != null);
 			return CollapseDimension(array, array.Shape.IndexOfFirstNonSingletonDimension(), map, reduce);
 		}
 
-		public static MArray<TResult> CollapseDimension<TSource, TResult>(
-			this MArray<TSource> array, int dimensionIndex,
+		public static MFullArray<TResult> CollapseDimension<TSource, TResult>(
+			this MFullArray<TSource> array, int dimensionIndex,
 			Func<TSource, TResult> map, Func<TResult, TResult, TResult> reduce)
 		{
 			Contract.Requires(array != null);

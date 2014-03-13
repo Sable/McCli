@@ -13,7 +13,7 @@ namespace McCli.Builtins
 	[MatlabLibrary]
 	public static class DescriptiveStatistics
 	{
-		public static MArray<double> min(MArray<double> array)
+		public static MFullArray<double> min(MFullArray<double> array)
 		{
 			Contract.Requires(array != null);
 
@@ -39,7 +39,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		public static MArray<double> max(MArray<double> array)
+		public static MFullArray<double> max(MFullArray<double> array)
 		{
 			Contract.Requires(array != null);
 
@@ -65,7 +65,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		public static MArray<double> mean(MArray<double> array)
+		public static MFullArray<double> mean(MFullArray<double> array)
 		{
 			Contract.Requires(array != null);
 

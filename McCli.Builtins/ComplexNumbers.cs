@@ -15,12 +15,12 @@ namespace McCli.Builtins
 	public static class ComplexNumbers
 	{
 		#region abs
-		public static MArray<double> abs(MArray<double> array)
+		public static MFullArray<double> abs(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, abs);
 		}
 
-		public static MArray<double> abs(MArray<MComplex<double>> array)
+		public static MFullArray<double> abs(MFullArray<MComplex<double>> array)
 		{
 			return MFunctional.Map(array, abs);
 		}
@@ -47,12 +47,12 @@ namespace McCli.Builtins
 			return new MComplex<TReal>(a, b);
 		}
 
-		public static MArray<MComplex<TReal>> complex<[AnyReal] TReal>(MArray<TReal> a) where TReal : struct
+		public static MFullArray<MComplex<TReal>> complex<[AnyReal] TReal>(MFullArray<TReal> a) where TReal : struct
 		{
 			return MFunctional.Map(a, complex);
 		}
 
-		public static MArray<MComplex<TReal>> complex<[AnyReal] TReal>(MArray<TReal> a, MArray<TReal> b) where TReal : struct
+		public static MFullArray<MComplex<TReal>> complex<[AnyReal] TReal>(MFullArray<TReal> a, MFullArray<TReal> b) where TReal : struct
 		{
 			return MFunctional.Map(a, b, complex);
 		}
@@ -69,7 +69,7 @@ namespace McCli.Builtins
 		}
 
 		#region real/imag
-		public static MArray<TReal> real<[AnyReal] TReal>(MArray<MComplex<TReal>> array) where TReal : struct
+		public static MFullArray<TReal> real<[AnyReal] TReal>(MFullArray<MComplex<TReal>> array) where TReal : struct
 		{
 			Contract.Requires(array != null);
 
@@ -84,7 +84,7 @@ namespace McCli.Builtins
 			return value.RealPart;
 		}
 
-		public static MArray<TReal> imag<[AnyReal] TReal>(MArray<MComplex<TReal>> array) where TReal : struct
+		public static MFullArray<TReal> imag<[AnyReal] TReal>(MFullArray<MComplex<TReal>> array) where TReal : struct
 		{
 			Contract.Requires(array != null);
 

@@ -14,7 +14,7 @@ namespace McCli.Builtins
 	public static class ElementaryOperations
 	{
 		#region Real Additive
-		public static MArray<double> plus(MArray<double> lhs, MArray<double> rhs)
+		public static MFullArray<double> plus(MFullArray<double> lhs, MFullArray<double> rhs)
 		{
 			Contract.Requires(lhs != null);
 			Contract.Requires(rhs != null);
@@ -29,7 +29,7 @@ namespace McCli.Builtins
 			return c;
 		}
 
-		public static MArray<double> plus(MArray<double> lhs, double rhs)
+		public static MFullArray<double> plus(MFullArray<double> lhs, double rhs)
 		{
 			Contract.Requires(lhs != null);
 
@@ -39,7 +39,7 @@ namespace McCli.Builtins
 			return c;
 		}
 
-		public static MArray<double> plus(double lhs, MArray<double> rhs)
+		public static MFullArray<double> plus(double lhs, MFullArray<double> rhs)
 		{
 			return plus(rhs, lhs);
 		}
@@ -50,7 +50,7 @@ namespace McCli.Builtins
 			return lhs + rhs;
 		}
 
-		public static MArray<TScalar> uplus<[AnyNumeric]TScalar>(MArray<TScalar> array)
+		public static MFullArray<TScalar> uplus<[AnyNumeric]TScalar>(MFullArray<TScalar> array)
 		{
 			Contract.Requires(array != null);
 			return array.DeepClone();
@@ -61,7 +61,7 @@ namespace McCli.Builtins
 			return value;
 		}
 
-		public static MArray<double> sum(MArray<double> array)
+		public static MFullArray<double> sum(MFullArray<double> array)
 		{
 			Contract.Requires(array != null);
 
@@ -87,7 +87,7 @@ namespace McCli.Builtins
 		#endregion
 
 		#region Complex Additive
-		public static MArray<MComplex<double>> plus(MArray<MComplex<double>> lhs, MArray<MComplex<double>> rhs)
+		public static MFullArray<MComplex<double>> plus(MFullArray<MComplex<double>> lhs, MFullArray<MComplex<double>> rhs)
 		{
 			MatchShapes(ref lhs, ref rhs);
 			return MFunctional.Map(lhs, rhs, plus);
@@ -100,7 +100,7 @@ namespace McCli.Builtins
 		#endregion
 
 		#region Real Subtractive
-		public static MArray<double> minus(MArray<double> lhs, MArray<double> rhs)
+		public static MFullArray<double> minus(MFullArray<double> lhs, MFullArray<double> rhs)
 		{
 			Contract.Requires(lhs != null);
 			Contract.Requires(rhs != null);
@@ -115,7 +115,7 @@ namespace McCli.Builtins
 			return c;
 		}
 
-		public static MArray<double> minus(MArray<double> lhs, double rhs)
+		public static MFullArray<double> minus(MFullArray<double> lhs, double rhs)
 		{
 			Contract.Requires(lhs != null);
 
@@ -125,7 +125,7 @@ namespace McCli.Builtins
 			return c;
 		}
 
-		public static MArray<double> minus(double lhs, MArray<double> rhs)
+		public static MFullArray<double> minus(double lhs, MFullArray<double> rhs)
 		{
 			Contract.Requires(rhs != null);
 
@@ -141,7 +141,7 @@ namespace McCli.Builtins
 			return lhs - rhs;
 		}
 
-		public static MArray<double> uminus(MArray<double> array)
+		public static MFullArray<double> uminus(MFullArray<double> array)
 		{
 			Contract.Requires(array != null);
 
@@ -159,7 +159,7 @@ namespace McCli.Builtins
 		#endregion
 
 		#region Complex Subtractive
-		public static MArray<MComplex<double>> minus(MArray<MComplex<double>> lhs, MArray<MComplex<double>> rhs)
+		public static MFullArray<MComplex<double>> minus(MFullArray<MComplex<double>> lhs, MFullArray<MComplex<double>> rhs)
 		{
 			MatchShapes(ref lhs, ref rhs);
 			return MFunctional.Map(lhs, rhs, minus);
@@ -170,7 +170,7 @@ namespace McCli.Builtins
 			return new MComplex<double>(lhs.RealPart - rhs.RealPart, lhs.ImaginaryPart - rhs.ImaginaryPart);
 		}
 
-		public static MArray<MComplex<double>> uminus(MArray<MComplex<double>> array)
+		public static MFullArray<MComplex<double>> uminus(MFullArray<MComplex<double>> array)
 		{
 			return MFunctional.Map(array, uminus);
 		}
@@ -182,7 +182,7 @@ namespace McCli.Builtins
 		#endregion
 
 		#region Real Scalar Multiplicative
-		public static MArray<double> times(MArray<double> lhs, MArray<double> rhs)
+		public static MFullArray<double> times(MFullArray<double> lhs, MFullArray<double> rhs)
 		{
 			Contract.Requires(lhs != null);
 			Contract.Requires(rhs != null);
@@ -197,7 +197,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		public static MArray<double> times(MArray<double> lhs, double rhs)
+		public static MFullArray<double> times(MFullArray<double> lhs, double rhs)
 		{
 			Contract.Requires(lhs != null);
 
@@ -207,7 +207,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		public static MArray<double> times(double lhs, MArray<double> rhs)
+		public static MFullArray<double> times(double lhs, MFullArray<double> rhs)
 		{
 			return times(rhs, lhs);
 		}
@@ -218,7 +218,7 @@ namespace McCli.Builtins
 			return lhs * rhs;
 		}
 
-		public static MArray<double> prod(MArray<double> array)
+		public static MFullArray<double> prod(MFullArray<double> array)
 		{
 			Contract.Requires(array != null);
 
@@ -244,7 +244,7 @@ namespace McCli.Builtins
 		#endregion
 
 		#region Complex Scalar Multiplicative
-		public static MArray<MComplex<double>> times(MArray<MComplex<double>> lhs, MArray<MComplex<double>> rhs)
+		public static MFullArray<MComplex<double>> times(MFullArray<MComplex<double>> lhs, MFullArray<MComplex<double>> rhs)
 		{
 			MatchShapes(ref lhs, ref rhs);
 			return MFunctional.Map(lhs, rhs, times);
@@ -269,7 +269,7 @@ namespace McCli.Builtins
 		#endregion
 
 		#region Scalar Divisive
-		public static MArray<double> rdivide(MArray<double> lhs, MArray<double> rhs)
+		public static MFullArray<double> rdivide(MFullArray<double> lhs, MFullArray<double> rhs)
 		{
 			Contract.Requires(lhs != null);
 			Contract.Requires(rhs != null);
@@ -284,7 +284,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		public static MArray<double> rdivide(MArray<double> lhs, double rhs)
+		public static MFullArray<double> rdivide(MFullArray<double> lhs, double rhs)
 		{
 			Contract.Requires(lhs != null);
 
@@ -294,7 +294,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		public static MArray<double> rdivide(double lhs, MArray<double> rhs)
+		public static MFullArray<double> rdivide(double lhs, MFullArray<double> rhs)
 		{
 			Contract.Requires(rhs != null);
 
@@ -310,7 +310,7 @@ namespace McCli.Builtins
 			return lhs / rhs;
 		}
 
-		public static MArray<double> ldivide(MArray<double> lhs, MArray<double> rhs)
+		public static MFullArray<double> ldivide(MFullArray<double> lhs, MFullArray<double> rhs)
 		{
 			Contract.Requires(lhs != null);
 			Contract.Requires(rhs != null);
@@ -324,7 +324,7 @@ namespace McCli.Builtins
 			return rhs / lhs;
 		}
 
-		public static MArray<double> mod(MArray<double> lhs, MArray<double> rhs)
+		public static MFullArray<double> mod(MFullArray<double> lhs, MFullArray<double> rhs)
 		{
 			Contract.Requires(lhs != null);
 			Contract.Requires(rhs != null);
@@ -338,7 +338,7 @@ namespace McCli.Builtins
 			return lhs - times(floor(rdivide(lhs, rhs)), rhs);
 		}
 
-		public static MArray<double> rem(MArray<double> lhs, MArray<double> rhs)
+		public static MFullArray<double> rem(MFullArray<double> lhs, MFullArray<double> rhs)
 		{
 			Contract.Requires(lhs != null);
 			Contract.Requires(rhs != null);
@@ -354,7 +354,7 @@ namespace McCli.Builtins
 		#endregion
 
 		#region Real Matrix Operations
-		public static MArray<double> mtimes(MArray<double> lhs, MArray<double> rhs)
+		public static MFullArray<double> mtimes(MFullArray<double> lhs, MFullArray<double> rhs)
 		{
 			Contract.Requires(lhs != null);
 			Contract.Requires(rhs != null);
@@ -386,12 +386,12 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		public static MArray<double> mtimes(MArray<double> lhs, double rhs)
+		public static MFullArray<double> mtimes(MFullArray<double> lhs, double rhs)
 		{
 			return times(lhs, rhs);
 		}
 
-		public static MArray<double> mtimes(double lhs, MArray<double> rhs)
+		public static MFullArray<double> mtimes(double lhs, MFullArray<double> rhs)
 		{
 			return times(lhs, rhs);
 		}
@@ -402,7 +402,7 @@ namespace McCli.Builtins
 			return lhs * rhs;
 		}
 
-		public static MArray<double> mpower(MArray<double> @base, double exponent)
+		public static MFullArray<double> mpower(MFullArray<double> @base, double exponent)
 		{
 			Contract.Requires(@base != null);
 
@@ -417,7 +417,7 @@ namespace McCli.Builtins
 			return power(@base, exponent);
 		}
 
-		public static MArray<double> mrdivide(MArray<double> b, MArray<double> a)
+		public static MFullArray<double> mrdivide(MFullArray<double> b, MFullArray<double> a)
 		{
 			Contract.Requires(b != null);
 			Contract.Requires(a != null);
@@ -431,7 +431,7 @@ namespace McCli.Builtins
 			throw new NotImplementedException("Non-scalar mrdivide.");
 		}
 
-		public static MArray<double> mrdivide(MArray<double> b, double a)
+		public static MFullArray<double> mrdivide(MFullArray<double> b, double a)
 		{
 			return rdivide(b, a);
 		}
@@ -442,7 +442,7 @@ namespace McCli.Builtins
 			return b / a;
 		}
 
-		public static MArray<double> mldivide(MArray<double> a, MArray<double> b)
+		public static MFullArray<double> mldivide(MFullArray<double> a, MFullArray<double> b)
 		{
 			Contract.Requires(b != null);
 			Contract.Requires(a != null);
@@ -480,7 +480,7 @@ namespace McCli.Builtins
 		#endregion
 
 		#region Power
-		public static MArray<double> power(MArray<double> @base, MArray<double> exponent)
+		public static MFullArray<double> power(MFullArray<double> @base, MFullArray<double> exponent)
 		{
 			Contract.Requires(@base != null);
 			Contract.Requires(exponent != null);
@@ -494,7 +494,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		public static MArray<double> power(MArray<double> @base, double exponent)
+		public static MFullArray<double> power(MFullArray<double> @base, double exponent)
 		{
 			Contract.Requires(@base != null);
 
@@ -504,7 +504,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		public static MArray<double> power(double @base, MArray<double> exponent)
+		public static MFullArray<double> power(double @base, MFullArray<double> exponent)
 		{
 			Contract.Requires(exponent != null);
 
@@ -521,7 +521,7 @@ namespace McCli.Builtins
 		#endregion
 
 		#region Rounding
-		public static MArray<double> floor(MArray<double> array)
+		public static MFullArray<double> floor(MFullArray<double> array)
 		{
 			Contract.Requires(array != null);
 
@@ -536,7 +536,7 @@ namespace McCli.Builtins
 			return Math.Floor(value);
 		}
 
-		public static MArray<double> ceil(MArray<double> array)
+		public static MFullArray<double> ceil(MFullArray<double> array)
 		{
 			Contract.Requires(array != null);
 
@@ -551,7 +551,7 @@ namespace McCli.Builtins
 			return Math.Ceiling(value);
 		}
 
-		public static MArray<double> round(MArray<double> array)
+		public static MFullArray<double> round(MFullArray<double> array)
 		{
 			Contract.Requires(array != null);
 
@@ -572,7 +572,7 @@ namespace McCli.Builtins
 				return (value % 1) == -0.5 ? floor(value) : ceil(value);
 		}
 
-		public static MArray<double> fix(MArray<double> array)
+		public static MFullArray<double> fix(MFullArray<double> array)
 		{
 			Contract.Requires(array != null);
 
@@ -596,7 +596,7 @@ namespace McCli.Builtins
 		/// <typeparam name="TScalar">The type of scalar values.</typeparam>
 		/// <param name="first">The first array.</param>
 		/// <param name="second">The second array</param>
-		internal static void MatchShapes<TScalar>(ref MArray<TScalar> first, ref MArray<TScalar> second)
+		internal static void MatchShapes<TScalar>(ref MFullArray<TScalar> first, ref MFullArray<TScalar> second)
 		{
 			Contract.Requires(first != null);
 			Contract.Requires(second != null);

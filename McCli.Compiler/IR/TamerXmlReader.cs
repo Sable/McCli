@@ -103,7 +103,7 @@ namespace McCli.Compiler.IR
 			}
 
 			return constantValue == null
-				? new Variable(name, new MRepr(type, scalar ? MStructuralClass.Scalar : MStructuralClass.Array), initOnly)
+				? new Variable(name, new MRepr(type, scalar ? MStructuralClass.Scalar : MStructuralClass.FullArray), initOnly)
 				: new Variable(name, constantValue, initOnly);
 		}
 

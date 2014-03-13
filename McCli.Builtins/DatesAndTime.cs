@@ -30,7 +30,7 @@ namespace McCli.Builtins
 				now.Hour, now.Minute, now.Second + now.Millisecond / 1000.0);
 		}
 
-		public static MFullArray<double> etime(MArray<double> from, MArray<double> to)
+		public static MFullArray<double> etime(MFullArray<double> from, MFullArray<double> to)
 		{
 			Contract.Requires(from != null);
 			Contract.Requires(to != null);
@@ -47,7 +47,7 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		internal static DateTime RowToDateTime(MArray<double> array, int rowIndex)
+		internal static DateTime RowToDateTime(MFullArray<double> array, int rowIndex)
 		{
 			int rowCount = array.Shape.RowCount;
 			double seconds = array[rowCount * 5 + rowIndex];

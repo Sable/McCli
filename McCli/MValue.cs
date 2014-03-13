@@ -14,7 +14,7 @@ namespace McCli
 	public abstract class MValue
 	{
 		#region Fields
-		protected MArrayShape shape;
+		protected internal MArrayShape shape;
 		#endregion
 
 		#region Constructors

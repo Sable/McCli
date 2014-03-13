@@ -14,7 +14,7 @@ namespace McCli.Builtins
 	public static class ArrayManipulation
 	{
 		#region Transpose
-		public static MArray<TScalar> transpose<[AnyPrimitive] TScalar>(MArray<TScalar> array)
+		public static MFullArray<TScalar> transpose<[AnyPrimitive] TScalar>(MFullArray<TScalar> array)
 		{
 			Contract.Requires(array != null);
 			if (array.IsHigherDimensional) throw new MArrayShapeException();

@@ -13,7 +13,7 @@ namespace McCli.Builtins
 	[MatlabLibrary]
 	public static class MatrixAnalysis
 	{
-		public static double norm(MArray<double> array)
+		public static double norm(MFullArray<double> array)
 		{
 			Contract.Requires(array != null);
 

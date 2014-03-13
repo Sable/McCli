@@ -13,7 +13,7 @@ namespace McCli.Builtins
 	public static class ExponentsAndLogarithms
 	{
 		#region Roots
-		public static MArray<double> sqrt(MArray<double> array)
+		public static MFullArray<double> sqrt(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, sqrt);
 		}
@@ -23,7 +23,7 @@ namespace McCli.Builtins
 			return Math.Sqrt(value);
 		}
 
-		public static MArray<double> realsqrt(MArray<double> array)
+		public static MFullArray<double> realsqrt(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, realsqrt);
 		}
@@ -40,7 +40,7 @@ namespace McCli.Builtins
 		#endregion
 
 		#region Exponentials
-		public static MArray<double> exp(MArray<double> array)
+		public static MFullArray<double> exp(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, exp);
 		}
@@ -50,7 +50,7 @@ namespace McCli.Builtins
 			return Math.Exp(value);
 		}
 
-		public static MArray<MComplex<double>> exp(MArray<MComplex<double>> array)
+		public static MFullArray<MComplex<double>> exp(MFullArray<MComplex<double>> array)
 		{
 			return MFunctional.Map(array, exp);
 		}
@@ -63,7 +63,7 @@ namespace McCli.Builtins
 		#endregion
 
 		#region Powers
-		public static MArray<double> pow2(MArray<double> array)
+		public static MFullArray<double> pow2(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, pow2);
 		}
@@ -73,7 +73,7 @@ namespace McCli.Builtins
 			return Math.Pow(2, value);
 		}
 
-		public static MArray<double> realpow(MArray<double> @base, MArray<double> exponent)
+		public static MFullArray<double> realpow(MFullArray<double> @base, MFullArray<double> exponent)
 		{
 			return MFunctional.Map(@base, exponent, realpow);
 		}
@@ -85,7 +85,7 @@ namespace McCli.Builtins
 		#endregion
 
 		#region Logarithms
-		public static MArray<double> log(MArray<double> array)
+		public static MFullArray<double> log(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, log);
 		}
@@ -95,7 +95,7 @@ namespace McCli.Builtins
 			return Math.Log(value);
 		}
 
-		public static MArray<double> log2(MArray<double> array)
+		public static MFullArray<double> log2(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, log2);
 		}
@@ -105,7 +105,7 @@ namespace McCli.Builtins
 			return Math.Log(value, 2);
 		}
 
-		public static MArray<double> log10(MArray<double> array)
+		public static MFullArray<double> log10(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, log10);
 		}
@@ -115,7 +115,7 @@ namespace McCli.Builtins
 			return Math.Log10(value);
 		}
 
-		public static MArray<double> reallog(MArray<double> array)
+		public static MFullArray<double> reallog(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, reallog);
 		}

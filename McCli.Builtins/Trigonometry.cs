@@ -17,7 +17,7 @@ namespace McCli.Builtins
 			return Math.PI;
 		}
 
-		public static MArray<double> hypot(MArray<double> x, MArray<double> y)
+		public static MFullArray<double> hypot(MFullArray<double> x, MFullArray<double> y)
 		{
 			ElementaryOperations.MatchShapes(ref x, ref y);
 			var result = new MFullArray<double>(x.Shape);
@@ -32,7 +32,7 @@ namespace McCli.Builtins
 		}
 
 		#region Degrees/Radians
-		public static MArray<double> degtorad(MArray<double> array)
+		public static MFullArray<double> degtorad(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, degtorad);
 		}
@@ -42,7 +42,7 @@ namespace McCli.Builtins
 			return value * (Math.PI / 180);
 		}
 
-		public static MArray<double> radtodeg(MArray<double> array)
+		public static MFullArray<double> radtodeg(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, radtodeg);
 		}
@@ -54,7 +54,7 @@ namespace McCli.Builtins
 		#endregion
 
 		#region cos, sin, ...
-		public static MArray<double> cos(MArray<double> array)
+		public static MFullArray<double> cos(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, cos);
 		}
@@ -64,7 +64,7 @@ namespace McCli.Builtins
 			return Math.Cos(value);
 		}
 
-		public static MArray<double> cot(MArray<double> array)
+		public static MFullArray<double> cot(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, cot);
 		}
@@ -74,7 +74,7 @@ namespace McCli.Builtins
 			return 1 / tan(value);
 		}
 
-		public static MArray<double> csc(MArray<double> array)
+		public static MFullArray<double> csc(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, csc);
 		}
@@ -84,7 +84,7 @@ namespace McCli.Builtins
 			return 1 / sin(value);
 		}
 
-		public static MArray<double> sec(MArray<double> array)
+		public static MFullArray<double> sec(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, sec);
 		}
@@ -94,7 +94,7 @@ namespace McCli.Builtins
 			return 1 / cos(value);
 		}
 
-		public static MArray<double> sin(MArray<double> array)
+		public static MFullArray<double> sin(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, sin);
 		}
@@ -104,7 +104,7 @@ namespace McCli.Builtins
 			return Math.Sin(value);
 		}
 
-		public static MArray<double> tan(MArray<double> array)
+		public static MFullArray<double> tan(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, tan);
 		}
@@ -116,7 +116,7 @@ namespace McCli.Builtins
 		#endregion
 
 		#region cosd, sind, ...
-		public static MArray<double> cosd(MArray<double> array)
+		public static MFullArray<double> cosd(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, cosd);
 		}
@@ -126,7 +126,7 @@ namespace McCli.Builtins
 			return cos(degtorad(value));
 		}
 
-		public static MArray<double> cotd(MArray<double> array)
+		public static MFullArray<double> cotd(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, cotd);
 		}
@@ -136,7 +136,7 @@ namespace McCli.Builtins
 			return cot(degtorad(value));
 		}
 
-		public static MArray<double> cscd(MArray<double> array)
+		public static MFullArray<double> cscd(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, cscd);
 		}
@@ -146,7 +146,7 @@ namespace McCli.Builtins
 			return csc(degtorad(value));
 		}
 
-		public static MArray<double> secd(MArray<double> array)
+		public static MFullArray<double> secd(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, secd);
 		}
@@ -156,7 +156,7 @@ namespace McCli.Builtins
 			return sec(degtorad(value));
 		}
 
-		public static MArray<double> sind(MArray<double> array)
+		public static MFullArray<double> sind(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, sind);
 		}
@@ -166,7 +166,7 @@ namespace McCli.Builtins
 			return sin(degtorad(value));
 		}
 
-		public static MArray<double> tand(MArray<double> array)
+		public static MFullArray<double> tand(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, tand);
 		}
@@ -178,7 +178,7 @@ namespace McCli.Builtins
 		#endregion
 
 		#region acos, asin, ...
-		public static MArray<double> acos(MArray<double> array)
+		public static MFullArray<double> acos(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, acos);
 		}
@@ -188,7 +188,7 @@ namespace McCli.Builtins
 			return Math.Acos(value);
 		}
 
-		public static MArray<double> acot(MArray<double> array)
+		public static MFullArray<double> acot(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, acot);
 		}
@@ -198,7 +198,7 @@ namespace McCli.Builtins
 			return (Math.PI * 0.5) - atan(value);
 		}
 
-		public static MArray<double> acsc(MArray<double> array)
+		public static MFullArray<double> acsc(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, acsc);
 		}
@@ -208,7 +208,7 @@ namespace McCli.Builtins
 			return (Math.PI * 0.5) - asec(value);
 		}
 
-		public static MArray<double> asec(MArray<double> array)
+		public static MFullArray<double> asec(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, asec);
 		}
@@ -218,7 +218,7 @@ namespace McCli.Builtins
 			return acos(1 / value);
 		}
 
-		public static MArray<double> asin(MArray<double> array)
+		public static MFullArray<double> asin(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, asin);
 		}
@@ -228,7 +228,7 @@ namespace McCli.Builtins
 			return Math.Asin(value);
 		}
 
-		public static MArray<double> atan(MArray<double> array)
+		public static MFullArray<double> atan(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, atan);
 		}
@@ -240,7 +240,7 @@ namespace McCli.Builtins
 		#endregion
 
 		#region acosd, asind, ...
-		public static MArray<double> acosd(MArray<double> array)
+		public static MFullArray<double> acosd(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, acosd);
 		}
@@ -250,7 +250,7 @@ namespace McCli.Builtins
 			return radtodeg(acos(value));
 		}
 
-		public static MArray<double> acotd(MArray<double> array)
+		public static MFullArray<double> acotd(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, acotd);
 		}
@@ -260,7 +260,7 @@ namespace McCli.Builtins
 			return radtodeg(acotd(value));
 		}
 
-		public static MArray<double> acscd(MArray<double> array)
+		public static MFullArray<double> acscd(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, acscd);
 		}
@@ -270,7 +270,7 @@ namespace McCli.Builtins
 			return radtodeg(acsc(value));
 		}
 
-		public static MArray<double> asecd(MArray<double> array)
+		public static MFullArray<double> asecd(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, asecd);
 		}
@@ -280,7 +280,7 @@ namespace McCli.Builtins
 			return radtodeg(asec(value));
 		}
 
-		public static MArray<double> asind(MArray<double> array)
+		public static MFullArray<double> asind(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, asind);
 		}
@@ -290,7 +290,7 @@ namespace McCli.Builtins
 			return radtodeg(asin(value));
 		}
 
-		public static MArray<double> atand(MArray<double> array)
+		public static MFullArray<double> atand(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, atand);
 		}
@@ -302,7 +302,7 @@ namespace McCli.Builtins
 		#endregion
 
 		#region cosh, sinh, ...
-		public static MArray<double> cosh(MArray<double> array)
+		public static MFullArray<double> cosh(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, cosh);
 		}
@@ -312,7 +312,7 @@ namespace McCli.Builtins
 			return Math.Cosh(value);
 		}
 
-		public static MArray<double> coth(MArray<double> array)
+		public static MFullArray<double> coth(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, coth);
 		}
@@ -322,7 +322,7 @@ namespace McCli.Builtins
 			return cosh(value) / sinh(value);
 		}
 
-		public static MArray<double> csch(MArray<double> array)
+		public static MFullArray<double> csch(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, csch);
 		}
@@ -332,7 +332,7 @@ namespace McCli.Builtins
 			return 1 / sinh(value);
 		}
 
-		public static MArray<double> sech(MArray<double> array)
+		public static MFullArray<double> sech(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, sech);
 		}
@@ -342,7 +342,7 @@ namespace McCli.Builtins
 			return 1 / cosh(value);
 		}
 
-		public static MArray<double> sinh(MArray<double> array)
+		public static MFullArray<double> sinh(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, sinh);
 		}
@@ -352,7 +352,7 @@ namespace McCli.Builtins
 			return Math.Sinh(value);
 		}
 
-		public static MArray<double> tanh(MArray<double> array)
+		public static MFullArray<double> tanh(MFullArray<double> array)
 		{
 			return MFunctional.Map(array, tanh);
 		}
