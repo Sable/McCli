@@ -10,7 +10,7 @@ namespace CliKit
 	/// <summary>
 	/// Represents opcode which reference a field.
 	/// </summary>
-	public sealed class FieldReferenceOpcode : Opcode
+	public sealed class FieldReferenceOpcode : Opcode, ILocationReferenceOpcode
 	{
 		#region Constructors
 		internal FieldReferenceOpcode(Emit.OpCode opcode) : base(opcode) { }
@@ -42,6 +42,13 @@ namespace CliKit
 		public override void Accept<T>(OpcodeVisitor<T> visitor, T param)
 		{
 			visitor.VisitFieldReference(this, param);
+		}
+		#endregion
+
+		#region Explicit Members
+		LocationKind ILocationReferenceOpcode.LocationKind
+		{
+			get { return LocationKind.Field; }
 		}
 		#endregion
 	}

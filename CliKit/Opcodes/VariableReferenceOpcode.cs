@@ -10,7 +10,7 @@ namespace CliKit
 	/// <summary>
 	/// Represents CIL opcodes that refers to a local variable or argument. <c>[ls]darg(\.[0123s])?</c>
 	/// </summary>
-	public sealed class VariableReferenceOpcode : Opcode
+	public sealed class VariableReferenceOpcode : Opcode, ILocationReferenceOpcode
 	{
 		#region Constructors
 		internal VariableReferenceOpcode(Emit.OpCode opcode) : base(opcode) {}
@@ -33,7 +33,7 @@ namespace CliKit
 			}
 		}
 
-		public bool IsParameter
+		public bool IsArgument
 		{
 			get { return VariableKind == VariableKind.Argument; }
 		}
@@ -87,6 +87,13 @@ namespace CliKit
 		public override void Accept<T>(OpcodeVisitor<T> visitor, T param)
 		{
 			visitor.VisitVariableReference(this, param);
+		}
+		#endregion
+
+		#region Explicit Members
+		LocationKind ILocationReferenceOpcode.LocationKind
+		{
+			get { return IsArgument ? LocationKind.Argument : LocationKind.Local; }
 		}
 		#endregion
 	}

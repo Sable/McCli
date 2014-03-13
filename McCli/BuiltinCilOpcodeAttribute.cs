@@ -12,20 +12,20 @@ namespace McCli
 	public sealed class BuiltinCilOpcodeAttribute : Attribute
 	{
 		#region Fields
-		private readonly int opcode;
+		private readonly ushort[] opcodes;
 		#endregion
 
 		#region Constructors
-		public BuiltinCilOpcodeAttribute(int opcode)
+		public BuiltinCilOpcodeAttribute(params ushort[] opcodes)
 		{
-			this.opcode = opcode;
+			this.opcodes = opcodes;
 		}
 		#endregion
 
 		#region Properties
-		public int Opcode
+		public IList<ushort> Opcodes
 		{
-			get { return opcode; }
+			get { return opcodes; }
 		}
 		#endregion
 

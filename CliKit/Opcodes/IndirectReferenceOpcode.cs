@@ -10,7 +10,7 @@ namespace CliKit
 	/// <summary>
 	/// Represents an opcode which references the value pointed to by a pointer.
 	/// </summary>
-	public sealed class IndirectReferenceOpcode : Opcode
+	public sealed class IndirectReferenceOpcode : Opcode, ILocationReferenceOpcode
 	{
 		#region Constructors
 		internal IndirectReferenceOpcode(Emit.OpCode opcode) : base(opcode) { }
@@ -59,6 +59,13 @@ namespace CliKit
 		public override void Accept<T>(OpcodeVisitor<T> visitor, T param)
 		{
 			visitor.VisitIndirectReference(this, param);
+		}
+		#endregion
+
+		#region Explicit Members
+		LocationKind ILocationReferenceOpcode.LocationKind
+		{
+			get { return LocationKind.Pointee; }
 		}
 		#endregion
 	}

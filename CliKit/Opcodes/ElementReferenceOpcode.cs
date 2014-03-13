@@ -10,7 +10,7 @@ namespace CliKit
 	/// <summary>
 	/// Represents opcodes which reference array elements
 	/// </summary>
-	public sealed class ElementReferenceOpcode : Opcode
+	public sealed class ElementReferenceOpcode : Opcode, ILocationReferenceOpcode
 	{
 		#region Fields
 		private readonly DataType? dataType;
@@ -55,6 +55,13 @@ namespace CliKit
 		public override void Accept<T>(OpcodeVisitor<T> visitor, T param)
 		{
 			visitor.VisitElementReference(this, param);
+		}
+		#endregion
+
+		#region Explicit Members
+		LocationKind ILocationReferenceOpcode.LocationKind
+		{
+			get { return LocationKind.ArrayElement; }
 		}
 		#endregion
 	}

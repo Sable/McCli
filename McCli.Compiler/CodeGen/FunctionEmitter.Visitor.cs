@@ -141,10 +141,13 @@ namespace McCli.Compiler.CodeGen
 				}
 				else
 				{
-					// Calling the builtin is equivalent to emitting a single CIL opcode so do that instead
-					var opcode = Opcode.FromValue((OpcodeValue)builtinCilOpcodeAttribute.Opcode);
-					Contract.Assert(opcode != null);
-					cil.Instruction(opcode);
+					// Calling the builtin is equivalent to emitting a sequence of CIL opcodes, so do that instead
+					foreach (var opcodeValue in builtinCilOpcodeAttribute.Opcodes)
+					{
+						var opcode = Opcode.FromValue((OpcodeValue)opcodeValue);
+						Contract.Assert(opcode != null);
+						cil.Instruction(opcode);
+					}
 				}
 			}
 
@@ -226,6 +229,9 @@ namespace McCli.Compiler.CodeGen
 
 		private void EmitIsTrue(MRepr conditionRepr)
 		{
+			if (conditionRepr.Type == MClass.Logical && conditionRepr.StructuralClass == MStructuralClass.Scalar)
+				return;
+
 			var isTrueFunction = pseudoBuiltins.Lookup("IsTrue", conditionRepr);
 			EmitConversion(conditionRepr, isTrueFunction.Signature.Inputs[0]);
 			cil.Invoke(isTrueFunction.Method);

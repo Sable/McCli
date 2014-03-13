@@ -77,6 +77,7 @@
     <Compile Include="IO\CilReader.cs" />
     <Compile Include="IO\ILAsmMethodBodyWriter.cs" />
     <Compile Include="IO\ILGeneratorMethodBodyWriter.cs" />
+    <Compile Include="IO\ITokenProvider.cs" />
     <Compile Include="IO\MethodBodyVerificationContext.cs" />
     <Compile Include="IO\MethodBodyVerifier.cs" />
     <Compile Include="IO\MethodBodyVerifier.Stack.cs" />
@@ -96,6 +97,7 @@
     <Compile Include="IO\Label.cs" />
     <Compile Include="IO\TemporaryLocalPool.cs" />
     <Compile Include="IO\PE\MetadataTablesStreamHeader.cs" />
+    <Compile Include="LocationKind.cs" />
     <Compile Include="MetadataToken.cs" />
     <Compile Include="MetadataTokenKind.cs" />
     <Compile Include="Conversion.cs" />
@@ -103,6 +105,7 @@
     <Compile Include="Opcode.Lookup.cs" />
     <Compile Include="Opcodes\ConversionOpcode.cs" />
     <Compile Include="NumericalOperand.cs" />
+    <Compile Include="Opcodes\ILocationReferenceOpcode.cs" />
     <Compile Include="Opcodes\OpcodeVisitor.cs" />
     <Compile Include="Opcodes\CastOpcode.cs" />
     <Compile Include="OpcodeValue.cs" />

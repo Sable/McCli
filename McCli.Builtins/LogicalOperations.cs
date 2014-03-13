@@ -110,7 +110,7 @@ namespace McCli.Builtins
 			return MFunctional.Map(array, not);
 		}
 
-		[BuiltinCilOpcode(0x66 /* not */)]
+		[BuiltinCilOpcode(0x16, 0xFE01 /* ldc.i4.0, ceq */)]
 		public static bool not(bool value)
 		{
 			return !value;
