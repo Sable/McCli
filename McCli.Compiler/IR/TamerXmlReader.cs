@@ -109,24 +109,29 @@ namespace McCli.Compiler.IR
 
 		private static IEnumerable<Statement> ReadStatements(XElement parentElement, IReadOnlyDictionary<string, Variable> variables)
 		{
-			if (parentElement == null) yield break;
-			foreach (var element in parentElement.Elements())
+			if (parentElement != null)
 			{
-				switch (element.Name.LocalName)
-				{
-					case "ArrayGet": yield return ReadArrayGet(element, variables); break;
-					case "ArraySet": yield return ReadArraySet(element, variables); break;
-					case "Break": yield return new Jump(JumpKind.Break); break;
-					case "Call": yield return ReadCall(element, variables); break;
-					case "Continue": yield return new Jump(JumpKind.Continue); break;
-					case "Copy": yield return ReadCopy(element, variables); break;
-					case "For": yield return ReadFor(element, variables); break;
-					case "If": yield return ReadIf(element, variables); break;
-					case "Literal": yield return ReadLiteral(element, variables); break;
-					case "Return": yield return new Jump(JumpKind.Return); break;
-					case "While": yield return ReadWhile(element, variables); break;
-					default: throw new NotImplementedException("Statements of type: " + element.Name.LocalName);
-				}
+				foreach (var element in parentElement.Elements())
+					yield return ReadStatement(element, variables);
+			}
+		}
+
+		private static Statement ReadStatement(XElement element, IReadOnlyDictionary<string, Variable> variables)
+		{
+			switch (element.Name.LocalName)
+			{
+				case "ArrayGet": return ReadArrayGet(element, variables);
+				case "ArraySet": return ReadArraySet(element, variables);
+				case "Break": return new Jump(JumpKind.Break);
+				case "Call": return ReadCall(element, variables);
+				case "Continue": return new Jump(JumpKind.Continue);
+				case "Copy": return ReadCopy(element, variables);
+				case "For": return ReadFor(element, variables);
+				case "If": return ReadIf(element, variables);
+				case "Literal": return ReadLiteral(element, variables);
+				case "Return": return new Jump(JumpKind.Return);
+				case "While": return ReadWhile(element, variables);
+				default: throw new NotImplementedException("Statements of type: " + element.Name.LocalName);
 			}
 		}
 
@@ -175,9 +180,24 @@ namespace McCli.Compiler.IR
 		private static If ReadIf(XElement element, IReadOnlyDictionary<string, Variable> variables)
 		{
 			var condition = ReadVariable(element.Attribute("condition"), variables);
-			var then = ReadStatements(element.Element("Then"), variables).ToImmutableArray();
-			var @else = ReadStatements(element.Element("Else"), variables).ToImmutableArray();
-			return new If(condition, then, @else);
+
+			var then = new List<Statement>();
+			var @else = new List<Statement>();
+			var block = then;
+			foreach (var child in element.Elements())
+			{
+				if (child.Name == "Else")
+				{
+					if (block == @else) throw new InvalidDataException("If statement with multiple <Else/> tags.");
+					block = @else;
+				}
+				else
+				{
+					block.Add(ReadStatement(child, variables));
+				}
+			}
+
+			return new If(condition, then.ToImmutableArray(), @else.ToImmutableArray());
 		}
 
 		private static Literal ReadLiteral(XElement element, IReadOnlyDictionary<string, Variable> variables)
