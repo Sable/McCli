@@ -53,6 +53,11 @@ namespace CliKit
 				return DataTypeEnum.TryParseNameInOpcode(typeName);
 			}
 		}
+
+		public override PrefixMask ValidPrefixes
+		{
+			get { return PrefixMask.Unaligned | PrefixMask.Volatile; }
+		}
 		#endregion
 
 		#region Methods

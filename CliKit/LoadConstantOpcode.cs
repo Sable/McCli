@@ -36,6 +36,22 @@ namespace CliKit
 		#endregion
 
 		#region Properties
+		public override OpcodeForm Form
+		{
+			get
+			{
+				switch (OperandKind)
+				{
+					case OperandKind.Int8: return OpcodeForm.Short;
+					case OperandKind.None:
+						if (opcode.StackBehaviourPush == Emit.StackBehaviour.Pushi) return OpcodeForm.Macro;
+						break;
+				}
+
+				return OpcodeForm.Normal;
+			}
+		}
+
 		public DataType DataType
 		{
 			get
@@ -62,7 +78,7 @@ namespace CliKit
 			}
 		}
 
-		public int? ConstantValue
+		public int? MacroIntValue
 		{
 			get { return constantValue == sbyte.MinValue ? (int?)null : (int)constantValue; }
 		}

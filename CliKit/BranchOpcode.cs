@@ -65,9 +65,9 @@ namespace CliKit
 			}
 		}
 
-		public bool IsShortForm
+		public override OpcodeForm Form
 		{
-			get { return OperandKind == OperandKind.BranchTarget8; }
+			get { return OperandKind == OperandKind.BranchTarget8 ? OpcodeForm.Short : OpcodeForm.Normal; }
 		}
 		#endregion
 

@@ -36,6 +36,17 @@ namespace CliKit
 				return name[2] == 's';
 			}
 		}
+
+		public override PrefixMask ValidPrefixes
+		{
+			get
+			{
+				var prefixes = PrefixMask.None;
+				if (ReferenceKind == LocationReferenceKind.LoadAddress) prefixes |= PrefixMask.Volatile;
+				if (!IsStatic) prefixes |= PrefixMask.Unaligned | PrefixMask.SuppressCheck;
+				return prefixes;
+			}
+		}
 		#endregion
 
 		#region Methods

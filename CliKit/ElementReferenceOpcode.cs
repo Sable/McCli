@@ -49,6 +49,16 @@ namespace CliKit
 		{
 			get { return dataType; }
 		}
+
+		public override PrefixMask ValidPrefixes
+		{
+			get
+			{
+				var prefixes = PrefixMask.SuppressCheck;
+				if (ReferenceKind == LocationReferenceKind.LoadAddress) prefixes |= PrefixMask.Readonly;
+				return prefixes;
+			}
+		}
 		#endregion
 
 		#region Methods

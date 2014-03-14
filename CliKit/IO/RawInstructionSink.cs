@@ -95,7 +95,7 @@ namespace CliKit.IO
 				{
 					// We can actually encode it as an int followed by a conversion
 					var opcode = Opcode.LoadInt32(intValue);
-					Contract.Assert(opcode.ConstantValue == intValue);
+					Contract.Assert(opcode.MacroIntValue == intValue);
 					Instruction(opcode);
 					Instruction(intToFloatConversionOpcode);
 					return;

@@ -68,12 +68,43 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArithmeticOpcode.cs">
+      <DependentUpon>Opcode.cs</DependentUpon>
+    </Compile>
     <Compile Include="ArithmeticOperation.cs" />
     <Compile Include="BranchKind.cs" />
+    <Compile Include="BranchOpcode.cs">
+      <DependentUpon>Opcode.cs</DependentUpon>
+    </Compile>
     <Compile Include="CallKind.cs" />
+    <Compile Include="CallOpcode.cs">
+      <DependentUpon>Opcode.cs</DependentUpon>
+    </Compile>
     <Compile Include="CastKind.cs" />
+    <Compile Include="CastOpcode.cs">
+      <DependentUpon>Opcode.cs</DependentUpon>
+    </Compile>
     <Compile Include="Comparison.cs" />
+    <Compile Include="ComparisonOpcode.cs">
+      <DependentUpon>Opcode.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ControlFlowEffect.cs" />
+    <Compile Include="ConversionOpcode.cs">
+      <DependentUpon>Opcode.cs</DependentUpon>
+    </Compile>
     <Compile Include="Conversions.cs" />
+    <Compile Include="ElementReferenceOpcode.cs">
+      <DependentUpon>Opcode.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FieldReferenceOpcode.cs">
+      <DependentUpon>Opcode.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ILocationReferenceOpcode.cs">
+      <DependentUpon>Opcode.cs</DependentUpon>
+    </Compile>
+    <Compile Include="IndirectReferenceOpcode.cs">
+      <DependentUpon>Opcode.cs</DependentUpon>
+    </Compile>
     <Compile Include="IO\CilReader.cs" />
     <Compile Include="IO\ILAsmMethodBodyWriter.cs" />
     <Compile Include="IO\ILGeneratorMethodBodyWriter.cs" />
@@ -97,38 +128,39 @@
     <Compile Include="IO\Label.cs" />
     <Compile Include="IO\TemporaryLocalPool.cs" />
     <Compile Include="IO\PE\MetadataTablesStreamHeader.cs" />
+    <Compile Include="LoadConstantOpcode.cs">
+      <DependentUpon>Opcode.cs</DependentUpon>
+    </Compile>
     <Compile Include="LocationKind.cs" />
     <Compile Include="MetadataToken.cs" />
     <Compile Include="MetadataTokenKind.cs" />
     <Compile Include="Conversion.cs" />
-    <Compile Include="Opcode.Definitions.cs" />
-    <Compile Include="Opcode.Lookup.cs" />
-    <Compile Include="Opcodes\ConversionOpcode.cs" />
+    <Compile Include="Opcode.Definitions.cs">
+      <DependentUpon>Opcode.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Opcode.Lookup.cs">
+      <DependentUpon>Opcode.cs</DependentUpon>
+    </Compile>
     <Compile Include="NumericalOperand.cs" />
-    <Compile Include="Opcodes\ILocationReferenceOpcode.cs" />
-    <Compile Include="Opcodes\OpcodeVisitor.cs" />
-    <Compile Include="Opcodes\CastOpcode.cs" />
+    <Compile Include="OpcodeForm.cs" />
     <Compile Include="OpcodeValue.cs" />
+    <Compile Include="OpcodeVisitor.cs" />
     <Compile Include="OperandKind.cs" />
+    <Compile Include="PrefixData.cs" />
+    <Compile Include="PrefixMask.cs" />
     <Compile Include="RawInstruction.cs" />
     <Compile Include="ReflectionEmitEnums.cs" />
     <Compile Include="LocationReferenceKind.cs" />
     <Compile Include="IO\ILGeneratorExtensions.cs" />
     <Compile Include="DataType.cs" />
     <Compile Include="Opcode.cs" />
-    <Compile Include="Opcodes\ArithmeticOpcode.cs" />
-    <Compile Include="Opcodes\BranchOpcode.cs" />
-    <Compile Include="Opcodes\CallOpcode.cs" />
-    <Compile Include="Opcodes\ComparisonOpcode.cs" />
-    <Compile Include="Opcodes\ElementReferenceOpcode.cs" />
-    <Compile Include="Opcodes\FieldReferenceOpcode.cs" />
-    <Compile Include="Opcodes\IndirectReferenceOpcode.cs" />
-    <Compile Include="Opcodes\LoadConstantOpcode.cs" />
-    <Compile Include="Opcodes\VariableReferenceOpcode.cs" />
     <Compile Include="VariableKind.cs" />
     <Compile Include="VariableLocation.cs" />
     <Compile Include="ParameterDescriptor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="VariableReferenceOpcode.cs">
+      <DependentUpon>Opcode.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Remaining Opcodes.txt" />

@@ -33,6 +33,20 @@ namespace CliKit
 			}
 		}
 
+		public override OpcodeForm Form
+		{
+			get
+			{
+				switch (OperandKind)
+				{
+					case OperandKind.VariableIndex16: return OpcodeForm.Normal;
+					case OperandKind.VariableIndex8: return OpcodeForm.Short;
+					case OperandKind.None: return OpcodeForm.Macro;
+					default: throw new NotSupportedException("Unexpected operand kind.");
+				}
+			}
+		}
+
 		public bool IsArgument
 		{
 			get { return VariableKind == VariableKind.Argument; }
@@ -73,7 +87,7 @@ namespace CliKit
 			get { return OperandKind == OperandKind.None; }
 		}
 
-		public int? ConstantIndex
+		public int? MacroIndex
 		{
 			get
 			{

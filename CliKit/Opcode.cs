@@ -43,6 +43,38 @@ namespace CliKit
 		}
 
 		/// <summary>
+		/// Gets the mask of prefixes that can be used with this opcode.
+		/// </summary>
+		public virtual PrefixMask ValidPrefixes
+		{
+			get { return PrefixMask.None; }
+		}
+
+		/// <summary>
+		/// Gets the form of this opcode.
+		/// </summary>
+		public virtual OpcodeForm Form
+		{
+			get { return OpcodeForm.Normal; }
+		}
+
+		/// <summary>
+		/// Gets the effect of this opcode on control flow.
+		/// </summary>
+		public ControlFlowEffect ControlFlowEffect
+		{
+			get { return (ControlFlowEffect)opcode.FlowControl; }
+		}
+
+		/// <summary>
+		/// Gets the kind of inline operand that accompanies this opcode.
+		/// </summary>
+		public OperandKind OperandKind
+		{
+			get { return (OperandKind)opcode.OperandType; }
+		}
+
+		/// <summary>
 		/// Gets the number of values popped from the evaluation stack by this opcode,
 		/// or <c>null</c> if this opcode pops a variable number of values.
 		/// </summary>
@@ -71,14 +103,6 @@ namespace CliKit
 				return ReflectionEmitEnums.GetStackDelta(opcode.StackBehaviourPop)
 					+ ReflectionEmitEnums.GetStackDelta(opcode.StackBehaviourPush);
 			}
-		}
-
-		/// <summary>
-		/// Gets the kind of inline operand that accompanies this opcode.
-		/// </summary>
-		public OperandKind OperandKind
-		{
-			get { return (OperandKind)opcode.OperandType; }
 		}
 
 		/// <summary>

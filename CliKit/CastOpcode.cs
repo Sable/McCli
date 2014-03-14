@@ -33,6 +33,22 @@ namespace CliKit
 				}
 			}
 		}
+
+		public override PrefixMask ValidPrefixes
+		{
+			get
+			{
+				switch (Value)
+				{
+					case OpcodeValue.Castclass:
+					case OpcodeValue.Unbox:
+						return PrefixMask.SuppressCheck;
+
+					default:
+						return PrefixMask.None;
+				}
+			}
+		}
 		#endregion
 
 		#region Methods
