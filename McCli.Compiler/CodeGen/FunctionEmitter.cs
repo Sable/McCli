@@ -1,4 +1,5 @@
 ﻿using CliKit;
+using CliKit.Cil;
 using CliKit.IO;
 using McCli.Compiler.IR;
 using System;

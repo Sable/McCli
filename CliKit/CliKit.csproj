@@ -68,41 +68,41 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ArithmeticOpcode.cs">
+    <Compile Include="Cil\ArithmeticOpcode.cs">
       <DependentUpon>Opcode.cs</DependentUpon>
     </Compile>
-    <Compile Include="ArithmeticOperation.cs" />
-    <Compile Include="BranchKind.cs" />
-    <Compile Include="BranchOpcode.cs">
+    <Compile Include="Cil\ArithmeticOperation.cs" />
+    <Compile Include="Cil\BranchKind.cs" />
+    <Compile Include="Cil\BranchOpcode.cs">
       <DependentUpon>Opcode.cs</DependentUpon>
     </Compile>
-    <Compile Include="CallKind.cs" />
-    <Compile Include="CallOpcode.cs">
+    <Compile Include="Cil\CallKind.cs" />
+    <Compile Include="Cil\CallOpcode.cs">
       <DependentUpon>Opcode.cs</DependentUpon>
     </Compile>
-    <Compile Include="CastKind.cs" />
-    <Compile Include="CastOpcode.cs">
+    <Compile Include="Cil\CastKind.cs" />
+    <Compile Include="Cil\CastOpcode.cs">
       <DependentUpon>Opcode.cs</DependentUpon>
     </Compile>
-    <Compile Include="Comparison.cs" />
-    <Compile Include="ComparisonOpcode.cs">
+    <Compile Include="Cil\Comparison.cs" />
+    <Compile Include="Cil\ComparisonOpcode.cs">
       <DependentUpon>Opcode.cs</DependentUpon>
     </Compile>
-    <Compile Include="ControlFlowEffect.cs" />
-    <Compile Include="ConversionOpcode.cs">
+    <Compile Include="Cil\ControlFlowEffect.cs" />
+    <Compile Include="Cil\ConversionOpcode.cs">
       <DependentUpon>Opcode.cs</DependentUpon>
     </Compile>
-    <Compile Include="Conversions.cs" />
-    <Compile Include="ElementReferenceOpcode.cs">
+    <Compile Include="Cil\Conversions.cs" />
+    <Compile Include="Cil\ElementReferenceOpcode.cs">
       <DependentUpon>Opcode.cs</DependentUpon>
     </Compile>
-    <Compile Include="FieldReferenceOpcode.cs">
+    <Compile Include="Cil\FieldReferenceOpcode.cs">
       <DependentUpon>Opcode.cs</DependentUpon>
     </Compile>
-    <Compile Include="ILocationReferenceOpcode.cs">
+    <Compile Include="Cil\ILocationReferenceOpcode.cs">
       <DependentUpon>Opcode.cs</DependentUpon>
     </Compile>
-    <Compile Include="IndirectReferenceOpcode.cs">
+    <Compile Include="Cil\IndirectReferenceOpcode.cs">
       <DependentUpon>Opcode.cs</DependentUpon>
     </Compile>
     <Compile Include="IO\CilReader.cs" />
@@ -128,42 +128,41 @@
     <Compile Include="IO\Label.cs" />
     <Compile Include="IO\TemporaryLocalPool.cs" />
     <Compile Include="IO\PE\MetadataTablesStreamHeader.cs" />
-    <Compile Include="LoadConstantOpcode.cs">
+    <Compile Include="Cil\LoadConstantOpcode.cs">
       <DependentUpon>Opcode.cs</DependentUpon>
     </Compile>
-    <Compile Include="LocationKind.cs" />
+    <Compile Include="Cil\LocationKind.cs" />
     <Compile Include="MetadataToken.cs" />
     <Compile Include="MetadataTokenKind.cs" />
-    <Compile Include="Conversion.cs" />
-    <Compile Include="Opcode.Definitions.cs">
+    <Compile Include="Cil\Conversion.cs" />
+    <Compile Include="Cil\Opcode.Definitions.cs">
       <DependentUpon>Opcode.cs</DependentUpon>
     </Compile>
-    <Compile Include="Opcode.Lookup.cs">
+    <Compile Include="Cil\Opcode.Lookup.cs">
       <DependentUpon>Opcode.cs</DependentUpon>
     </Compile>
-    <Compile Include="NumericalOperand.cs" />
-    <Compile Include="OpcodeForm.cs" />
-    <Compile Include="OpcodeValue.cs" />
-    <Compile Include="OpcodeVisitor.cs" />
-    <Compile Include="OperandKind.cs" />
-    <Compile Include="PrefixData.cs" />
-    <Compile Include="PrefixMask.cs" />
-    <Compile Include="RawInstruction.cs" />
-    <Compile Include="ReflectionEmitEnums.cs" />
-    <Compile Include="LocationReferenceKind.cs" />
-    <Compile Include="IO\ILGeneratorExtensions.cs" />
+    <Compile Include="Cil\NumericalOperand.cs" />
+    <Compile Include="Cil\OpcodeForm.cs" />
+    <Compile Include="Cil\OpcodeValue.cs" />
+    <Compile Include="Cil\OpcodeVisitor.cs" />
+    <Compile Include="Cil\OperandKind.cs" />
+    <Compile Include="Cil\PrefixData.cs" />
+    <Compile Include="Cil\PrefixMask.cs" />
+    <Compile Include="Cil\RawInstruction.cs" />
+    <Compile Include="Cil\ReflectionEmitEnums.cs" />
+    <Compile Include="Cil\LocationReferenceKind.cs" />
     <Compile Include="DataType.cs" />
-    <Compile Include="Opcode.cs" />
-    <Compile Include="VariableKind.cs" />
-    <Compile Include="VariableLocation.cs" />
+    <Compile Include="Cil\Opcode.cs" />
+    <Compile Include="Cil\VariableKind.cs" />
+    <Compile Include="Cil\VariableLocation.cs" />
     <Compile Include="ParameterDescriptor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="VariableReferenceOpcode.cs">
+    <Compile Include="Cil\VariableReferenceOpcode.cs">
       <DependentUpon>Opcode.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Remaining Opcodes.txt" />
+    <Content Include="Cil\Remaining Opcodes.txt" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

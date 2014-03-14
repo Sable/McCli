@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using CliKit.Cil;
 using Emit = System.Reflection.Emit;
 
 namespace CliKit.IO
