@@ -367,6 +367,18 @@ namespace McCli
 		}
 		#endregion
 
+		#region Linearize
+		public static MFullArray<TScalar> Linearize<[AnyPrimitive] TScalar>(MFullArray<TScalar> array)
+		{
+			Contract.Requires(array != null);
+
+			int count = array.Count;
+			var result = new MFullArray<TScalar>(count, 1);
+			Array.Copy(array.BackingArray, result.BackingArray, count);
+			return result;
+		}
+		#endregion
+
 		#region LinearizeIndex
 		internal static int LinearizeIndex(MArrayShape shape, int rowIndex, int columnIndex)
 		{

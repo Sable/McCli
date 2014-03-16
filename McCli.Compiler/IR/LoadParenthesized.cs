@@ -15,6 +15,11 @@ namespace McCli.Compiler.IR
 		#region Fields
 		public readonly ImmutableArray<Variable> Targets;
 		public readonly Variable Subject;
+
+		/// <summary>
+		/// The variables used as arguments or indices.
+		/// <c>null</c> indicates colon indexing.
+		/// </summary>
 		public readonly ImmutableArray<Variable> Arguments;
 		#endregion
 

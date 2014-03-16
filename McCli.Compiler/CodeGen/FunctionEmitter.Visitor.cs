@@ -173,11 +173,23 @@ namespace McCli.Compiler.CodeGen
 		{
 			Contract.Assert(node.Targets.Length == 1);
 
+			if (node.Arguments.Length == 1 && node.Arguments[0] == null)
+			{
+				// foo(:), linearization
+				EmitCall(node.Targets, pseudoBuiltins.Lookup("Linearize", node.Subject.StaticRepr), node.Subject);
+				return;
+			}
+
+			// TODO: Handle ':' indices
 			// TODO: Handle the zero-argument case specially
 			var argumentsBuilder = new ImmutableArray<Variable>.Builder(node.Arguments.Length + 1);
 			argumentsBuilder[0] = node.Subject;
 			for (int i = 0; i < node.Arguments.Length; ++i)
-				argumentsBuilder[1 + i] = node.Arguments[i];
+			{
+				var argument = node.Arguments[i];
+				if (argument == null) throw new NotImplementedException("':' indices.");
+				argumentsBuilder[1 + i] = argument;
+			}
 			var arguments = argumentsBuilder.Complete();
 
 			var function = pseudoBuiltins.Lookup("ArrayGet", arguments.Select(v => v.StaticRepr));
@@ -186,10 +198,26 @@ namespace McCli.Compiler.CodeGen
 
 		public override void VisitStoreParenthesized(StoreParenthesized node)
 		{
+			if (!locals.ContainsKey(node.Array) && node.Array.StaticRepr.IsArray)
+			{
+				// Array declared on the fly, we should new it up
+				if (depth > 0) throw new NotImplementedException("Store to undeclared array in a nested statement.");
+				var newEmptyArrayMethod = typeof(MFullArray<>)
+					.MakeGenericType(node.Array.StaticRepr.Type.CliType)
+					.GetMethod("CreateEmpty");
+				using (BeginEmitStore(node.Array))
+					cil.Invoke(newEmptyArrayMethod);
+			}
+
+			// TODO: Handle ':' indices
 			var argumentsBuilder = new ImmutableArray<Variable>.Builder(node.Indices.Length + 2);
 			argumentsBuilder[0] = node.Array;
 			for (int i = 0; i < node.Indices.Length; ++i)
-				argumentsBuilder[1 + i] = node.Indices[i];
+			{
+				var index = node.Indices[i];
+				if (index == null) throw new NotImplementedException("':' indices.");
+				argumentsBuilder[1 + i] = index;
+			}
 			argumentsBuilder[argumentsBuilder.Length - 1] = node.Value;
 			var arguments = argumentsBuilder.Complete();
 

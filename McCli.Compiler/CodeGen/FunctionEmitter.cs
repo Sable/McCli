@@ -46,6 +46,7 @@ namespace McCli.Compiler.CodeGen
 		private readonly Dictionary<Variable, VariableLocation> locals = new Dictionary<Variable, VariableLocation>();
 		private readonly TemporaryLocalPool temporaryPool;
 		private Label returnTargetLabel;
+		private int depth;
 		#endregion
 
 		#region Constructors
@@ -145,6 +146,8 @@ namespace McCli.Compiler.CodeGen
 			returnTargetLabel = cil.CreateLabel("return");
 
 			EmitCloneInputs();
+
+			depth = -1;
 			EmitStatements(declaration.Body);
 
 			cil.MarkLabel(returnTargetLabel);
@@ -188,6 +191,7 @@ namespace McCli.Compiler.CodeGen
 
 		private void EmitStatements(ImmutableArray<Statement> statements)
 		{
+			++depth;
 			foreach (var statement in statements)
 			{
 				// Do not generate expressions producing constant primitive values
@@ -209,6 +213,7 @@ namespace McCli.Compiler.CodeGen
 
 				statement.Accept(this);
 			}
+			--depth;
 		}
 
 		private bool IsLiteral(Variable variable)

@@ -53,29 +53,28 @@ namespace McCli.Builtins
 
 		public static MFullArray<double> randn(double rowCount, double columnCount)
 		{
-			int rowCountInt = PseudoBuiltins.ToInt(rowCount);
-			int columnCountInt = PseudoBuiltins.ToInt(columnCount);
-
 			var result = ArrayCreation.zeros(rowCount, columnCount);
+			var resultArray = result.BackingArray;
 			int count = result.Count;
 			lock (threadSharedRandom)
 			{
 				// The Box-Muller algorithm generates two values at a time,
 				// so unroll the loop to take advantage of this.
-				for (int i = 0; i < count; i += 2)
+				int unrolledCount = count / 2 * 2;
+				for (int i = 0; i < unrolledCount; i += 2)
 				{
 					double z1, z2;
 					RandomNormalBoxMuller_NoLock(out z1, out z2);
-					result[i + 0] = z1;
-					result[i + 1] = z2;
+					resultArray[i + 0] = z1;
+					resultArray[i + 1] = z2;
 				}
 
 				// For odd-sized arrays, generate the last value.
-				if ((count & 1) == 1)
+				if ((count % 2) == 1)
 				{
 					double z1, z2;
 					RandomNormalBoxMuller_NoLock(out z1, out z2);
-					result[count - 1] = z1;
+					resultArray[count - 1] = z1;
 				}
 			}
 

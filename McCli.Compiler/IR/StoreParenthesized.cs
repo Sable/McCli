@@ -15,6 +15,11 @@ namespace McCli.Compiler.IR
 	{
 		#region Fields
 		public readonly Variable Array;
+
+		/// <summary>
+		/// The variables used as indices.
+		/// <c>null</c> indicates colon indexing.
+		/// </summary>
 		public readonly ImmutableArray<Variable> Indices;
 		public readonly Variable Value;
 		#endregion
