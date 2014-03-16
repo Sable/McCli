@@ -82,8 +82,6 @@ namespace McCli
 		public override void Resize(MArrayShape newShape)
 		{
 			var copyShape = MArrayShape.Min(shape, newShape);
-			int copyCount = copyShape.Count;
-
 			var newArray = new TScalar[newShape.Count];
 			if (copyShape.IsHigherDimensional)
 			{
@@ -95,8 +93,8 @@ namespace McCli
 				{
 					for (int rowIndex = 0; rowIndex < copyShape.RowCount; ++rowIndex)
 					{
-						var value = elements[(columnIndex - 1) * shape.RowCount + rowIndex - 1];
-						elements[(columnIndex - 1) * newShape.RowCount + rowIndex - 1] = value;
+						var value = elements[columnIndex * shape.RowCount + rowIndex];
+						elements[columnIndex * newShape.RowCount + rowIndex] = value;
 					}
 				}
 			}

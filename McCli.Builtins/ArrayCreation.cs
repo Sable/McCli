@@ -226,6 +226,24 @@ namespace McCli.Builtins
 
 		#region vertcat
 		public static MFullArray<TScalar> vertcat<[AnyPrimitive] TScalar>(
+			MFullArray<TScalar> array1, MFullArray<TScalar> array2)
+		{
+			return vertcat(new[] { array1, array2 });
+		}
+
+		public static MFullArray<TScalar> vertcat<[AnyPrimitive] TScalar>(
+			MFullArray<TScalar> array1, MFullArray<TScalar> array2, MFullArray<TScalar> array3)
+		{
+			return vertcat(new[] { array1, array2, array3 });
+		}
+
+		public static MFullArray<TScalar> vertcat<[AnyPrimitive] TScalar>(
+			MFullArray<TScalar> array1, MFullArray<TScalar> array2, MFullArray<TScalar> array3, MFullArray<TScalar> array4)
+		{
+			return vertcat(new[] { array1, array2, array3, array4 });
+		}
+
+		public static MFullArray<TScalar> vertcat<[AnyPrimitive] TScalar>(
 			TScalar value1, TScalar value2)
 		{
 			return MFullArray<TScalar>.CreateColumnVector(value1, value2);
@@ -247,6 +265,33 @@ namespace McCli.Builtins
 			TScalar value1, TScalar value2, TScalar value3, TScalar value4, TScalar value5)
 		{
 			return MFullArray<TScalar>.CreateColumnVector(value1, value2, value3, value4, value5);
+		}
+
+		private static MFullArray<TScalar> vertcat<[AnyPrimitive] TScalar>(params MFullArray<TScalar>[] arrays)
+		{
+			Contract.Requires(arrays != null);
+			Contract.Requires(arrays.Length > 0);
+
+			int columnCount = arrays[0].ColumnCount;
+			int totalRowCount = 0;
+			foreach (var array in arrays)
+			{
+				if (array.IsHigherDimensional) throw new NotImplementedException("vertcat on higher-dimensional arrays.");
+				totalRowCount += array.RowCount;
+			}
+
+			var result = new MFullArray<TScalar>(totalRowCount, columnCount);
+			int baseRowIndex = 0;
+			foreach (var array in arrays)
+			{
+				int arrayRowCount = array.RowCount;
+				for (int i = 0; i < arrayRowCount; ++i)
+					for (int j = 0; j < columnCount; ++j)
+						result[j * totalRowCount + baseRowIndex + i] = array[j * arrayRowCount + i];
+				baseRowIndex += arrayRowCount;
+			}
+
+			return result;
 		}
 		#endregion
 
