@@ -27,7 +27,9 @@ namespace McCli.Compiler.CodeGen
 				AssemblyBuilderAccess.Save,
 				Path.GetDirectoryName(filePath));
 			PortableClassLibrary.AddPortableFrameworkAttribute(assemblyBuilder);
-			var moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName, Path.GetFileName(filePath), emitSymbolInfo: true);
+
+			bool emitSymbolInfo = Type.GetType("Mono.Runtime") == null; // Mono does not support emitting symbol info.
+			var moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName, Path.GetFileName(filePath), emitSymbolInfo);
 			var typeBuilder = moduleBuilder.DefineType(assemblyName, TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.Class);
 			
 			// Create the function emitters to "declare" the methods
