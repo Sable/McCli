@@ -42,16 +42,6 @@ namespace McCli
 		#endregion
 
 		#region Methods
-		/// <summary>
-		/// Obtains the only value in a 1x1 array.
-		/// </summary>
-		/// <returns>The scalar in this array.</returns>
-		public TScalar ToScalar()
-		{
-			if (!IsScalar) throw new MArrayShapeException();
-			return this[0];
-		}
-
 		public new MArray<TScalar> DeepClone()
 		{
 			return (MArray<TScalar>)DoDeepClone();

@@ -293,7 +293,8 @@ namespace McCli.Compiler.CodeGen
 					&& target.StructuralClass == MStructuralClass.Scalar)
 				{
 					// Convert an array assumed to have size 1x1 to a scalar.
-					cil.Invoke(typeof(MArray<>).MakeGenericType(type.CliType).GetMethod("ToScalar"));
+					var function = pseudoBuiltins.Lookup("ToScalar", source);
+					cil.Invoke(function.Method);
 					return;
 				}
 

@@ -62,8 +62,8 @@ namespace McCli.Compiler.IR
 				}
 			}
 
-			var inputs = ReadVariables(functionElement.Attribute("inputs"), variables, allowColon: false);
-			var outputs = ReadVariables(functionElement.Attribute("outputs"), variables, allowColon: false);
+			var inputs = ReadVariables(functionElement.Attribute("inputs"), variables);
+			var outputs = ReadVariables(functionElement.Attribute("outputs"), variables);
 
 			// Read the function body
 			var body = ReadStatements(functionElement.Element("Body"), variables).ToImmutableArray();
@@ -137,16 +137,16 @@ namespace McCli.Compiler.IR
 
 		private static LoadParenthesized ReadArrayGet(XElement element, IReadOnlyDictionary<string, Variable> variables)
 		{
-			var targets = ReadVariables(element.Attribute("targets"), variables, allowColon: false);
+			var targets = ReadVariables(element.Attribute("targets"), variables);
 			var subject = ReadVariable(element.Attribute("array"), variables);
-			var arguments = ReadVariables(element.Attribute("indices"), variables, allowColon: true);
+			var arguments = ReadIndexArguments(element.Attribute("indices"), variables);
 			return new LoadParenthesized(targets, subject, arguments);
 		}
 
 		private static StoreParenthesized ReadArraySet(XElement element, IReadOnlyDictionary<string, Variable> variables)
 		{
 			var array = ReadVariable(element.Attribute("array"), variables);
-			var indices = ReadVariables(element.Attribute("indices"), variables, allowColon: true);
+			var indices = ReadIndexArguments(element.Attribute("indices"), variables);
 			var value = ReadVariable(element.Attribute("value"), variables);
 			return new StoreParenthesized(array, indices, value);
 		}
@@ -154,8 +154,8 @@ namespace McCli.Compiler.IR
 		private static StaticCall ReadCall(XElement element, IReadOnlyDictionary<string, Variable> variables)
 		{
 			var functionName = (string)element.Attribute("function");
-			var targets = ReadVariables(element.Attribute("targets"), variables, allowColon: false);
-			var arguments = ReadVariables(element.Attribute("arguments"), variables, allowColon: false);
+			var targets = ReadVariables(element.Attribute("targets"), variables);
+			var arguments = ReadVariables(element.Attribute("arguments"), variables);
 			return new StaticCall(targets, functionName, arguments);
 		}
 
@@ -224,25 +224,25 @@ namespace McCli.Compiler.IR
 			return ResolveVariable(attribute.Value, variables);
 		}
 
-		private static ImmutableArray<Variable> ReadVariables(XAttribute attribute, IReadOnlyDictionary<string, Variable> lookup, bool allowColon)
+		private static ImmutableArray<IndexArgument> ReadIndexArguments(XAttribute attribute, IReadOnlyDictionary<string, Variable> lookup)
 		{
 			if (attribute == null) return ImmutableArray.Empty;
 
-			string commaSeparatedList = attribute.Value;
-			if (commaSeparatedList.Length == 0) return ImmutableArray.Empty;
+			var arguments = new List<IndexArgument>();
+			foreach (var name in attribute.Value.Split(new[] { ',' }))
+				arguments.Add(name == ":" ? IndexArgument.Colon : ResolveVariable(name, lookup));
+			return arguments.ToImmutableArray();
+		}
+
+		private static ImmutableArray<Variable> ReadVariables(XAttribute attribute, IReadOnlyDictionary<string, Variable> lookup)
+		{
+			if (attribute == null) return ImmutableArray.Empty;
 
 			var variables = new List<Variable>();
-			foreach (var name in commaSeparatedList.Split(new[] { ',' }))
+			foreach (var name in attribute.Value.Split(new[] { ',' }))
 			{
-				if (name == ":")
-				{
-					if (!allowColon) throw new InvalidDataException("Unexpected colon in variable list.");
-					variables.Add(null);
-				}
-				else
-				{
-					variables.Add(ResolveVariable(name, lookup));
-				}
+				Contract.Assert(name != ":");
+				variables.Add(ResolveVariable(name, lookup));
 			}
 			return variables.ToImmutableArray();
 		}

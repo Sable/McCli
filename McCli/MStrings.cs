@@ -11,7 +11,7 @@ namespace McCli
 	/// </summary>
 	public static class MStrings
 	{
-		public static string ToString(MArray<char> array)
+		public static string ToString(MFullArray<char> array)
 		{
 			Contract.Requires(array != null);
 
@@ -19,7 +19,7 @@ namespace McCli
 			if (!shape.IsRowVector) throw new MArrayShapeException();
 
 			// TODO: Don't assume a full array
-			return new string(((MFullArray<char>)array).BackingArray, 0, shape.ColumnCount);
+			return new string(array.BackingArray, 0, shape.ColumnCount);
 		}
 
 		public static MFullArray<char> FromString(string str)

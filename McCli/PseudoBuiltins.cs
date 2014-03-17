@@ -79,6 +79,13 @@ namespace McCli
 			return MFullArray<TScalar>.ExpandScalar(value, shape);
 		}
 
+		public static TScalar ToScalar<[AnyPrimitive] TScalar>(MFullArray<TScalar> array)
+		{
+			Contract.Requires(array != null);
+			if (!array.IsScalar) throw new MArrayShapeException();
+			return array[0];
+		}
+
 		public static MComplex<TReal> ToComplex<[AnyReal] TReal>(TReal value) where TReal : struct
 		{
 			return new MComplex<TReal>(value, default(TReal));

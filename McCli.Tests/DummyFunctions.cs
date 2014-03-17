@@ -60,6 +60,6 @@ namespace McCli
 		public static char InputTypeOverloadedIdentity(char value) { return value; }
 
 		public static double StructuralClassOverloadedDoubleIdentity(double value) { return value; }
-		public static MArray<double> StructuralClassOverloadedDoubleIdentity(MArray<double> value) { return value; }
+		public static MFullArray<double> StructuralClassOverloadedDoubleIdentity(MFullArray<double> value) { return value; }
 	}
 }

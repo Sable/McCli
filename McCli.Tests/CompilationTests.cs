@@ -36,14 +36,14 @@ namespace McCli
 		}
 
 		[TestMethod]
-		public void TestCopyAssignmentWithMArray()
+		public void TestCopyAssignmentWithMFullArray()
 		{
 			// function result = copy(x)
 			//   result = x;
 
-			var input = Declare<MArray<double>>("input");
-			var output = Declare<MArray<double>>("output");
-			var function = CompileFunction<Func<MArray<double>, MArray<double>>>(
+			var input = Declare<MFullArray<double>>("input");
+			var output = Declare<MFullArray<double>>("output");
+			var function = CompileFunction<Func<MFullArray<double>, MFullArray<double>>>(
 				input, output,
 				new Copy(output, input));
 
@@ -106,8 +106,8 @@ namespace McCli
 		[TestMethod]
 		public void TestStringLiteral()
 		{
-			var output = Declare<MArray<char>>("output");
-			var function = CompileFunction<Func<MArray<char>>>(
+			var output = Declare<MFullArray<char>>("output");
+			var function = CompileFunction<Func<MFullArray<char>>>(
 				none, output,
 				new Literal(output, "foobar"));
 
@@ -136,19 +136,45 @@ namespace McCli
 			// function value = arrayload(array, index)
 			//   value = array(index)
 
-			var arrayInput = Declare<MArray<double>>("array");
-			var indexInput = Declare<MArray<double>>("index");
-			var valueOutput = Declare<MArray<double>>("value");
-			var function = CompileFunction<Func<MArray<double>, MArray<double>, MArray<double>>>(
+			var arrayInput = Declare<MFullArray<double>>("array");
+			var indexInput = Declare<MFullArray<double>>("index");
+			var valueOutput = Declare<MFullArray<double>>("value");
+			var function = CompileFunction<Func<MFullArray<double>, MFullArray<double>, MFullArray<double>>>(
 				new[] { arrayInput, indexInput }, valueOutput,
-				new LoadParenthesized(valueOutput, arrayInput, indexInput));
+				new LoadParenthesized(valueOutput, arrayInput, (IndexArgument)indexInput));
 
 			var arg1 = new MFullArray<double>(2, 1);
 			arg1[0] = 42;
 			arg1[1] = 666;
 
-			Assert.AreEqual(arg1[0], function(arg1, 1.0).ToScalar());
-			Assert.AreEqual(arg1[1], function(arg1, 2.0).ToScalar());
+			Assert.AreEqual(arg1[0], ToScalar(function(arg1, 1.0)));
+			Assert.AreEqual(arg1[1], ToScalar(function(arg1, 2.0)));
+		}
+
+		[TestMethod]
+		public void TestArrayLoad_ColonLinearization()
+		{
+			// function value = arrayload(array)
+			//   value = array(:)
+
+			var arrayInput = Declare<MFullArray<double>>("array");
+			var valueOutput = Declare<MFullArray<double>>("value");
+			var function = CompileFunction<Func<MFullArray<double>, MFullArray<double>>>(
+				arrayInput, valueOutput,
+				new LoadParenthesized(valueOutput, arrayInput, IndexArgument.Colon));
+
+			var arg = new MFullArray<double>(2, 2);
+			arg[0] = 1;
+			arg[1] = 2;
+			arg[2] = 3;
+			arg[3] = 4;
+
+			var result = function(arg);
+			Assert.AreEqual(arg.Count, result.Count);
+			Assert.AreEqual(arg.Count, result.RowCount);
+			Assert.AreEqual(1, result.ColumnCount);
+			for (int i = 0; i < arg.Count; ++i)
+				Assert.AreEqual(arg[i], result[i]);
 		}
 
 		[TestMethod]
@@ -159,13 +185,13 @@ namespace McCli
 			//   output = array;
 			// end
 
-			var arrayInput = Declare<MArray<double>>("array");
-			var indexInput = Declare<MArray<double>>("index");
-			var valueInput = Declare<MArray<double>>("value");
-			var output = Declare<MArray<double>>("output");
-			var function = CompileFunction<Func<MArray<double>, MArray<double>, MArray<double>, MArray<double>>>(
+			var arrayInput = Declare<MFullArray<double>>("array");
+			var indexInput = Declare<MFullArray<double>>("index");
+			var valueInput = Declare<MFullArray<double>>("value");
+			var output = Declare<MFullArray<double>>("output");
+			var function = CompileFunction<Func<MFullArray<double>, MFullArray<double>, MFullArray<double>, MFullArray<double>>>(
 				new[] { arrayInput, indexInput, valueInput }, output,
-				new StoreParenthesized(arrayInput, indexInput, valueInput),
+				new StoreParenthesized(arrayInput, (IndexArgument)indexInput, valueInput),
 				new Copy(output, arrayInput));
 
 			var array = MFullArray<double>.CreateScalar(42);
@@ -307,12 +333,12 @@ namespace McCli
 			//     result = SquareDoubleScalar(result)
 			//   return result;
 
-			var input = Declare<MArray<double>>("input");
-			var output = Declare<MArray<double>>("output");
-			var iteratorVariable = Declare<MArray<double>>("iterator");
-			var oneConstant = Declare<MArray<double>>("one");
+			var input = Declare<MFullArray<double>>("input");
+			var output = Declare<MFullArray<double>>("output");
+			var iteratorVariable = Declare<MFullArray<double>>("iterator");
+			var oneConstant = Declare<MFullArray<double>>("one");
 
-			var function = CompileFunction<Func<MArray<double>, MArray<double>>>(
+			var function = CompileFunction<Func<MFullArray<double>, MFullArray<double>>>(
 				input, output,
 				new Literal(output, 2.0),
 				new Literal(oneConstant, 1.0),
@@ -320,10 +346,10 @@ namespace McCli
 					new StaticCall(output, "SquareDoubleScalar", output)
 				));
 
-			Assert.AreEqual(2.0, function(0).ToScalar());
-			Assert.AreEqual(4.0, function(1).ToScalar());
-			Assert.AreEqual(16.0, function(2).ToScalar());
-			Assert.AreEqual(256.0, function(3).ToScalar());
+			Assert.AreEqual(2.0, ToScalar(function(0)));
+			Assert.AreEqual(4.0, ToScalar(function(1)));
+			Assert.AreEqual(16.0, ToScalar(function(2)));
+			Assert.AreEqual(256.0, ToScalar(function(3)));
 		}
 
 		[TestMethod]
@@ -351,12 +377,12 @@ namespace McCli
 			//   array = scalar
 
 			var input = Declare<double>("input");
-			var output = Declare<MArray<double>>("output");
+			var output = Declare<MFullArray<double>>("output");
 
-			var function = CompileFunction<Func<double, MArray<double>>>(
+			var function = CompileFunction<Func<double, MFullArray<double>>>(
 				input, output, new Copy(output, input));
 
-			Assert.AreEqual(42.0, function(42.0).ToScalar());
+			Assert.AreEqual(42.0, ToScalar(function(42.0)));
 		}
 
 		[TestMethod]
@@ -454,16 +480,21 @@ namespace McCli
 		{
 			var scalarInput = Declare<double>("ScalarInput");
 			var scalarOutput = Declare<double>("ScalarOutput");
-			var arrayInput = Declare<MArray<double>>("arrayInput");
-			var arrayOutput = Declare<MArray<double>>("arrayOutput");
+			var arrayInput = Declare<MFullArray<double>>("arrayInput");
+			var arrayOutput = Declare<MFullArray<double>>("arrayOutput");
 
 			var scalarFunction = CompileFunction<Func<double, double>>(
 				scalarInput, scalarOutput, new StaticCall(scalarOutput, "StructuralClassOverloadedDoubleIdentity", scalarInput));
-			var arrayFunction = CompileFunction<Func<MArray<double>, MArray<double>>>(
+			var arrayFunction = CompileFunction<Func<MFullArray<double>, MFullArray<double>>>(
 				arrayInput, arrayOutput, new StaticCall(arrayOutput, "StructuralClassOverloadedDoubleIdentity", arrayInput));
 
 			Assert.AreEqual(42.0, scalarFunction(42));
-			Assert.AreEqual(666.0, arrayFunction(666).ToScalar());
+			Assert.AreEqual(666.0, ToScalar(arrayFunction(666)));
+		}
+
+		private static TScalar ToScalar<TScalar>(MFullArray<TScalar> array)
+		{
+			return PseudoBuiltins.ToScalar(array);
 		}
 	}
 }

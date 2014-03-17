@@ -15,16 +15,11 @@ namespace McCli.Compiler.IR
 		#region Fields
 		public readonly ImmutableArray<Variable> Targets;
 		public readonly Variable Subject;
-
-		/// <summary>
-		/// The variables used as arguments or indices.
-		/// <c>null</c> indicates colon indexing.
-		/// </summary>
-		public readonly ImmutableArray<Variable> Arguments;
+		public readonly ImmutableArray<IndexArgument> Arguments;
 		#endregion
 
 		#region Constructors
-		public LoadParenthesized(ImmutableArray<Variable> targets, Variable subject, ImmutableArray<Variable> arguments)
+		public LoadParenthesized(ImmutableArray<Variable> targets, Variable subject, ImmutableArray<IndexArgument> arguments)
 		{
 			Contract.Requires(subject != null);
 

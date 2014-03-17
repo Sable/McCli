@@ -15,17 +15,12 @@ namespace McCli.Compiler.IR
 	{
 		#region Fields
 		public readonly Variable Array;
-
-		/// <summary>
-		/// The variables used as indices.
-		/// <c>null</c> indicates colon indexing.
-		/// </summary>
-		public readonly ImmutableArray<Variable> Indices;
+		public readonly ImmutableArray<IndexArgument> Indices;
 		public readonly Variable Value;
 		#endregion
 
 		#region Constructors
-		public StoreParenthesized(Variable array, ImmutableArray<Variable> indices, Variable value)
+		public StoreParenthesized(Variable array, ImmutableArray<IndexArgument> indices, Variable value)
 		{
 			Contract.Requires(array != null);
 			Contract.Requires(value != null);

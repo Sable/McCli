@@ -173,7 +173,7 @@ namespace McCli.Compiler.CodeGen
 		{
 			Contract.Assert(node.Targets.Length == 1);
 
-			if (node.Arguments.Length == 1 && node.Arguments[0] == null)
+			if (node.Arguments.Length == 1 && node.Arguments[0].IsColon)
 			{
 				// foo(:), linearization
 				EmitCall(node.Targets, pseudoBuiltins.Lookup("Linearize", node.Subject.StaticRepr), node.Subject);
@@ -187,8 +187,8 @@ namespace McCli.Compiler.CodeGen
 			for (int i = 0; i < node.Arguments.Length; ++i)
 			{
 				var argument = node.Arguments[i];
-				if (argument == null) throw new NotImplementedException("':' indices.");
-				argumentsBuilder[1 + i] = argument;
+				if (argument.IsColon) throw new NotImplementedException("':' indices.");
+				argumentsBuilder[1 + i] = argument.Variable;
 			}
 			var arguments = argumentsBuilder.Complete();
 
@@ -215,8 +215,8 @@ namespace McCli.Compiler.CodeGen
 			for (int i = 0; i < node.Indices.Length; ++i)
 			{
 				var index = node.Indices[i];
-				if (index == null) throw new NotImplementedException("':' indices.");
-				argumentsBuilder[1 + i] = index;
+				if (index.IsColon) throw new NotImplementedException("':' indices.");
+				argumentsBuilder[1 + i] = index.Variable;
 			}
 			argumentsBuilder[argumentsBuilder.Length - 1] = node.Value;
 			var arguments = argumentsBuilder.Complete();

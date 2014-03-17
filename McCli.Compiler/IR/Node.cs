@@ -49,5 +49,23 @@ namespace McCli.Compiler.IR
 			}
 			return stringBuilder.ToString();
 		}
+
+		protected static string CommaSeparate(IEnumerable<IndexArgument> arguments)
+		{
+			var stringBuilder = new StringBuilder();
+			using (var enumerator = arguments.GetEnumerator())
+			{
+				if (enumerator.MoveNext())
+				{
+					stringBuilder.Append(enumerator.Current.ToString());
+					while (enumerator.MoveNext())
+					{
+						stringBuilder.Append(", ");
+						stringBuilder.Append(enumerator.Current.ToString());
+					}
+				}
+			}
+			return stringBuilder.ToString();
+		}
 	}
 }

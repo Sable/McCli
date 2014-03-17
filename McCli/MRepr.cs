@@ -25,7 +25,7 @@ namespace McCli
 		{
 			Contract.Requires(type == null || structuralClass != null);
 
-			Contract.Assert(structuralClass != MStructuralClass.Array);
+			Contract.Assert(structuralClass != MStructuralClass.Array, "Non-full arrays unsupported.");
 			this.type = type;
 			this.structuralClass = structuralClass;
 		}
