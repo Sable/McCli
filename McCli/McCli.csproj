@@ -121,6 +121,7 @@
     <CodeContractsFailBuildOnWarnings>False</CodeContractsFailBuildOnWarnings>
     <CodeContractsRuntimeCheckingLevel>Full</CodeContractsRuntimeCheckingLevel>
     <CodeContractsAnalysisWarningLevel>0</CodeContractsAnalysisWarningLevel>
+    <CodeContractsReferenceAssembly>DoNotBuild</CodeContractsReferenceAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
@@ -128,6 +129,7 @@
   <ItemGroup>
     <Compile Include="BuiltinCilOpcodeAttribute.cs" />
     <Compile Include="EmptyArray.cs" />
+    <Compile Include="MIntegralRange.cs" />
     <Compile Include="MStrings.cs" />
     <Compile Include="MArrayShape.cs" />
     <Compile Include="MArrayShapeException.cs" />

@@ -202,8 +202,11 @@ namespace McCli.Builtins
 			Contract.Requires(lhs != null);
 
 			var result = new MFullArray<double>(lhs.Shape);
-			for (int i = 0; i < lhs.Count; ++i)
-				result[i] = lhs[i] * rhs;
+			var lhsArray = lhs.BackingArray;
+			var resultArray = result.BackingArray;
+			int count = lhs.Count;
+			for (int i = 0; i < count; ++i)
+				resultArray[i] = lhsArray[i] * rhs;
 			return result;
 		}
 
@@ -359,27 +362,31 @@ namespace McCli.Builtins
 			Contract.Requires(lhs != null);
 			Contract.Requires(rhs != null);
 
-			var lhsShape = lhs.Shape;
-			if (lhsShape.DimensionCount > 2) throw new MArrayShapeException();
-
 			var rhsShape = rhs.Shape;
-			if (rhsShape.DimensionCount > 2) throw new MArrayShapeException();
-
-			if (lhsShape.IsScalar) return times(rhs, lhs[0]);
 			if (rhsShape.IsScalar) return times(lhs, rhs[0]);
-			if (lhsShape.ColumnCount != rhsShape.RowCount) throw new MArrayShapeException();
 
-			var resultShape = new MArrayShape(lhsShape.RowCount, rhsShape.ColumnCount);
-			var result = new MFullArray<double>(resultShape);
+			var lhsShape = lhs.Shape;
+			if (lhsShape.IsScalar) return times(rhs, lhs[0]);
 
-			for (int column = 0; column < resultShape.ColumnCount; ++column)
+			if (lhsShape.IsHigherDimensional || rhs.IsHigherDimensional)
+				throw new MArrayShapeException("Cannot multiply higher-dimensional matrices.");
+
+			if (lhsShape.ColumnCount != rhsShape.RowCount)
+				throw new MArrayShapeException("Matrix shape mismatch for multiplication.");
+
+			var result = new MFullArray<double>(lhsShape.RowCount, rhsShape.ColumnCount);
+			var lhsArray = lhs.BackingArray;
+			var rhsArray = rhs.BackingArray;
+			var resultArray = result.BackingArray;
+
+			for (int column = 0; column < rhsShape.ColumnCount; ++column)
 			{
-				for (int row = 0; row < resultShape.RowCount; ++row)
+				for (int row = 0; row < lhsShape.RowCount; ++row)
 				{
 					double value = 0;
 					for (int i = 0; i < lhsShape.ColumnCount; ++i)
-						value += lhs[row + i * resultShape.RowCount] * rhs[i + column * resultShape.RowCount];
-					result[row + column * resultShape.RowCount] = value;
+						value += lhsArray[row + i * lhsShape.RowCount] * rhsArray[i + column * rhsShape.RowCount];
+					resultArray[row + column * lhsShape.RowCount] = value;
 				}
 			}
 

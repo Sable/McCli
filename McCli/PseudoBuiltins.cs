@@ -96,6 +96,14 @@ namespace McCli
 			return MFunctional.Map(value, ToComplex);
 		}
 
+		public static MFullArray<double> ToArray(MIntegralRange<double> range)
+		{
+			var result = new MFullArray<double>(1, range.Count);
+			for (int i = 0; i < range.Count; ++i)
+				result[i] = (double)(range.First + i);
+			return result;
+		}
+
 		#region For Loops
 		public static int GetForSliceCount(MValue value)
 		{
@@ -133,6 +141,18 @@ namespace McCli
 			var result = new MFullArray<TScalar>(new MArrayShape(indicesShape.RowCount, 1));
 			for (int i = 0; i < indicesShape.RowCount; ++i)
 				result[i] = ArrayGet(array, ToInt(indices[i]));
+			return result;
+		}
+
+		public static MFullArray<TScalar> ArrayGet<[AnyPrimitive] TScalar>(MFullArray<TScalar> array, MIntegralRange<double> indices)
+		{
+			Contract.Requires(array != null);
+
+			if (indices.First < 1 || indices.End > array.Count)
+				throw new ArgumentOutOfRangeException("indices");
+
+			var result = new MFullArray<TScalar>(indices.Count, 1);
+			Array.Copy(array.BackingArray, indices.First - 1, result.BackingArray, 0, indices.Count);
 			return result;
 		}
 

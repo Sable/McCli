@@ -155,6 +155,7 @@ namespace McCli
 			var genericTypeDefinition = type.GetGenericTypeDefinition();
 			if (genericTypeDefinition == typeof(MArray<>)) return new MRepr(mtype, MStructuralClass.Array);
 			if (genericTypeDefinition == typeof(MFullArray<>)) return new MRepr(mtype, MStructuralClass.FullArray);
+			if (genericTypeDefinition == typeof(MIntegralRange<>)) return new MRepr(mtype, MStructuralClass.IntegralRange);
 			return Any;
 		}
 		#endregion

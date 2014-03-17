@@ -38,5 +38,21 @@ namespace McCli
 				throw new NotImplementedException();
 			}
 		}
+
+		private sealed class IntegralRangeClass : MStructuralClass
+		{
+			internal IntegralRangeClass()
+				: base("integral range", typeof(MIntegralRange<>), MClassKinds.NumericMask, supportsComplex: false) { }
+
+			public override object FromScalar(object value)
+			{
+				throw new NotImplementedException();
+			}
+
+			public override MValue ToArray(object value)
+			{
+				throw new NotImplementedException();
+			}
+		}
 	}
 }

@@ -16,6 +16,7 @@ namespace McCli
 		public static readonly MStructuralClass Scalar = new ScalarClass();
 		public static readonly MStructuralClass Array = new ArrayClass("array", typeof(MArray<>), MClassKinds.PrimitiveMask);
 		public static readonly MStructuralClass FullArray = new ArrayClass("full array", typeof(MFullArray<>), MClassKinds.PrimitiveMask);
+		public static readonly MStructuralClass IntegralRange = new IntegralRangeClass();
 
 		private readonly string name;
 		private readonly Type containerCliType;
