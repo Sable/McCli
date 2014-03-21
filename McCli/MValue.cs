@@ -136,6 +136,11 @@ namespace McCli
 		#endregion
 
 		#region Methods
+		public int GetDimensionSize(int index)
+		{
+			return Shape.GetDimensionSize(index);
+		}
+
 		/// <summary>
 		/// Obtains a deep clone of this value.
 		/// </summary>

@@ -261,7 +261,7 @@ namespace McCli.Compiler.CodeGen
 			else cil.Store(GetLocation(variable));
 		}
 
-		private void EmitConversion(MRepr source, MRepr target)
+		private void EmitConvert(MRepr source, MRepr target)
 		{
 			if (source == target) return;
 
@@ -310,7 +310,7 @@ namespace McCli.Compiler.CodeGen
 				cil.Invoke(function.Method);
 
 				// Change structural class if needed
-				EmitConversion(function.Signature.Outputs[0], target);
+				EmitConvert(function.Signature.Outputs[0], target);
 				return;
 			}
 
@@ -318,9 +318,10 @@ namespace McCli.Compiler.CodeGen
 				string.Format("Conversion from {0} to {1}.", source, target));
 		}
 
-		private void EmitConversion(MRepr source, MStructuralClass target)
+		private void EmitLoadAndConvert(Variable variable, MRepr targetRepr)
 		{
-			if (source.StructuralClass != target) EmitConversion(source, source.WithStructuralClass(target));
+			EmitLoad(variable);
+			EmitConvert(variable.StaticRepr, targetRepr);
 		}
 
 		private void EmitBoxScalar(MType type)

@@ -17,6 +17,7 @@ namespace McCli.Builtins
 		#endregion
 
 		#region Methods
+		#region rand
 		public static double rand()
 		{
 			lock (threadSharedRandom) return threadSharedRandom.NextDouble();
@@ -38,7 +39,9 @@ namespace McCli.Builtins
 			
 			return result;
 		}
+		#endregion
 
+		#region randn
 		public static double randn()
 		{
 			double result, dummy;
@@ -93,6 +96,34 @@ namespace McCli.Builtins
 			z1 = r * Math.Cos(t);
 			z2 = r * Math.Sin(t);
 		}
+		#endregion
+
+		#region randi
+		public static double randi(double imax)
+		{
+			var exclusiveMax = PseudoBuiltins.ToInt(imax + 1);
+			lock (threadSharedRandom)
+				return threadSharedRandom.Next(1, exclusiveMax);
+		}
+
+		public static MFullArray<double> randi(double imax, double n)
+		{
+			return randi(imax, n, n);
+		}
+
+		public static MFullArray<double> randi(double imax, double rowCount, double columnCount)
+		{
+			var exclusiveMax = PseudoBuiltins.ToInt(imax + 1);
+			var result = MFullArray<double>.CreateWithShape(rowCount, columnCount);
+			int count = result.Count;
+			lock (threadSharedRandom)
+			{
+				for (int i = 0; i < count; ++i)
+					result.BackingArray[i] = threadSharedRandom.Next(0, exclusiveMax);
+			}
+			return result;
+		}
+		#endregion
 		#endregion
 	}
 }

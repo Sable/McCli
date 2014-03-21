@@ -104,6 +104,12 @@ namespace McCli
 			return result;
 		}
 
+		public static MIntegralRange<double> GetDimensionRange<[AnyNumeric]TScalar>(MFullArray<TScalar> array, int index)
+		{
+			Contract.Requires(array != null);
+			return MIntegralRange<double>.FromFirstCount(1, array.shape.GetDimensionSize(index));
+		}
+
 		#region For Loops
 		public static int GetForSliceCount(MValue value)
 		{

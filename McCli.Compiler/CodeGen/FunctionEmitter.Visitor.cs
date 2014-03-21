@@ -60,7 +60,7 @@ namespace McCli.Compiler.CodeGen
 					throw new NotImplementedException("Literals of type " + node.Value.GetType());
 				}
 
-				EmitConversion(sourceRepr, node.Target.StaticRepr);
+				EmitConvert(sourceRepr, node.Target.StaticRepr);
 			}
 		}
 
@@ -72,7 +72,7 @@ namespace McCli.Compiler.CodeGen
 			{
 				EmitLoad(node.Value);
 				EmitCloneIfNeeded(node.Value.StaticRepr);
-				EmitConversion(node.Value.StaticRepr, node.Target.StaticRepr);
+				EmitConvert(node.Value.StaticRepr, node.Target.StaticRepr);
 			}
 		}
 
@@ -99,7 +99,7 @@ namespace McCli.Compiler.CodeGen
 			{
 				var argument = arguments[i];
 				EmitLoad(argument);
-				EmitConversion(argument.StaticRepr, signature.Inputs[i]);
+				EmitConvert(argument.StaticRepr, signature.Inputs[i]);
 			}
 
 			if (signature.OutParameterCount > 0)
@@ -157,7 +157,7 @@ namespace McCli.Compiler.CodeGen
 			{
 				if (targets.Length == 1)
 				{
-					EmitConversion(signature.Outputs[0], targets[0].StaticRepr);
+					EmitConvert(signature.Outputs[0], targets[0].StaticRepr);
 					EndEmitStore(targets[0]);
 				}
 				else
@@ -172,7 +172,9 @@ namespace McCli.Compiler.CodeGen
 		public override void VisitLoadParenthesized(LoadParenthesized node)
 		{
 			Contract.Assert(node.Targets.Length == 1);
-
+			Contract.Assert(node.Subject.StaticRepr.IsArray);
+			
+			// TODO: Handle the zero-argument case specially
 			if (node.Arguments.Length == 1 && node.Arguments[0].IsColon)
 			{
 				// foo(:), linearization
@@ -180,20 +182,51 @@ namespace McCli.Compiler.CodeGen
 				return;
 			}
 
-			// TODO: Handle ':' indices
-			// TODO: Handle the zero-argument case specially
-			var argumentsBuilder = new ImmutableArray<Variable>.Builder(node.Arguments.Length + 1);
-			argumentsBuilder[0] = node.Subject;
+			var argumentReprsBuilder = new ImmutableArray<MRepr>.Builder(node.Arguments.Length + 1);
+			argumentReprsBuilder[0] = node.Subject.StaticRepr;
 			for (int i = 0; i < node.Arguments.Length; ++i)
 			{
 				var argument = node.Arguments[i];
-				if (argument.IsColon) throw new NotImplementedException("':' indices.");
-				argumentsBuilder[1 + i] = argument.Variable;
+				argumentReprsBuilder[1 + i] = argument.IsColon
+					? new MRepr(MClass.Double, MStructuralClass.IntegralRange)
+					: argument.Variable.StaticRepr;
 			}
-			var arguments = argumentsBuilder.Complete();
 
-			var function = pseudoBuiltins.Lookup("ArrayGet", arguments.Select(v => v.StaticRepr));
-			EmitCall(node.Targets, function, arguments);
+			var function = pseudoBuiltins.Lookup("ArrayGet", argumentReprsBuilder.Complete());
+
+			using (BeginEmitStore(node.Targets[0]))
+			{
+				EmitLoadAndConvert(node.Subject, function.Signature.Inputs[0]);
+
+				for (int i = 0; i < node.Arguments.Length; ++i)
+				{
+					var argument = node.Arguments[i];
+					var expectedRepr = function.Signature.Inputs[1 + i];
+					if (argument.IsColon)
+					{
+						EmitColonRange(node.Subject, i);
+						EmitConvert(new MRepr(MClass.Double, MStructuralClass.IntegralRange), expectedRepr);
+					}
+					else
+					{
+						EmitLoadAndConvert(argument.Variable, expectedRepr);
+					}
+				}
+
+				cil.Invoke(function.Method);
+				EmitConvert(function.Signature.Outputs[0], node.Targets[0].StaticRepr);
+			}
+		}
+
+		private void EmitColonRange(Variable arrayVariable, int dimensionIndex)
+		{
+			var inputReprsBuilder = new ImmutableArray<MRepr>.Builder(2);
+			inputReprsBuilder[0] = arrayVariable.StaticRepr;
+			inputReprsBuilder[1] = new MRepr(MClass.Int32, MStructuralClass.Scalar);
+			var function = pseudoBuiltins.Lookup("GetDimensionRange", inputReprsBuilder.Complete());
+			EmitLoad(arrayVariable);
+			cil.LoadInt32(dimensionIndex);
+			cil.Invoke(functionLookup.Method);
 		}
 
 		public override void VisitStoreParenthesized(StoreParenthesized node)
@@ -262,7 +295,7 @@ namespace McCli.Compiler.CodeGen
 				return;
 
 			var isTrueFunction = pseudoBuiltins.Lookup("IsTrue", conditionRepr);
-			EmitConversion(conditionRepr, isTrueFunction.Signature.Inputs[0]);
+			EmitConvert(conditionRepr, isTrueFunction.Signature.Inputs[0]);
 			cil.Invoke(isTrueFunction.Method);
 		}
 
@@ -312,7 +345,7 @@ namespace McCli.Compiler.CodeGen
 			{
 				// Setup the iterator variable, "current"
 				EmitLoad(node.From);
-				EmitConversion(node.From.StaticRepr, repr);
+				EmitConvert(node.From.StaticRepr, repr);
 				cil.Store(currentLocal.Location);
 
 				// Save the increment to a local variable if it's not a literal or initonly
@@ -320,7 +353,7 @@ namespace McCli.Compiler.CodeGen
 				{
 					stepLocal = temporaryPool.Alloc(repr.CliType);
 					EmitLoad(node.Step);
-					EmitConversion(node.Step.StaticRepr, repr);
+					EmitConvert(node.Step.StaticRepr, repr);
 					EmitCloneIfNeeded(repr);
 					cil.Store(stepLocal.Value.Location);
 				}
@@ -330,7 +363,7 @@ namespace McCli.Compiler.CodeGen
 				{
 					toLocal = temporaryPool.Alloc(repr.CliType);
 					EmitLoad(node.To);
-					EmitConversion(node.To.StaticRepr, repr);
+					EmitConvert(node.To.StaticRepr, repr);
 					EmitCloneIfNeeded(repr);
 					cil.Store(toLocal.Value.Location);
 				}
@@ -351,7 +384,7 @@ namespace McCli.Compiler.CodeGen
 
 				// Setup the iterator variable (which can be modified inside the loop)
 				cil.Load(currentLocal.Location);
-				EmitConversion(repr, node.Iterator.StaticRepr);
+				EmitConvert(repr, node.Iterator.StaticRepr);
 				cil.Store(GetLocation(node.Iterator));
 
 				// body
