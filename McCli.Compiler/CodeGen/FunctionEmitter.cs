@@ -301,16 +301,32 @@ namespace McCli.Compiler.CodeGen
 				// Upcast
 				if (source.StructuralClass.IsArray && (target.IsArray || target.IsAny)) return;
 			}
-			else if (target.Type.IsComplex && source.Type == target.Type.Class)
+			else if (source.Class == target.Class)
 			{
-				// Real to complex promotion
-				
-				// Convert to complex
-				var function = pseudoBuiltins.Lookup("ToComplex", source);
-				cil.Invoke(function.Method);
+				if (target.IsComplex)
+				{
+					// Real to complex promotion
 
-				// Change structural class if needed
-				EmitConvert(function.Signature.Outputs[0], target);
+					// Convert to complex
+					var function = pseudoBuiltins.Lookup("ToComplex", source);
+					cil.Invoke(function.Method);
+
+					// Change structural class if needed
+					EmitConvert(function.Signature.Outputs[0], target);
+				}
+				else
+				{
+					Contract.Assert(source.IsComplex);
+
+					// Complex to real demotion
+					// We assume that this happens only in the case of variables
+					// that can be either scalar or complex over their lifetime.
+					var function = pseudoBuiltins.Lookup("GetRealPart", source);
+					cil.Invoke(function.Method);
+
+					// Change structural class if needed
+					EmitConvert(function.Signature.Outputs[0], target);
+				}
 				return;
 			}
 

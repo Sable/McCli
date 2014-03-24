@@ -96,6 +96,11 @@ namespace McCli
 			return MFunctional.Map(value, ToComplex);
 		}
 
+		public static TReal GetRealPart<[AnyReal] TReal>(MComplex<TReal> complex) where TReal : struct
+		{
+			return complex.RealPart;
+		}
+
 		public static MFullArray<double> ToArray(MIntegralRange<double> range)
 		{
 			var result = new MFullArray<double>(1, range.Count);
