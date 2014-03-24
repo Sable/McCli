@@ -185,6 +185,119 @@ namespace McCli.Builtins
 			return horzcat(new[] { array1, array2, array3, array4, array5, array6 });
 		}
 
+		#region Shameful overloads due to lack of variadic functions
+		public static MFullArray<TScalar> horzcat<[AnyPrimitive]TScalar>(
+			MFullArray<TScalar> array1, MFullArray<TScalar> array2, MFullArray<TScalar> array3,
+			MFullArray<TScalar> array4, MFullArray<TScalar> array5, MFullArray<TScalar> array6,
+			MFullArray<TScalar> array7, MFullArray<TScalar> array8, MFullArray<TScalar> array9,
+			MFullArray<TScalar> array10, MFullArray<TScalar> array11, MFullArray<TScalar> array12,
+			MFullArray<TScalar> array13, MFullArray<TScalar> array14)
+		{
+			return horzcat(new[] { array1, array2, array3, array4, array5, array6, array7, array8, array9, array10, array11, array12, array13, array14 });
+		}
+
+		public static MFullArray<TScalar> horzcat<[AnyPrimitive]TScalar>(
+			MFullArray<TScalar> array1, MFullArray<TScalar> array2, MFullArray<TScalar> array3,
+			MFullArray<TScalar> array4, MFullArray<TScalar> array5, MFullArray<TScalar> array6,
+			MFullArray<TScalar> array7, MFullArray<TScalar> array8, MFullArray<TScalar> array9,
+			MFullArray<TScalar> array10, MFullArray<TScalar> array11, MFullArray<TScalar> array12,
+			MFullArray<TScalar> array13, MFullArray<TScalar> array14, MFullArray<TScalar> array15,
+			MFullArray<TScalar> array16)
+		{
+			return horzcat(new[]
+			{
+				array1, array2, array3, array4, array5, array6, array7, array8, array9, array10,
+				array11, array12, array13, array14, array15, array16
+			});
+		}
+
+		public static MFullArray<TScalar> horzcat<[AnyPrimitive]TScalar>(
+			MFullArray<TScalar> array1, MFullArray<TScalar> array2, MFullArray<TScalar> array3,
+			MFullArray<TScalar> array4, MFullArray<TScalar> array5, MFullArray<TScalar> array6,
+			MFullArray<TScalar> array7, MFullArray<TScalar> array8, MFullArray<TScalar> array9,
+			MFullArray<TScalar> array10, MFullArray<TScalar> array11, MFullArray<TScalar> array12,
+			MFullArray<TScalar> array13, MFullArray<TScalar> array14, MFullArray<TScalar> array15,
+			MFullArray<TScalar> array16, MFullArray<TScalar> array17, MFullArray<TScalar> array18,
+			MFullArray<TScalar> array19, MFullArray<TScalar> array20, MFullArray<TScalar> array21,
+			MFullArray<TScalar> array22, MFullArray<TScalar> array23, MFullArray<TScalar> array24,
+			MFullArray<TScalar> array25, MFullArray<TScalar> array26, MFullArray<TScalar> array27,
+			MFullArray<TScalar> array28, MFullArray<TScalar> array29, MFullArray<TScalar> array30,
+			MFullArray<TScalar> array31, MFullArray<TScalar> array32, MFullArray<TScalar> array33)
+		{
+			return horzcat(new[]
+			{
+				array1, array2, array3, array4, array5, array6, array7, array8, array9, array10,
+				array11, array12, array13, array14, array15, array16, array17, array18, array19, array20,
+				array21, array22, array23, array24, array25, array26, array27, array28, array29, array30,
+				array31, array32, array33
+			});
+		}
+
+		public static MFullArray<TScalar> horzcat<[AnyPrimitive]TScalar>(
+			MFullArray<TScalar> array1, MFullArray<TScalar> array2, MFullArray<TScalar> array3,
+			MFullArray<TScalar> array4, MFullArray<TScalar> array5, MFullArray<TScalar> array6,
+			MFullArray<TScalar> array7, MFullArray<TScalar> array8, MFullArray<TScalar> array9,
+			MFullArray<TScalar> array10, MFullArray<TScalar> array11, MFullArray<TScalar> array12,
+			MFullArray<TScalar> array13, MFullArray<TScalar> array14, MFullArray<TScalar> array15,
+			MFullArray<TScalar> array16, MFullArray<TScalar> array17, MFullArray<TScalar> array18,
+			MFullArray<TScalar> array19, MFullArray<TScalar> array20, MFullArray<TScalar> array21,
+			MFullArray<TScalar> array22, MFullArray<TScalar> array23, MFullArray<TScalar> array24,
+			MFullArray<TScalar> array25, MFullArray<TScalar> array26, MFullArray<TScalar> array27,
+			MFullArray<TScalar> array28, MFullArray<TScalar> array29, MFullArray<TScalar> array30,
+			MFullArray<TScalar> array31, MFullArray<TScalar> array32, MFullArray<TScalar> array33,
+			MFullArray<TScalar> array34, MFullArray<TScalar> array35, MFullArray<TScalar> array36,
+			MFullArray<TScalar> array37, MFullArray<TScalar> array38, MFullArray<TScalar> array39,
+			MFullArray<TScalar> array40, MFullArray<TScalar> array41, MFullArray<TScalar> array42,
+			MFullArray<TScalar> array43, MFullArray<TScalar> array44, MFullArray<TScalar> array45,
+			MFullArray<TScalar> array46, MFullArray<TScalar> array47, MFullArray<TScalar> array48,
+			MFullArray<TScalar> array49, MFullArray<TScalar> array50, MFullArray<TScalar> array51,
+			MFullArray<TScalar> array52, MFullArray<TScalar> array53, MFullArray<TScalar> array54,
+			MFullArray<TScalar> array55)
+		{
+			return horzcat(new[]
+			{
+				array1, array2, array3, array4, array5, array6, array7, array8, array9, array10,
+				array11, array12, array13, array14, array15, array16, array17, array18, array19, array20,
+				array21, array22, array23, array24, array25, array26, array27, array28, array29, array30,
+				array31, array32, array33, array34, array35, array36, array37, array38, array39, array40,
+				array41, array42, array43, array44, array45, array46, array47, array48, array49, array50,
+				array51, array52, array53, array54, array55
+			});
+		}
+
+		public static MFullArray<TScalar> horzcat<[AnyPrimitive]TScalar>(
+			MFullArray<TScalar> array1, MFullArray<TScalar> array2, MFullArray<TScalar> array3,
+			MFullArray<TScalar> array4, MFullArray<TScalar> array5, MFullArray<TScalar> array6,
+			MFullArray<TScalar> array7, MFullArray<TScalar> array8, MFullArray<TScalar> array9,
+			MFullArray<TScalar> array10, MFullArray<TScalar> array11, MFullArray<TScalar> array12,
+			MFullArray<TScalar> array13, MFullArray<TScalar> array14, MFullArray<TScalar> array15,
+			MFullArray<TScalar> array16, MFullArray<TScalar> array17, MFullArray<TScalar> array18,
+			MFullArray<TScalar> array19, MFullArray<TScalar> array20, MFullArray<TScalar> array21,
+			MFullArray<TScalar> array22, MFullArray<TScalar> array23, MFullArray<TScalar> array24,
+			MFullArray<TScalar> array25, MFullArray<TScalar> array26, MFullArray<TScalar> array27,
+			MFullArray<TScalar> array28, MFullArray<TScalar> array29, MFullArray<TScalar> array30,
+			MFullArray<TScalar> array31, MFullArray<TScalar> array32, MFullArray<TScalar> array33,
+			MFullArray<TScalar> array34, MFullArray<TScalar> array35, MFullArray<TScalar> array36,
+			MFullArray<TScalar> array37, MFullArray<TScalar> array38, MFullArray<TScalar> array39,
+			MFullArray<TScalar> array40, MFullArray<TScalar> array41, MFullArray<TScalar> array42,
+			MFullArray<TScalar> array43, MFullArray<TScalar> array44, MFullArray<TScalar> array45,
+			MFullArray<TScalar> array46, MFullArray<TScalar> array47, MFullArray<TScalar> array48,
+			MFullArray<TScalar> array49, MFullArray<TScalar> array50, MFullArray<TScalar> array51,
+			MFullArray<TScalar> array52, MFullArray<TScalar> array53, MFullArray<TScalar> array54,
+			MFullArray<TScalar> array55, MFullArray<TScalar> array56)
+		{
+			return horzcat(new[]
+			{
+				array1, array2, array3, array4, array5, array6, array7, array8, array9, array10,
+				array11, array12, array13, array14, array15, array16, array17, array18, array19, array20,
+				array21, array22, array23, array24, array25, array26, array27, array28, array29, array30,
+				array31, array32, array33, array34, array35, array36, array37, array38, array39, array40,
+				array41, array42, array43, array44, array45, array46, array47, array48, array49, array50,
+				array51, array52, array53, array54, array55, array56
+			});
+		}
+		#endregion
+
 		internal static MFullArray<TScalar> horzcat<[AnyPrimitive]TScalar>(params MFullArray<TScalar>[] arrays)
 		{
 			Contract.Requires(arrays != null);
@@ -225,6 +338,11 @@ namespace McCli.Builtins
 		#endregion
 
 		#region vertcat
+		public static MFullArray<TScalar> vertcat<[AnyPrimitive] TScalar>(MFullArray<TScalar> array)
+		{
+			return array.DeepClone();
+		}
+
 		public static MFullArray<TScalar> vertcat<[AnyPrimitive] TScalar>(
 			MFullArray<TScalar> array1, MFullArray<TScalar> array2)
 		{
