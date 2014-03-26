@@ -147,11 +147,17 @@ namespace McCli
 
 			var indicesShape = indices.shape;
 			if (indicesShape.IsEmpty) return new MFullArray<TScalar>(MArrayShape.Empty);
-			Contract.Assert(indicesShape.ColumnCount == 1);
+			if (!indices.IsVector)
+			{
+				string message = string.Format("Array index must be a vector but has shape {0}.", indices.shape);
+				throw new MArrayShapeException(message);
+			}
 
-			var result = new MFullArray<TScalar>(new MArrayShape(indicesShape.RowCount, 1));
-			for (int i = 0; i < indicesShape.RowCount; ++i)
-				result[i] = ArrayGet(array, ToInt(indices[i]));
+			// Row vector indices yields row vector array, column vector indices yields column vector array
+			var result = new MFullArray<TScalar>(indices.shape);
+			int count = indices.shape.Count;
+			for (int i = 0; i < count; ++i)
+				result[i] = ArrayGet(array, indices[i]);
 			return result;
 		}
 
