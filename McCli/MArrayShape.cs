@@ -166,6 +166,14 @@ namespace McCli
 		}
 
 		/// <summary>
+		/// Gets a value indicating if this shape is a row or column vector or an empty array.
+		/// </summary>
+		public bool IsVectorOrEmpty
+		{
+			get { return (rowCount <= 1 || columnCount <= 1) && !IsHigherDimensional; }
+		}
+
+		/// <summary>
 		/// Gets a value indicating if this shape is a square matrix.
 		/// </summary>
 		public bool IsSquareMatrix

@@ -146,8 +146,7 @@ namespace McCli
 			Contract.Requires(indices != null);
 
 			var indicesShape = indices.shape;
-			if (indicesShape.IsEmpty) return new MFullArray<TScalar>(MArrayShape.Empty);
-			if (!indices.IsVector)
+			if (!indicesShape.IsVectorOrEmpty)
 			{
 				string message = string.Format("Array index must be a vector but has shape {0}.", indices.shape);
 				throw new MArrayShapeException(message);
@@ -295,8 +294,11 @@ namespace McCli
 			if (indices.IsEmpty && values.IsEmpty) return;
 
 			var indicesShape = indices.shape;
-			Contract.Assert(indicesShape.ColumnCount == 1);
-			Contract.Assert(indicesShape == values.shape);
+			if (indicesShape.IsHigherDimensional || (indicesShape.RowCount > 1 && indicesShape.ColumnCount > 1))
+				throw MArrayShapeException.CreateFormatted("Array index must be a vector but has shape {0}.", indicesShape);
+
+			if (indicesShape != values.shape)
+				throw new MArrayShapeException("Assigned value shape must match index shape.");
 			
 			for (int i = 0; i < indicesShape.RowCount; ++i)
 				array[ToInt(indices[i]) - 1] = values[i];
