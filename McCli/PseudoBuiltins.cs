@@ -219,7 +219,6 @@ namespace McCli
 		public static TScalar ArrayGet<[AnyPrimitive] TScalar>(MFullArray<TScalar> array, double index)
 		{
 			// Performance critical method!
-			Contract.Requires(array != null);
 			int indexInt = ToInt(index);
 			if (indexInt > array.shape.Count) // We'll get an IndexOutOfRangeException if it's < 1
 				throw new ArgumentOutOfRangeException("index");
@@ -230,8 +229,6 @@ namespace McCli
 			MFullArray<TScalar> array, double rowIndex, double columnIndex)
 		{
 			// Performance critical method!
-			Contract.Requires(array != null);
-
 			int rowCount = array.shape.RowCount;
 
 			int rowIndexInt = ToInt(rowIndex);
@@ -248,7 +245,6 @@ namespace McCli
 		public static TScalar ArrayGet<[AnyPrimitive] TScalar>(
 			MFullArray<TScalar> array, double rowIndex, double columnIndex, double sliceIndex)
 		{
-			Contract.Requires(array != null);
 			var index = LinearizeIndex(array.shape, ToInt(rowIndex), ToInt(columnIndex), ToInt(sliceIndex));
 			return array.elements[index - 1];
 		}

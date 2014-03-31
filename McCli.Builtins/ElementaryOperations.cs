@@ -375,22 +375,28 @@ namespace McCli.Builtins
 				throw new MArrayShapeException("Matrix shape mismatch for multiplication.");
 
 			var result = new MFullArray<double>(lhsShape.RowCount, rhsShape.ColumnCount);
-			var lhsArray = lhs.BackingArray;
-			var rhsArray = rhs.BackingArray;
-			var resultArray = result.BackingArray;
-
-			for (int column = 0; column < rhsShape.ColumnCount; ++column)
-			{
-				for (int row = 0; row < lhsShape.RowCount; ++row)
-				{
-					double value = 0;
-					for (int i = 0; i < lhsShape.ColumnCount; ++i)
-						value += lhsArray[row + i * lhsShape.RowCount] * rhsArray[i + column * rhsShape.RowCount];
-					resultArray[row + column * lhsShape.RowCount] = value;
-				}
-			}
+			mtimes_core(lhsShape.RowCount, lhsShape.ColumnCount, rhsShape.ColumnCount,
+				lhs.BackingArray, rhs.BackingArray, result.BackingArray);
 
 			return result;
+		}
+
+		private static void mtimes_core(int m, int n, int p, double[] lhs, double[] rhs, double[] result)
+		{
+			// m×n * n×p = m×p
+			int index = 0;
+			for (int j = 0; j < p; ++j)
+			{
+				int rhsColumnOffset = j * n;
+				for (int i = 0; i < m; ++i)
+				{
+					double value = 0;
+					for (int k = 0; k < n; ++k)
+						value += lhs[i + k * m] * rhs[k + rhsColumnOffset];
+					result[index] = value;
+					index++;
+				}
+			}
 		}
 
 		public static MFullArray<double> mtimes(MFullArray<double> lhs, double rhs)
