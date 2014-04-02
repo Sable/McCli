@@ -160,18 +160,6 @@ namespace McCli
 			return result;
 		}
 
-		public static MFullArray<TScalar> ArrayGet<[AnyPrimitive] TScalar>(MFullArray<TScalar> array, MIntegralRange<double> indices)
-		{
-			Contract.Requires(array != null);
-
-			if (indices.First < 1 || indices.Last > array.Count)
-				throw new ArgumentOutOfRangeException("indices");
-
-			var result = new MFullArray<TScalar>(1, indices.Count);
-			Array.Copy(array.BackingArray, indices.First - 1, result.BackingArray, 0, indices.Count);
-			return result;
-		}
-
 		public static MFullArray<TScalar> ArrayGet<[AnyPrimitive] TScalar>(MFullArray<TScalar> array, MFullArray<bool> mask)
 		{
 			Contract.Requires(array != null);
@@ -248,12 +236,25 @@ namespace McCli
 			var index = LinearizeIndex(array.shape, ToInt(rowIndex), ToInt(columnIndex), ToInt(sliceIndex));
 			return array.elements[index - 1];
 		}
+
+		#region Integral Ranges
+		public static MFullArray<TScalar> ArrayGet<[AnyPrimitive] TScalar>(MFullArray<TScalar> array, MIntegralRange<double> indices)
+		{
+			Contract.Requires(array != null);
+
+			if (indices.First < 1 || indices.Last > array.Count)
+				throw new ArgumentOutOfRangeException("indices");
+
+			var result = new MFullArray<TScalar>(1, indices.Count);
+			Array.Copy(array.BackingArray, indices.First - 1, result.BackingArray, 0, indices.Count);
+			return result;
+		}
 		
 		public static MFullArray<TScalar> ArrayGet<[AnyPrimitive] TScalar>(
 			MFullArray<TScalar> array, MIntegralRange<double> rowIndices, MIntegralRange<double> columnIndices)
 		{
 			if (array.IsHigherDimensional)
-				throw new ArgumentOutOfRangeException("array");
+				throw new MArrayShapeException();
 
 			int sourceRowCount = array.shape.RowCount;
 			if (rowIndices.First < 1 || rowIndices.Last > sourceRowCount)
@@ -292,6 +293,7 @@ namespace McCli
 		{
 			return ArrayGet(array, MIntegralRange<double>.FromValue(ToInt(rowIndex)), columnIndices);
 		}
+		#endregion
 		#endregion
 
 		#region ArraySet
@@ -451,6 +453,51 @@ namespace McCli
 			var index = LinearizeIndex(array.shape, ToInt(rowIndex), ToInt(columnIndex), ToInt(sliceIndex));
 			array[index - 1] = value;
 		}
+
+		#region Integral Ranges
+		public static void ArraySet<[AnyPrimitive] TScalar>(
+			MFullArray<TScalar> array, MIntegralRange<double> rowIndices, MIntegralRange<double> columnIndices, MFullArray<TScalar> values)
+		{
+			if (array.IsHigherDimensional)
+				throw new MArrayShapeException();
+
+			int destRowCount = array.shape.RowCount;
+			if (rowIndices.First < 1 || rowIndices.Last > destRowCount)
+				throw new ArgumentOutOfRangeException("rowIndices");
+
+			int destColumnCount = array.shape.ColumnCount;
+			if (columnIndices.First < destColumnCount || columnIndices.Last > destColumnCount)
+				throw new ArgumentOutOfRangeException("columnIndices");
+
+			int valueRowCount = rowIndices.Count;
+			int valueColumnCount = columnIndices.Count;
+			if (values.shape.RowCount != valueRowCount || values.shape.ColumnCount != valueColumnCount || values.IsHigherDimensional)
+				throw new MArrayShapeException();
+
+			for (int j = 0; j < valueColumnCount; ++j)
+			{
+				int destColumnIndex = columnIndices.First + j - 1;
+				for (int i = 0; i < valueRowCount; ++i)
+				{
+					int destRowIndex = rowIndices.First + i - 1;
+					var value = values.elements[j * valueRowCount + i];
+					array.elements[destColumnIndex * destRowCount + destRowIndex] = value;
+				}
+			}
+		}
+
+		public static void ArraySet<[AnyPrimitive] TScalar>(
+			MFullArray<TScalar> array, MIntegralRange<double> rowIndices, double columnIndex, MFullArray<TScalar> values)
+		{
+			ArraySet(array, rowIndices, MIntegralRange<double>.FromValue(ToInt(columnIndex)), values);
+		}
+
+		public static void ArraySet<[AnyPrimitive] TScalar>(
+			MFullArray<TScalar> array, double rowIndex, MIntegralRange<double> columnIndices, MFullArray<TScalar> values)
+		{
+			ArraySet(array, MIntegralRange<double>.FromValue(ToInt(rowIndex)), columnIndices, values);
+		}
+		#endregion
 		#endregion
 
 		#region Linearize
