@@ -185,16 +185,16 @@ namespace McCli
 			var indexedShape = new MArrayShape(rowIndices.Count, columnIndices.Count);
 			var result = new MFullArray<TScalar>(indexedShape);
 
-			for (int i = 0; i < rowIndices.Count; ++i)
+			for (int j = 0; j < columnIndices.Count; ++j)
 			{
-				int rowIndex = ToInt(rowIndices[i]);
-				if (rowIndex < 1 || rowIndex > array.RowCount)
+				int columnIndex = ToInt(columnIndices[j]);
+				if (columnIndex < 1 || columnIndex > array.ColumnCount)
 					throw new IndexOutOfRangeException();
 
-				for (int j = 0; j < columnIndices.Count; ++j)
+				for (int i = 0; i < rowIndices.Count; ++i)
 				{
-					int columnIndex = ToInt(columnIndices[i]);
-					if (columnIndex < 1 || columnIndex > array.ColumnCount)
+					int rowIndex = ToInt(rowIndices[i]);
+					if (rowIndex < 1 || rowIndex > array.RowCount)
 						throw new IndexOutOfRangeException();
 
 					result[j * indexedShape.RowCount + i] = array[(columnIndex - 1) * array.RowCount + (rowIndex - 1)];
@@ -261,7 +261,7 @@ namespace McCli
 				throw new ArgumentOutOfRangeException("rowIndices");
 
 			int sourceColumnCount = array.shape.ColumnCount;
-			if (columnIndices.First < sourceColumnCount || columnIndices.Last > sourceColumnCount)
+			if (columnIndices.First < 1 || columnIndices.Last > sourceColumnCount)
 				throw new ArgumentOutOfRangeException("columnIndices");
 
 			int resultRowCount = rowIndices.Count;
@@ -385,20 +385,20 @@ namespace McCli
 			var indexedShape = new MArrayShape(rowIndices.Count, columnIndices.Count);
 			if (values.shape != indexedShape) throw new MArrayShapeException();
 
-			for (int i = 0; i < rowIndices.Count; ++i)
+			for (int j = 0; j < columnIndices.Count; ++j)
 			{
-				int rowIndex = ToInt(rowIndices[i]);
-				if (rowIndex < 1 || rowIndex > array.RowCount)
+				int columnIndex = ToInt(columnIndices[j]);
+				if (columnIndex < 1 || columnIndex > array.ColumnCount)
 					throw new IndexOutOfRangeException();
 
-				for (int j = 0; j < columnIndices.Count; ++j)
+				for (int i = 0; i < rowIndices.Count; ++i)
 				{
-					int columnIndex = ToInt(columnIndices[i]);
-					if (columnIndex < 1 || columnIndex > array.ColumnCount)
+					int rowIndex = ToInt(rowIndices[i]);
+					if (rowIndex < 1 || rowIndex > array.RowCount)
 						throw new IndexOutOfRangeException();
 
 					var value = values[j * indexedShape.RowCount + i];
-					array[(columnIndex - 1) * array.RowCount + (columnIndex - 1)] = value;
+					array[(columnIndex - 1) * array.RowCount + (rowIndex - 1)] = value;
 				}
 			}
 		}
@@ -466,7 +466,7 @@ namespace McCli
 				throw new ArgumentOutOfRangeException("rowIndices");
 
 			int destColumnCount = array.shape.ColumnCount;
-			if (columnIndices.First < destColumnCount || columnIndices.Last > destColumnCount)
+			if (columnIndices.First < 1 || columnIndices.Last > destColumnCount)
 				throw new ArgumentOutOfRangeException("columnIndices");
 
 			int valueRowCount = rowIndices.Count;
