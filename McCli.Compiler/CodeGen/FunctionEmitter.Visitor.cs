@@ -226,7 +226,7 @@ namespace McCli.Compiler.CodeGen
 			var function = pseudoBuiltins.Lookup("GetDimensionRange", inputReprsBuilder.Complete());
 			EmitLoad(arrayVariable);
 			cil.LoadInt32(dimensionIndex);
-			cil.Invoke(functionLookup.Method);
+			cil.Invoke(function.Method);
 		}
 
 		public override void VisitStoreParenthesized(StoreParenthesized node)
@@ -242,20 +242,43 @@ namespace McCli.Compiler.CodeGen
 					cil.Invoke(newEmptyArrayMethod);
 			}
 
-			// TODO: Handle ':' indices
-			var argumentsBuilder = new ImmutableArray<Variable>.Builder(node.Indices.Length + 2);
-			argumentsBuilder[0] = node.Array;
+			// Determine the type of the arguments to the ArraySet call
+			var argumentReprsBuilder = new ImmutableArray<MRepr>.Builder(node.Indices.Length + 2);
+			argumentReprsBuilder[0] = node.Array.StaticRepr;
+			argumentReprsBuilder[argumentReprsBuilder.Length - 1] = node.Value.StaticRepr;
 			for (int i = 0; i < node.Indices.Length; ++i)
 			{
 				var index = node.Indices[i];
-				if (index.IsColon) throw new NotImplementedException("':' indices.");
-				argumentsBuilder[1 + i] = index.Variable;
+				argumentReprsBuilder[1 + i] = index.IsColon
+					? new MRepr(MClass.Double, MStructuralClass.IntegralRange)
+					: index.Variable.StaticRepr;
 			}
-			argumentsBuilder[argumentsBuilder.Length - 1] = node.Value;
-			var arguments = argumentsBuilder.Complete();
 
-			var function = pseudoBuiltins.Lookup("ArraySet", arguments.Select(v => v.StaticRepr));
-			EmitCall(ImmutableArray.Empty, function, arguments);
+			// Find our ArraySet overload
+			var function = pseudoBuiltins.Lookup("ArraySet", argumentReprsBuilder.Complete());
+
+			// Call it
+			EmitLoadAndConvert(node.Array, function.Signature.Inputs[0]);
+
+			for (int i = 0; i < node.Indices.Length; ++i)
+			{
+				var index = node.Indices[i];
+				var expectedRepr = function.Signature.Inputs[1 + i];
+				if (index.IsColon)
+				{
+					EmitColonRange(node.Array, i);
+					EmitConvert(new MRepr(MClass.Double, MStructuralClass.IntegralRange), expectedRepr);
+				}
+				else
+				{
+					EmitLoadAndConvert(index.Variable, expectedRepr);
+				}
+			}
+
+			EmitLoadAndConvert(node.Value, function.Signature.Inputs[function.Signature.Inputs.Count - 1]);
+
+			cil.Invoke(function.Method);
+			Contract.Assert(!function.Signature.HasReturnValue);
 		}
 
 		public override void VisitIf(If node)

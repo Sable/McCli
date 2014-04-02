@@ -297,6 +297,14 @@ namespace McCli.Compiler.CodeGen
 					cil.Invoke(function.Method);
 					return;
 				}
+				else if (source.StructuralClass == MStructuralClass.IntegralRange
+					&& (target.IsArray || target.IsAny))
+				{
+					// Integral range to array
+					var function = pseudoBuiltins.Lookup("ToArray", source);
+					cil.Invoke(function.Method);
+					return;
+				}
 
 				// Upcast
 				if (source.StructuralClass.IsArray && (target.IsArray || target.IsAny)) return;

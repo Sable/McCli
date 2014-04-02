@@ -15,14 +15,14 @@ namespace McCli
 	public struct MIntegralRange<TReal> : IEquatable<MIntegralRange<TReal>>
 	{
 		#region Fields
-		private readonly int first, count;
+		private readonly int first, last;
 		#endregion
 
 		#region Constructors
-		private MIntegralRange(int first, int count)
+		private MIntegralRange(int first, int last)
 		{
 			this.first = first;
-			this.count = count;
+			this.last = last;
 		}
 
 		static MIntegralRange()
@@ -38,26 +38,26 @@ namespace McCli
 			get { return first; }
 		}
 
-		public int End
+		public int Last
 		{
-			get { return first + count; }
+			get { return last; }
 		}
 
 		public bool IsEmpty
 		{
-			get { return count <= 0; }
+			get { return last < first; }
 		}
 
 		public int Count
 		{
-			get { return count; }
+			get { return Math.Max(last - first + 1, 0); }
 		}
 		#endregion
 
 		#region Methods
 		public bool Equals(MIntegralRange<TReal> other)
 		{
-			return first == other.first && count == other.count;
+			return first == other.first && last == other.last;
 		}
 
 		public override bool Equals(object obj)
@@ -67,18 +67,28 @@ namespace McCli
 
 		public override int GetHashCode()
 		{
-			return first ^ (count << 13);
+			return first ^ (last << 13);
 		}
 
 		public override string ToString()
 		{
-			return string.Format(CultureInfo.InvariantCulture, "{0}:{1}", first, first + count - 1);
+			return string.Format(CultureInfo.InvariantCulture, "{0}:{1}", first, last);
+		}
+
+		public static MIntegralRange<TReal> FromValue(int value)
+		{
+			return new MIntegralRange<TReal>(value, value);
+		}
+
+		public static MIntegralRange<TReal> FromFirstLast(int first, int last)
+		{
+			return new MIntegralRange<TReal>(first, last);
 		}
 
 		public static MIntegralRange<TReal> FromFirstCount(int first, int count)
 		{
 			Contract.Requires(count >= 0);
-			return new MIntegralRange<TReal>(first, count);
+			return new MIntegralRange<TReal>(first, first + count - 1);
 		}
 		#endregion
 	}
