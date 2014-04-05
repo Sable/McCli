@@ -15,7 +15,7 @@ namespace CliKit.Cil
 	public sealed class ConversionOpcode : Opcode
 	{
 		#region Fields
-		private static readonly Regex nameRegex = new Regex("conv(.ovf)?.([a-z]+)(.un)?", RegexOptions.CultureInvariant);
+		private static readonly Regex nameRegex = new Regex("conv(.ovf)?.([iur][1248]?)(.un)?", RegexOptions.CultureInvariant);
 
 		private readonly DataType targetDataType;
 		private readonly bool isSourceUnsigned;

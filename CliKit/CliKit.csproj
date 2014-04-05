@@ -92,7 +92,6 @@
     <Compile Include="Cil\ConversionOpcode.cs">
       <DependentUpon>Opcode.cs</DependentUpon>
     </Compile>
-    <Compile Include="Cil\Conversions.cs" />
     <Compile Include="Cil\ElementReferenceOpcode.cs">
       <DependentUpon>Opcode.cs</DependentUpon>
     </Compile>
@@ -134,7 +133,7 @@
     <Compile Include="Cil\LocationKind.cs" />
     <Compile Include="MetadataToken.cs" />
     <Compile Include="MetadataTokenKind.cs" />
-    <Compile Include="Cil\Conversion.cs" />
+    <Compile Include="Cil\ConversionOperation.cs" />
     <Compile Include="Cil\Opcode.Definitions.cs">
       <DependentUpon>Opcode.cs</DependentUpon>
     </Compile>

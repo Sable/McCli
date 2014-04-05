@@ -337,6 +337,36 @@ namespace McCli.Compiler.CodeGen
 				}
 				return;
 			}
+			else
+			{
+				// Different classes
+				if (source.StructuralClass == MStructuralClass.Scalar
+					&& source.Class.IsInteger && source.Type.IsReal)
+				{
+					if (target.Class.IsFloat)
+					{
+						// Int to float
+						if (source.Class.IsUnsignedInteger)
+							cil.Instruction(Opcode.Conv_R_Un);
+						else if (target.Class == MClass.Single)
+							cil.Instruction(Opcode.Conv_R4);
+						else if (target.Class == MClass.Double)
+							cil.Instruction(Opcode.Conv_R8);
+						else
+							throw new NotSupportedException("Unexpected int-to-float conversion.");
+
+						// Do the rest of the conversion (complex, structural class), if needed
+						EmitConvert(new MRepr(target.Class, MStructuralClass.Scalar), target);
+						return;
+					}
+					else if (source.Class == MClass.Int32 && target.Class == MClass.Int64)
+					{
+						// Int32 to Int64 (hack for IntOK)
+						cil.Instruction(Opcode.Conv_I8);
+						return;
+					}
+				}
+			}
 
 			throw new NotImplementedException(
 				string.Format("Conversion from {0} to {1}.", source, target));

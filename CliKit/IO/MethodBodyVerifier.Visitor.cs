@@ -115,7 +115,7 @@ namespace CliKit.IO
 				var value = param.This.stack.Pop(opcode);
 
 				bool verifiable;
-				var conversion = Conversions.Get(value.DataType, opcode.TargetDataType, out verifiable);
+				var conversion = ConversionOperationEnum.Get(value.DataType, opcode.TargetDataType, out verifiable);
 				if (!conversion.HasValue)
 					throw Error("{0} cannot convert {1} to {2}.", opcode.Name, value.DataType, opcode.TargetDataType);
 

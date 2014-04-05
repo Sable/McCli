@@ -37,8 +37,28 @@ namespace McCli.Compiler.CodeGen
 				MRepr sourceRepr;
 				if (node.Value is double)
 				{
-					cil.LoadFloat64((double)node.Value);
-					sourceRepr = MClass.Double.ScalarRepr;
+					var value = (double)node.Value;
+					var targetType = node.Target.StaticRepr.Type;
+					if (targetType.IsInteger)
+					{
+						// IntOK'd variable
+						if (targetType == MClass.Int64)
+						{
+							Contract.Assert((long)value == value);
+							cil.LoadInt64((long)value);
+						}
+						else if (targetType == MClass.Int32)
+						{
+							Contract.Assert((int)value == value);
+							cil.LoadInt32((int)value);
+						}
+						sourceRepr = new MRepr(targetType, MStructuralClass.Scalar);
+					}
+					else
+					{
+						cil.LoadFloat64((double)node.Value);
+						sourceRepr = MClass.Double.ScalarRepr;
+					}
 				}
 				else if (node.Value is string)
 				{
@@ -357,74 +377,93 @@ namespace McCli.Compiler.CodeGen
 			breakTargetLabel = cil.CreateLabel("for_break");
 			var conditionLabel = cil.CreateLabel("for_condition");
 
-			var repr = new MRepr(node.Iterator.StaticRepr.Type, MStructuralClass.Scalar);
-			Contract.Assert(repr.Class.IsNumeric && !repr.IsComplex);
+			var iteratorRepr = new MRepr(node.Iterator.StaticRepr.Type, MStructuralClass.Scalar);
+			Contract.Assert(iteratorRepr.Class.IsNumeric && !iteratorRepr.IsComplex);
 
 			// Allocate the the temporaries we need
-			var currentLocal = temporaryPool.Alloc(repr.CliType);
+			var currentLocal = temporaryPool.Alloc(iteratorRepr.CliType);
 			TemporaryLocalPool.AllocationScope? stepLocal = null, toLocal = null;
 
 			try
 			{
 				// Setup the iterator variable, "current"
 				EmitLoad(node.From);
-				EmitConvert(node.From.StaticRepr, repr);
+				EmitConvert(node.From.StaticRepr, iteratorRepr);
 				cil.Store(currentLocal.Location);
 
 				// Save the increment to a local variable if it's not a literal or initonly
 				if (node.Step != null && !IsLiteral(node.Step) && !node.Step.IsInitOnly)
 				{
-					stepLocal = temporaryPool.Alloc(repr.CliType);
+					stepLocal = temporaryPool.Alloc(iteratorRepr.CliType);
 					EmitLoad(node.Step);
-					EmitConvert(node.Step.StaticRepr, repr);
-					EmitCloneIfNeeded(repr);
+					EmitConvert(node.Step.StaticRepr, iteratorRepr);
+					EmitCloneIfNeeded(iteratorRepr);
 					cil.Store(stepLocal.Value.Location);
 				}
 
 				// Save the "to" variable to a local variable if it's not a literal or initonly
 				if (!IsLiteral(node.To) && !node.To.IsInitOnly)
 				{
-					toLocal = temporaryPool.Alloc(repr.CliType);
+					toLocal = temporaryPool.Alloc(iteratorRepr.CliType);
 					EmitLoad(node.To);
-					EmitConvert(node.To.StaticRepr, repr);
-					EmitCloneIfNeeded(repr);
+					EmitConvert(node.To.StaticRepr, iteratorRepr);
+					EmitCloneIfNeeded(iteratorRepr);
 					cil.Store(toLocal.Value.Location);
 				}
 
 				// Test the loop condition
+				{
 				// TODO: support down-going loops
 				// condition: if (current > to) goto break;
 				cil.MarkLabel(conditionLabel);
 				cil.Load(currentLocal.Location);
-				
+
 				// Load the "to" loop bound variable (or our copy of it)
 				if (toLocal.HasValue)
 					cil.Load(toLocal.Value.Location);
 				else
 					EmitLoad(node.To);
-				
+
 				cil.Branch(Comparison.GreaterThan, breakTargetLabel);
+					}
 
 				// Setup the iterator variable (which can be modified inside the loop)
 				cil.Load(currentLocal.Location);
-				EmitConvert(repr, node.Iterator.StaticRepr);
+				EmitConvert(iteratorRepr, node.Iterator.StaticRepr);
 				cil.Store(GetLocation(node.Iterator));
 
 				// body
 				EmitStatements(node.Body);
 
 				// Loop increment
-				// continue: current += increment; goto condition;
-				cil.MarkLabel(continueTargetLabel);
-				cil.Load(currentLocal.Location);
+				{
+					// continue: current += increment; goto condition;
+					cil.MarkLabel(continueTargetLabel);
+					cil.Load(currentLocal.Location);
 
-				// Load the "step" loop increment variable, our copy of it or the default value of 1
-				if (stepLocal.HasValue) cil.Load(stepLocal.Value.Location);
-				else if (node.Step == null) cil.LoadFloat64(1.0);
-				else EmitLoad(node.Step);
+					// Load the "step" loop increment variable, our copy of it or the default value of 1
+					if (stepLocal.HasValue) cil.Load(stepLocal.Value.Location);
+					else if (node.Step == null)
+					{
+						if (iteratorRepr.Class.IsInteger)
+						{
+							cil.Instruction(Opcode.Ldc_I4_1);
+							if (iteratorRepr.Class == MClass.Int64)
+								cil.Instruction(Opcode.Conv_I8);
+						}
+						else
+							cil.LoadFloat64(1.0);
+					}
+					else
+					{
+						EmitLoad(node.Step);
+					}
 
-				cil.Instruction(Opcode.Add);
-				cil.Store(currentLocal.Location);
+					// Increment
+					cil.Instruction(Opcode.Add);
+					cil.Store(currentLocal.Location);
+				}
+
 				cil.Branch(conditionLabel);
 			}
 			finally

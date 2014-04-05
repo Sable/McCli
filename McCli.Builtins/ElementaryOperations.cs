@@ -50,6 +50,20 @@ namespace McCli.Builtins
 			return lhs + rhs;
 		}
 
+		// For IntOK
+		[BuiltinCilOpcode(0x58 /* add */)]
+		public static int plus(int lhs, int rhs)
+		{
+			return lhs + rhs;
+		}
+
+		// For IntOK
+		[BuiltinCilOpcode(0x58 /* add */)]
+		public static long plus(long lhs, long rhs)
+		{
+			return lhs + rhs;
+		}
+
 		public static MFullArray<TScalar> uplus<[AnyNumeric]TScalar>(MFullArray<TScalar> array)
 		{
 			Contract.Requires(array != null);
@@ -137,6 +151,19 @@ namespace McCli.Builtins
 
 		[BuiltinCilOpcode(0x59 /* sub */)]
 		public static double minus(double lhs, double rhs)
+		{
+			return lhs - rhs;
+		}
+
+		// For IntOK
+		[BuiltinCilOpcode(0x59 /* sub */)]
+		public static int minus(int lhs, int rhs)
+		{
+			return lhs - rhs;
+		}
+
+		[BuiltinCilOpcode(0x59 /* sub */)]
+		public static long minus(long lhs, long rhs)
 		{
 			return lhs - rhs;
 		}

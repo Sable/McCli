@@ -39,14 +39,15 @@ namespace McCli.Compiler
 			}
 		}
 
-		private enum Admissibility
+		[Flags]
+		private enum CoercionFlags
 		{
-			Incompatible,
-			ToAny,
-			RealToComplexAndStructuralClassChange,
-			RealToComplex,
-			StructuralClassChange,
-			PerfectMatch,
+			// From least to most "costly"
+			None = 0,
+			IntegerToFloat = 1 << 0,
+			RealToComplex = 1 << 1,
+			StructuralClassChange = 1 << 2,
+			ToAny = unchecked((int)0xFFFFFFFF)
 		}
 		#endregion
 
@@ -87,7 +88,6 @@ namespace McCli.Compiler
 
 			// TODO: Support variadic arguments
 			// TODO: Support variadic return parameters
-			// TODO: Support overloading
 			var function = new FunctionMethod(method);
 			AddFunction(function);
 		}
@@ -116,24 +116,26 @@ namespace McCli.Compiler
 
 			FunctionMethod bestOverload = null;
 
+			// Perform overload resolution based on the required input coercions
 			List<FunctionMethod> overloads;
 			if (functions.TryGetValue(key, out overloads))
 			{
-				var bestAdmissibility = Admissibility.PerfectMatch;
+				var leastCoercionFlags = CoercionFlags.None;
 				foreach (var overload in overloads)
 				{
-					var admissibility = GetAdmissibility(overload, inputs);
-					if (admissibility == Admissibility.Incompatible) continue;
+					var overloadCoercionFlags = GetCoercion(overload, inputs);
+					if (!overloadCoercionFlags.HasValue) continue; // Not admissible
 
-					if (bestOverload == null || bestAdmissibility < admissibility)
+					if (bestOverload == null || overloadCoercionFlags.Value < leastCoercionFlags)
 					{
-						// TODO: assert we don't have multiple overloads with the same admissibility
+						// TODO: assert we don't have multiple overloads with the same minimal admissibility
 						bestOverload = overload;
-						bestAdmissibility = admissibility;
+						leastCoercionFlags = overloadCoercionFlags.Value;
 					}
 				}
 			}
 
+			// Make sure we have an admissible overload
 			if (bestOverload == null)
 			{
 				var message = new StringBuilder();
@@ -154,34 +156,51 @@ namespace McCli.Compiler
 			return bestOverload;
 		}
 
-		private static Admissibility GetAdmissibility(FunctionMethod overload, ImmutableArray<MRepr> inputs)
+		private static CoercionFlags? GetCoercion(FunctionMethod overload, ImmutableArray<MRepr> inputs)
 		{
-			var admissibility = Admissibility.PerfectMatch;
+			var coercionFlags = CoercionFlags.None;
 			for (int i = 0; i < inputs.Length; ++i)
 			{
 				MRepr provided = inputs[i];
 				MRepr expected = overload.Signature.Inputs[i];
 
-				if (provided != expected)
+				if (provided == expected) continue;
+
+				if (expected.IsAny)
 				{
-					Admissibility inputAdmissibility;
-					if (expected.IsAny)
-						inputAdmissibility = Admissibility.ToAny;
-					else if (provided.Type == expected.Type)
-						inputAdmissibility = Admissibility.StructuralClassChange;
-					else if (expected.Type.IsComplex && expected.Type.Class == provided.Type)
+					coercionFlags |= CoercionFlags.ToAny;
+					continue;
+				}
+
+				// Check structural class compatibility
+				if (provided.StructuralClass != expected.StructuralClass)
+				{
+					// TODO: Check the subtyping relation of the structural classes
+					coercionFlags |= CoercionFlags.StructuralClassChange;
+				}
+
+				// Check complex attribute compatibility
+				if (provided.IsComplex != expected.IsComplex)
+				{
+					if (provided.IsComplex) return null; // Complex to real
+					coercionFlags |= CoercionFlags.RealToComplex;
+				}
+
+				// Check class compatibility.
+				if (provided.Class != expected.Class)
+				{
+					if (provided.Class.IsInteger && expected.Class.IsReal)
 					{
-						inputAdmissibility = expected.StructuralClass == provided.StructuralClass
-							? Admissibility.RealToComplex : Admissibility.RealToComplexAndStructuralClassChange;
+						coercionFlags |= CoercionFlags.IntegerToFloat;
 					}
 					else
-						return Admissibility.Incompatible;
-
-					if (inputAdmissibility < admissibility) admissibility = inputAdmissibility;
+					{
+						return null;
+					}
 				}
 			}
 
-			return admissibility;
+			return coercionFlags;
 		}
 
 		/// <summary>

@@ -14,13 +14,13 @@ namespace McCli.Builtins
 	public static class ArrayDimensions
 	{
 		#region Counting
-		public static double numel(MValue value)
+		public static int numel(MValue value)
 		{
 			Contract.Requires(value != null);
 			return value.Count;
 		}
 
-		public static double ndims(MValue value)
+		public static int ndims(MValue value)
 		{
 			Contract.Requires(value != null);
 			return value.Shape.DimensionCount;
@@ -37,14 +37,14 @@ namespace McCli.Builtins
 			return result;
 		}
 
-		public static double size(MValue value, double dim)
+		public static int size(MValue value, double dim)
 		{
 			Contract.Requires(value != null);
 			var shape = value.Shape;
 			return shape.GetDimensionSize(PseudoBuiltins.ToInt(dim) - 1);
 		}
 
-		public static double length(MValue value)
+		public static int length(MValue value)
 		{
 			Contract.Requires(value != null);
 
