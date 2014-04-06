@@ -226,7 +226,7 @@ namespace McCli.Compiler.CodeGen
 			if (IsLiteral(variable))
 			{
 				if (variable.ConstantValue is double)
-					cil.LoadFloat64((double)variable.ConstantValue);
+					EmitLoadConstant((double)variable.ConstantValue, variable.StaticRepr.Class);
 				else
 					throw new NotImplementedException("Loading constants of type " + variable.StaticRepr);
 				return;
@@ -259,6 +259,28 @@ namespace McCli.Compiler.CodeGen
 
 			if (IsByRef(variable)) cil.StoreIndirect(variable.StaticCliType);
 			else cil.Store(GetLocation(variable));
+		}
+
+		private void EmitLoadConstant(double value, MClass mclass)
+		{
+			if (mclass.IsInteger)
+			{
+				// IntOK'd variable
+				if (mclass == MClass.Int64)
+				{
+					Contract.Assert((long)value == value);
+					cil.LoadInt64((long)value);
+				}
+				else if (mclass == MClass.Int32)
+				{
+					Contract.Assert((int)value == value);
+					cil.LoadInt32((int)value);
+				}
+			}
+			else if (mclass == MClass.Double)
+			{
+				cil.LoadFloat64(value);
+			}
 		}
 
 		private void EmitConvert(MRepr source, MRepr target)

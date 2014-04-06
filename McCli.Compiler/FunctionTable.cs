@@ -44,9 +44,9 @@ namespace McCli.Compiler
 		{
 			// From least to most "costly"
 			None = 0,
-			IntegerToFloat = 1 << 0,
-			RealToComplex = 1 << 1,
-			StructuralClassChange = 1 << 2,
+			RealToComplex = 1 << 0,
+			StructuralClassChange = 1 << 1,
+			IntegerToFloat = 1 << 2,
 			ToAny = unchecked((int)0xFFFFFFFF)
 		}
 		#endregion
@@ -176,6 +176,7 @@ namespace McCli.Compiler
 				if (provided.StructuralClass != expected.StructuralClass)
 				{
 					// TODO: Check the subtyping relation of the structural classes
+					if (expected.StructuralClass == MStructuralClass.Scalar) return null;
 					coercionFlags |= CoercionFlags.StructuralClassChange;
 				}
 

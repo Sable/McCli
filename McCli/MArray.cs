@@ -13,17 +13,13 @@ namespace McCli
 	/// <typeparam name="TScalar">The type of the array elements.</typeparam>
 	public abstract class MArray<TScalar> : MValue
 	{
-		#region Fields
-		protected static readonly MType type;
-		#endregion
-
 		#region Constructors
 		internal MArray(MArrayShape shape) : base(shape) {}
 
 		static MArray()
 		{
 			// Ensure the generic type is one that supports being in arrays.
-			type = MType.FromCliType(typeof(TScalar));
+			var type = MType.FromCliType(typeof(TScalar));
 			Contract.Assert(type != null && type.IsPrimitive);
 		}
 		#endregion

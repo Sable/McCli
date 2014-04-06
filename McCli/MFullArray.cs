@@ -49,7 +49,9 @@ namespace McCli
 
 		static MFullArray()
 		{
-			repr = new MRepr(MArray<TScalar>.type, MStructuralClass.FullArray);
+			var type = MType.FromCliType(typeof(TScalar));
+			Contract.Assert(type != null && type.IsPrimitive);
+			repr = new MRepr(type, MStructuralClass.FullArray);
 		}
 		#endregion
 

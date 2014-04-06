@@ -165,10 +165,15 @@ namespace CliKit.IO
 
 				// TODO: Check operand types
 				case BranchKind.Comparison:
+				{
 					stack.RequireSize(opcode, 2);
-					stack.Pop(opcode);
-					stack.Pop(opcode);
+					var lhs = stack.Pop(opcode);
+					var rhs = stack.Pop(opcode);
+					bool verifiable;
+					if (!opcode.Comparison.IsApplicableTo(lhs.DataType, rhs.DataType, out verifiable))
+						throw Error("{0} cannot operate on stack operands of type {1} and {2}.", opcode.Name, lhs.DataType, rhs.DataType);
 					break;
+				}
 
 				default: throw new NotImplementedException();
 			}

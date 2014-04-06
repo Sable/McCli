@@ -45,7 +45,8 @@ namespace McCli.Builtins
 		public static double randn()
 		{
 			double result, dummy;
-			lock (threadSharedRandom) RandomNormalBoxMuller_NoLock(out result, out dummy);
+			lock (threadSharedRandom)
+				RandomNormalBoxMuller_NoLock(out result, out dummy);
 			return result;
 		}
 

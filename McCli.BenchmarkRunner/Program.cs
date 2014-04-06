@@ -18,7 +18,7 @@ namespace McCli.BenchmarkRunner
 				return;
 			}
 
-			string benchmarkPath = args[0];
+			string benchmarkPath = Path.GetFullPath(args[0]);
 			var benchmarkAssembly = Assembly.LoadFile(benchmarkPath);
 			var type = benchmarkAssembly.GetExportedTypes().Single();
 			var method = type.GetMethod(type.Name);

@@ -104,8 +104,11 @@ namespace CliKit.IO
 				param.This.stack.RequireSize(opcode, 2);
 				var rhs = param.This.stack.Pop(opcode);
 				var lhs = param.This.stack.Pop(opcode);
-
-				// TODO: Implement type verification!
+				
+				// TODO: Assert verifiable?
+				bool verifiable;
+				if (!opcode.Comparison.IsApplicableTo(lhs.DataType, rhs.DataType, out verifiable))
+					throw Error("{0} cannot operate on stack operands of type {1} and {2}.", opcode.Name, lhs.DataType, rhs.DataType);
 
 				param.This.stack.Push(DataType.Int32);
 			}

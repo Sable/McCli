@@ -183,6 +183,18 @@ namespace McCli.Builtins
 		{
 			return -value;
 		}
+
+		[BuiltinCilOpcode(0x65 /* neg */)]
+		public static int uminus(int value)
+		{
+			return -value;
+		}
+
+		[BuiltinCilOpcode(0x65 /* neg */)]
+		public static long uminus(long value)
+		{
+			return -value;
+		}
 		#endregion
 
 		#region Complex Subtractive

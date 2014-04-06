@@ -97,14 +97,13 @@ namespace McCli.Compiler.IR
 			object constantValue = null;
 			if (constantString != null)
 			{
-				if (type == MClass.Double)
+				if (type.IsReal && type.IsNumeric)
 					constantValue = double.Parse(constantString, CultureInfo.InvariantCulture);
 				// TODO: Implement strings
 			}
 
-			return constantValue == null
-				? new Variable(name, new MRepr(type, scalar ? MStructuralClass.Scalar : MStructuralClass.FullArray), initOnly)
-				: new Variable(name, constantValue, initOnly);
+			var staticRepr = new MRepr(type, scalar ? MStructuralClass.Scalar : MStructuralClass.FullArray);
+			return new Variable(name, staticRepr, constantValue, initOnly);
 		}
 
 		private static IEnumerable<Statement> ReadStatements(XElement parentElement, IReadOnlyDictionary<string, Variable> variables)

@@ -56,5 +56,44 @@ namespace CliKit.Cil
 		{
 			return (comparison & (Comparison.UnsignedFlag | Comparison.UnorderedFlag)) != 0;
 		}
+
+		public static bool IsApplicableTo(this Comparison comparison, DataType first, DataType second, out bool verifiable)
+		{
+			if (!first.IsStackTypeExceptValueType() || !second.IsStackTypeExceptValueType())
+			{
+				verifiable = false;
+				return false;
+			}
+
+			if (first == second)
+			{
+				if (first != DataType.ObjectReference
+					|| comparison == Comparison.Equal
+					|| comparison == Comparison.NotEqual_Unordered)
+				{
+					verifiable = true;
+					return true;
+				}
+			}
+			else
+			{
+				if ((first == DataType.Int32 && second == DataType.NativeInt)
+					|| (first == DataType.NativeInt && second == DataType.Int32))
+				{
+					verifiable = true;
+					return true;
+				}
+
+				if ((first.IsManagedPointer() && second == DataType.NativeInt)
+					|| (first == DataType.NativeInt && second.IsManagedPointer()))
+				{
+					verifiable = false;
+					return true;
+				}
+			}
+
+			verifiable = false;
+			return false;
+		}
 	}
 }

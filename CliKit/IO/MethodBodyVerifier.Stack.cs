@@ -93,7 +93,9 @@ namespace CliKit.IO
 				else if (!targetType.IsAssignableFrom(poppedEntry.CtsType))
 				{
 					var targetDataType = DataTypeEnum.FromCtsType(targetType);
-					if (targetDataType.ToStackType() != poppedEntry.DataType)
+					if (targetDataType.ToStackType() != poppedEntry.DataType
+						|| targetDataType == DataType.ValueType
+						|| targetDataType == DataType.ObjectReference)
 					{
 						throw Error("{0} expects a stack operand of type {1} but the stack top has type {2}.",
 							opcode.Name, targetType.FullName, poppedEntry.CtsType.FullName);

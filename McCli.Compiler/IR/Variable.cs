@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,7 +12,6 @@ namespace McCli.Compiler.IR
 	/// <summary>
 	/// Represents a variable in a matlab program.
 	/// </summary>
-	[DebuggerDisplay("{Name} : {StaticRepr}")]
 	public sealed class Variable
 	{
 		#region Fields
@@ -46,13 +46,12 @@ namespace McCli.Compiler.IR
 			this.IsInitOnly = initOnly;
 		}
 
-		public Variable(string name, object constantValue, bool initOnly)
+		public Variable(string name, MRepr staticRepr, object constantValue, bool initOnly)
 		{
 			Contract.Requires(name != null);
-			Contract.Requires(constantValue is double || constantValue is char || constantValue is string);
 
 			this.Name = name;
-			this.StaticRepr = MRepr.FromCliType(constantValue.GetType());
+			this.StaticRepr = staticRepr;
 			this.ConstantValue = constantValue;
 			this.IsInitOnly = initOnly;
 		}
@@ -62,6 +61,26 @@ namespace McCli.Compiler.IR
 		public Type StaticCliType
 		{
 			get { return StaticRepr.CliType; }
+		}
+		#endregion
+
+		#region Methods
+		public override string ToString()
+		{
+			var str = new StringBuilder();
+
+			str.Append(Name);
+			str.Append(" : ");
+			str.Append(StaticRepr);
+
+			if (ConstantValue != null)
+			{
+				str.Append(" (");
+				str.AppendFormat(CultureInfo.InvariantCulture, "{0}", ConstantValue);
+				str.Append(')');
+			}
+
+			return str.ToString();
 		}
 		#endregion
 	}

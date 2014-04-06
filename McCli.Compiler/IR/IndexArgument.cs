@@ -47,7 +47,7 @@ namespace McCli.Compiler.IR
 		#region Methods
 		public override string ToString()
 		{
-			return variable == null ? ":" : variable.Name;
+			return variable == null ? ":" : variable.ToString();
 		}
 		#endregion
 

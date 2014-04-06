@@ -13,6 +13,11 @@ namespace McCli.Builtins
 	public static class ArrayIndexing
 	{
 		#region Colon
+		public static MIntegralRange<int> colon(int low, int high)
+		{
+			return MIntegralRange<int>.FromFirstLast(low, high);
+		}
+
 		public static MFullArray<double> colon(double low, double high)
 		{
 			if (low > high) return MFullArray<double>.CreateEmpty();

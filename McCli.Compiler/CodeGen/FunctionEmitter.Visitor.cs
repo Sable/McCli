@@ -37,28 +37,9 @@ namespace McCli.Compiler.CodeGen
 				MRepr sourceRepr;
 				if (node.Value is double)
 				{
-					var value = (double)node.Value;
 					var targetType = node.Target.StaticRepr.Type;
-					if (targetType.IsInteger)
-					{
-						// IntOK'd variable
-						if (targetType == MClass.Int64)
-						{
-							Contract.Assert((long)value == value);
-							cil.LoadInt64((long)value);
-						}
-						else if (targetType == MClass.Int32)
-						{
-							Contract.Assert((int)value == value);
-							cil.LoadInt32((int)value);
-						}
-						sourceRepr = new MRepr(targetType, MStructuralClass.Scalar);
-					}
-					else
-					{
-						cil.LoadFloat64((double)node.Value);
-						sourceRepr = MClass.Double.ScalarRepr;
-					}
+					EmitLoadConstant((double)node.Value, targetType.Class);
+					sourceRepr = new MRepr(targetType, MStructuralClass.Scalar);
 				}
 				else if (node.Value is string)
 				{
@@ -211,8 +192,9 @@ namespace McCli.Compiler.CodeGen
 					? new MRepr(MClass.Double, MStructuralClass.IntegralRange)
 					: argument.Variable.StaticRepr;
 			}
+			var argumentReprs = argumentReprsBuilder.Complete();
 
-			var function = pseudoBuiltins.Lookup("ArrayGet", argumentReprsBuilder.Complete());
+			var function = pseudoBuiltins.Lookup("ArrayGet", argumentReprs);
 
 			using (BeginEmitStore(node.Targets[0]))
 			{
@@ -379,6 +361,7 @@ namespace McCli.Compiler.CodeGen
 
 			var iteratorRepr = new MRepr(node.Iterator.StaticRepr.Type, MStructuralClass.Scalar);
 			Contract.Assert(iteratorRepr.Class.IsNumeric && !iteratorRepr.IsComplex);
+			Contract.Assert(node.Step == null || IsLiteral(node.Step));
 
 			// Allocate the the temporaries we need
 			var currentLocal = temporaryPool.Alloc(iteratorRepr.CliType);
@@ -413,19 +396,21 @@ namespace McCli.Compiler.CodeGen
 
 				// Test the loop condition
 				{
-				// TODO: support down-going loops
-				// condition: if (current > to) goto break;
-				cil.MarkLabel(conditionLabel);
-				cil.Load(currentLocal.Location);
+					// TODO: support down-going loops
+					// condition: if (current > to) goto break;
+					cil.MarkLabel(conditionLabel);
+					cil.Load(currentLocal.Location);
+					EmitConvert(iteratorRepr, node.To.StaticRepr); // Hack for IntOK
 
-				// Load the "to" loop bound variable (or our copy of it)
-				if (toLocal.HasValue)
-					cil.Load(toLocal.Value.Location);
-				else
-					EmitLoad(node.To);
+					// Load the "to" loop bound variable (or our copy of it)
+					if (toLocal.HasValue)
+						cil.Load(toLocal.Value.Location);
+					else
+						EmitLoad(node.To);
 
-				cil.Branch(Comparison.GreaterThan, breakTargetLabel);
-					}
+					bool forward = node.Step == null || (double)node.Step.ConstantValue > 0;
+					cil.Branch(forward ? Comparison.GreaterThan : Comparison.LessThan, breakTargetLabel);
+				}
 
 				// Setup the iterator variable (which can be modified inside the loop)
 				cil.Load(currentLocal.Location);

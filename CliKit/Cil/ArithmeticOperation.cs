@@ -98,7 +98,12 @@ namespace CliKit.Cil
 			Contract.Requires(operand.IsStackType());
 
 			// ECMA 335 III.1.5 Table 3: Unary Numeric Operations (neg - plus 'not')
-			return operand.IsIntegerStackType() ? operand : (DataType?)null;
+			switch (operation)
+			{
+				case ArithmeticOperation.Negate: return operand.IsNumericStackType() ? operand : (DataType?)null;
+				case ArithmeticOperation.BitwiseNot: return operand.IsIntegerStackType() ? operand : (DataType?)null;
+				default: throw new ArgumentException("operation");
+			}
 		}
 
 		public static DataType? GetResult(this ArithmeticOperation operation, DataType lhs, DataType rhs, out bool verifiable)

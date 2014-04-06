@@ -27,7 +27,17 @@ namespace McCli.Builtins
 			return zeros(n, n);
 		}
 
+		public static MFullArray<double> zeros(int n)
+		{
+			return zeros(n, n);
+		}
+
 		public static MFullArray<double> zeros(double rowCount, double columnCount)
+		{
+			return MFullArray<double>.CreateWithShape(rowCount, columnCount);
+		}
+
+		public static MFullArray<double> zeros(int rowCount, int columnCount)
 		{
 			return MFullArray<double>.CreateWithShape(rowCount, columnCount);
 		}
