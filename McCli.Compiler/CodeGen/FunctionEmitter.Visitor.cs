@@ -396,19 +396,30 @@ namespace McCli.Compiler.CodeGen
 
 				// Test the loop condition
 				{
-					// TODO: support down-going loops
 					// condition: if (current > to) goto break;
 					cil.MarkLabel(conditionLabel);
 					cil.Load(currentLocal.Location);
-					EmitConvert(iteratorRepr, node.To.StaticRepr); // Hack for IntOK
+
+					// IntOK hack: if the "to" is an integral float and our iterator is an integer,
+					// consider "to" as an integer to avoid a cast.
+					bool useIntegralFloatTo = iteratorRepr.Class == MClass.Int32 && IsLiteral(node.To)
+						&& PseudoBuiltins.IsIntegralFloat(Convert.ToDouble(node.To.ConstantValue));
+					if (!useIntegralFloatTo) EmitConvert(iteratorRepr, node.To.StaticRepr);   // Hack for IntOK
 
 					// Load the "to" loop bound variable (or our copy of it)
 					if (toLocal.HasValue)
 						cil.Load(toLocal.Value.Location);
 					else
-						EmitLoad(node.To);
+					{
+						if (useIntegralFloatTo)
+							cil.LoadInt32((int)Convert.ToDouble(node.To.ConstantValue));
+						else
+						{
+							EmitLoad(node.To);
+						}
+					}
 
-					bool forward = node.Step == null || (double)node.Step.ConstantValue > 0;
+					bool forward = node.Step == null || Convert.ToDouble(node.Step.ConstantValue) > 0;
 					cil.Branch(forward ? Comparison.GreaterThan : Comparison.LessThan, breakTargetLabel);
 				}
 
@@ -442,6 +453,7 @@ namespace McCli.Compiler.CodeGen
 					else
 					{
 						EmitLoad(node.Step);
+						EmitConvert(node.Step.StaticRepr, iteratorRepr);
 					}
 
 					// Increment

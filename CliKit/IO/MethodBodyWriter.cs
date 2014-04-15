@@ -148,19 +148,16 @@ namespace CliKit.IO
 
 		public void Branch(Comparison comparison, Label target)
 		{
-			Contract.Requires(target != null);
 			Branch(Opcode.Branch(comparison, longForm: true), target);
 		}
 
 		public void Branch(bool condition, Label target)
 		{
-			Contract.Requires(target != null);
 			Branch(Opcode.Branch(condition, longForm: true), target);
 		}
 
 		public void Branch(Label target)
 		{
-			Contract.Requires(target != null);
 			Branch(Opcode.Br, target);
 		}
 
