@@ -24,7 +24,7 @@ namespace McCli.BenchmarkRunner
 			var method = type.GetMethod(type.Name);
 			var @delegate = (Action<double>)Delegate.CreateDelegate(typeof(Action<double>), method);
 
-			@delegate(0);
+			@delegate(0); // Pre-jit
 
 			double scale = int.Parse(args[1]);
 

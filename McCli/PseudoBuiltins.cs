@@ -417,22 +417,43 @@ namespace McCli
 		}
 
 		public static void ArraySet<[AnyPrimitive] TScalar>(
+			MFullArray<TScalar> array, MFullArray<double> indices, TScalar value)
+		{
+			Contract.Requires(array != null);
+			Contract.Requires(indices != null);
+
+			var indicesShape = indices.shape;
+			if (!indicesShape.IsVector)
+				throw MArrayShapeException.CreateFormatted("Array index must be a vector but has shape {0}.", indicesShape);
+
+			int indexCount = indices.Count;
+			for (int i = 0; i < indexCount; i++)
+				array[ToInt(indices[i]) - 1] = value;
+		}
+
+		public static void ArraySet<[AnyPrimitive] TScalar>(
 			MFullArray<TScalar> array, MFullArray<double> indices, MFullArray<TScalar> values)
 		{
 			Contract.Requires(array != null);
 			Contract.Requires(indices != null);
 			Contract.Requires(values != null);
 
-			if (indices.IsEmpty && values.IsEmpty) return;
+			if (indices.IsEmpty) return;
+			if (values.IsScalar)
+			{
+				ArraySet(array, indices, values[0]);
+				return;
+			}
 
 			var indicesShape = indices.shape;
-			if (indicesShape.IsHigherDimensional || (indicesShape.RowCount > 1 && indicesShape.ColumnCount > 1))
+			if (!indicesShape.IsVector)
 				throw MArrayShapeException.CreateFormatted("Array index must be a vector but has shape {0}.", indicesShape);
 
 			if (indicesShape != values.shape)
 				throw new MArrayShapeException("Assigned value shape must match index shape.");
-			
-			for (int i = 0; i < indicesShape.RowCount; ++i)
+
+			int indexCount = indicesShape.Count;
+			for (int i = 0; i < indexCount; ++i)
 				array[ToInt(indices[i]) - 1] = values[i];
 		}
 
